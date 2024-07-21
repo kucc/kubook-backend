@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from models import Book, BookCategory, BookInfo
-from books.schemas import models, schemas
+from src.domains.model.books_schemas import models, schemas
 
 
 def search_books(db: Session, search_query: str):

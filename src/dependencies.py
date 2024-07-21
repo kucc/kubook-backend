@@ -4,17 +4,9 @@ from fastapi import Header, Depends, HTTPException, status
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from database import get_db_session
+from database import get_db
 from config import Settings
 from models import User
-
-
-def get_db():
-    try:
-        session = get_db_session()
-        yield session
-    finally:
-        session.close()
 
 
 async def get_current_user(token=Header(None), db: Session = Depends(get_db)):

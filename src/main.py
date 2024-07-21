@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import Settings
 
 # from auth.router import router as auth_router
-# from tests.test_router import router as test_router
+from test.test_router import router as test_router
 # from admin.router import router as admin_router
 
 settings = Settings()
@@ -14,7 +14,7 @@ settings = Settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if settings.ENVIRONMENT == "development":
+    if settings.ENVIRONMENT == "exp":
         # Open SSH Connection
         ssh_connection = get_ssh_connection()
         yield
@@ -56,7 +56,7 @@ app.add_middleware(
 )
 
 # app.include_router(auth_router)
-# app.include_router(test_router)
+app.include_router(test_router)
 # app.include_router(admin_router)
 
 

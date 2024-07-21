@@ -6,8 +6,8 @@ from fastapi import HTTPException, status
 
 from config import Settings
 from models import User
-from auth.firebase import sign_in_with_email_and_password
-from auth.token_service import create_user_tokens
+from src.externals.firebase import sign_in_with_email_and_password
+from src.domains.services.token_service import create_user_tokens
 
 
 async def register(current_user, request, db: Session):

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from dependencies import get_db, get_current_active_user
-from books.schemas import BookCreate, BookSearchResult
+from src.domains.model.books_schemas import BookCreate, BookSearchResult
 
 router = APIRouter(
     prefix="/books",
