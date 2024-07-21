@@ -181,6 +181,7 @@ class Loan(Base):
 
 class LibrarySetting(Base):
     __tablename__ = "library_setting"
+
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(50), nullable=False)
     value = Column(String(50), nullable=False)

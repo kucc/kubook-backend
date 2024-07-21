@@ -12,7 +12,8 @@ db_host = settings.DB_HOST
 db_port = settings.DB_PORT
 
 local_host = 'localhost'
-local_port = 3307 
+local_port = 3307
+
 
 class SSHConnection:
     def __init__(self):
@@ -47,7 +48,7 @@ class SSHConnection:
         except Exception as e:
             print(f"Error connecting to SSH: {e}")
             exit(1)
-        else :
+        else:
             print("SSH connection successful.")
             self.ssh_client.start()
 
@@ -55,6 +56,7 @@ class SSHConnection:
         print(f'Closing SSH connection : {self.ssh_host}:{self.ssh_port} with username: {self.ssh_username}')
         if self.ssh_client:
             self.ssh_client.stop()
+
 
 def get_ssh_connection():
     ssh_connection = SSHConnection()

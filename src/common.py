@@ -1,6 +1,6 @@
 from typing import List, Type
 from pydantic import BaseModel, Field, create_model
- 
+
 
 class CustomBaseModel(BaseModel):
     """
@@ -20,14 +20,14 @@ class CustomBaseModel(BaseModel):
             __base__=cls,
             **{
                 name: (
-                    info.annotation, 
+                    info.annotation,
                     Field(None, title=info.title, description=info.description, examples=info.examples)
                 ) for name, info in cls.model_fields.items()
             }
         )
-    
+
     @classmethod
-    def omit_fields(cls, name:str, attrs: List[str]) -> Type["CustomBaseModel"]:
+    def omit_fields(cls, name: str, attrs: List[str]) -> Type["CustomBaseModel"]:
         """
         Creates a new model with the omitted fields.
 
@@ -35,9 +35,9 @@ class CustomBaseModel(BaseModel):
         """
         new_annotations = {
             name: (
-                    info.annotation, 
-                    Field(info.default, title=info.title, description=info.description, examples=info.examples)
-                ) for name, info in cls.model_fields.items() if name not in attrs
+                info.annotation,
+                Field(info.default, title=info.title, description=info.description, examples=info.examples)
+            ) for name, info in cls.model_fields.items() if name not in attrs
         }
         return create_model(name, __base__=CustomBaseModel, **new_annotations)
 
