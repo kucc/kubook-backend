@@ -1,7 +1,7 @@
 from typing import Optional
 from datetime import datetime as _datetime
 from pydantic import Field
-from common import CustomBaseModel
+from src.core.common import CustomBaseModel
 
 # TODO : GET REQUEST에 대한 RESPONSE SCHEMA 구현
 # - BookInfo, Book, Category, Review schema를 활용

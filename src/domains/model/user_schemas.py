@@ -1,6 +1,6 @@
 from datetime import datetime as _datetime
 from pydantic import Field
-from common import CustomBaseModel
+from src.core.common import CustomBaseModel
 
 
 class UserBase(CustomBaseModel):

@@ -3,7 +3,7 @@ from sqlalchemy import select, update, delete
 from fastapi import status, HTTPException
 from sqlalchemy.orm import Session
 from src.domains.model.admin_schemas import *
-from models import *
+from src.repositories.models import *
 
 # Get the list of items
 

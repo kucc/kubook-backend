@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from typing import List
-from dependencies import get_db, get_current_admin
+from src.core.dependencies import get_db, get_current_admin
 from src.domains.services.admin_service import *
 import src.domains.model.admin_schemas as s
-import models as m
+import src.repositories.models as m
 
 router = APIRouter(
     prefix="/admin",

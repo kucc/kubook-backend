@@ -1,5 +1,5 @@
 from sshtunnel import SSHTunnelForwarder
-from config import Settings
+from src.core.config import Settings
 
 settings = Settings()
 

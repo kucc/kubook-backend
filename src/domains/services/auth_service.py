@@ -4,8 +4,8 @@ from datetime import timedelta
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 
-from config import Settings
-from models import User
+from src.core.config import Settings
+from src.repositories.models import User
 from src.externals.firebase import sign_in_with_email_and_password
 from src.domains.services.token_service import create_user_tokens
 

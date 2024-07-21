@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import SQLAlchemyError
 from contextlib import contextmanager
 from typing import Generator
-from config import Settings
+from src.core.config import Settings
 
 settings = Settings()
 

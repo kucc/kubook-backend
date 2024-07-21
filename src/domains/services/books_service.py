@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from models import Book, BookCategory, BookInfo
+from src.repositories.models import Book, BookCategory, BookInfo
 from src.domains.model.books_schemas import models, schemas
 
 

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from config import Settings
-from dependencies import get_db, get_current_user
+from src.core.config import Settings
+from src.core.dependencies import get_db, get_current_user
 import src.domains.model.auth_schemas as auth_schemas
 import src.domains.services.auth_service as auth_service
 

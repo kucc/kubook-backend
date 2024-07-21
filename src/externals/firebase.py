@@ -12,7 +12,7 @@ import pprint
 
 from fastapi import HTTPException, status
 
-from config import Settings
+from src.core.config import Settings
 
 FIREBASE_WEB_API_KEY = Settings().FIREBASE_WEB_API_KEY
 rest_api_url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
