@@ -11,19 +11,6 @@ settings = Settings()
 class DatabaseConnection:
     def __init__(self):
         self.SQLALCHEMY_DATABASE_URL = self._get_database_url()
-        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
-        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
-        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
-        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
-        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
-        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
-        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
-        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
-        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
-        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
-        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
-        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
-        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
         self.engine = create_engine(
             self.SQLALCHEMY_DATABASE_URL,
             pool_recycle=500,
