@@ -8,6 +8,14 @@ router = APIRouter(
     tags=["reviews"]
 )
 
+"""
+- POST /reviews: 리뷰 작성
+- GET /reviews/me: 내가 작성한 리뷰 목록 조회
+- GET /reviews/books/{book_id}: 특정 도서에 대한 리뷰 목록 조회
+- PUT /reviews/{review_id}: 리뷰 수정
+- DELETE /reviews/{review_id}: 리뷰 삭제
+"""
+
 
 @router.post(
     "/",

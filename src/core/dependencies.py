@@ -4,9 +4,9 @@ from fastapi import Header, Depends, HTTPException, status
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from src.core.database import get_db
-from src.core.config import Settings
-from src.repositories.models import User
+from core.database import get_db
+from core.config import Settings
+from repositories.models import User
 
 
 async def get_current_user(token=Header(None), db: Session = Depends(get_db)):

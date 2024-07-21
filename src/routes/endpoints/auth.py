@@ -13,7 +13,9 @@ router = APIRouter(
 
 settings = Settings()
 
-# 신규 사용자 등록
+"""
+- POST /auth/login: 로그인
+"""
 
 
 @router.post(

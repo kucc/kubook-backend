@@ -8,6 +8,13 @@ router = APIRouter(
     tags=["reservations"]
 )
 
+"""
+- POST /reservations: 도서 예약 신청
+- GET /reservations: 예약 목록 조회
+- GET /reservations/{reservation_id}: 예약 상세 정보 조회
+- DELETE /reservations/{reservation_id}: 예약 취소
+"""
+
 
 @router.post(
     "/",

@@ -8,6 +8,10 @@ router = APIRouter(
     tags=["book-requests"]
 )
 
+"""
+- POST /book-requests: 도서 구매 요청 생성
+"""
+
 
 @router.post(
     "/",

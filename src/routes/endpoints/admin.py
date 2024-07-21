@@ -11,6 +11,27 @@ router = APIRouter(
     tags=["admin"]
 )
 
+"""
+- POST /admin/books: 도서 정보 등록 (관리자 권한 필요)
+- PUT /admin/books/{book_id}: 도서 정보 수정 (관리자 권한 필요)
+- DELETE /admin/books/{book_id}: 도서 정보 삭제 (관리자 권한 필요)
+- POST /admin/notifications: 알림 생성 (관리자 권한 필요)
+- GET /admin/book-requests: 도서 구매 요청 목록 조회 (관리자 권한 필요)
+- GET /admin/book-requests/{request_id}: 도서 구매 요청 상세 정보 조회 (관리자 권한 필요)
+- PUT /admin/book-requests/{request_id}: 도서 구매 요청 수정 (관리자 권한 필요)
+- DELETE /admin/book-requests/{request_id}: 도서 구매 요청 삭제 (관리자 권한 필요)
+- GET /admin/users: 전체 사용자 목록 조회 (관리자 권한 필요)
+- PUT /admin/users/{user_id}: 사용자 정보 수정 (관리자 권한 필요)
+- DELETE /admin/users/{user_id}: 사용자 정보 삭제 (관리자 권한 필요)
+- GET /admin/loans: 전체 대출 목록 조회 (관리자 권한 필요)
+- GET /admin/reservations: 전체 예약 목록 조회 (관리자 권한 필요)
+- POST /admin/notices: 공지사항 등록 (관리자 권한 필요)
+- PUT /admin/notices/{notice_id}: 공지사항 수정 (관리자 권한 필요)
+- DELETE /admin/notices/{notice_id}: 공지사항 삭제 (관리자 권한 필요)
+- GET /admin/settings: 시스템 설정 조회 (관리자 권한 필요)
+- PUT /admin/settings: 시스템 설정 수정 (관리자 권한 필요)
+"""
+
 
 @router.delete(
     "/dba",

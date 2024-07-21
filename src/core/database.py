@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import SQLAlchemyError
 from contextlib import contextmanager
 from typing import Generator
-from src.core.config import Settings
+from core.config import Settings
 
 settings = Settings()
 
@@ -11,6 +11,19 @@ settings = Settings()
 class DatabaseConnection:
     def __init__(self):
         self.SQLALCHEMY_DATABASE_URL = self._get_database_url()
+        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
+        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
+        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
+        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
+        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
+        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
+        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
+        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
+        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
+        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
+        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
+        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
+        print(f"Database URL: {self.SQLALCHEMY_DATABASE_URL}")
         self.engine = create_engine(
             self.SQLALCHEMY_DATABASE_URL,
             pool_recycle=500,

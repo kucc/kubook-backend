@@ -11,6 +11,13 @@ router = APIRouter(
     tags=["books"]
 )
 
+"""
+- GET /books: 도서 목록 조회
+- GET /books/{book_id}: 도서 상세 정보 조회
+- GET /books/search: 도서 검색 (제목, 저자, 출판사 등)
+- GET /books/categories/{category_id}: 카테고리별 도서 조회
+"""
+
 
 @router.get(
     "/search",

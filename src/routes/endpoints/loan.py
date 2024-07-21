@@ -8,6 +8,14 @@ router = APIRouter(
     tags=["loans"]
 )
 
+"""
+- POST /loans: 도서 대출 신청
+- GET /loans: 대출 목록 조회
+- GET /loans/{loan_id}: 대출 상세 정보 조회
+- PUT /loans/{loan_id}: 대출 정보 수정 (연장 등)
+- DELETE /loans/{loan_id}: 대출 정보 삭제 (반납 처리)
+"""
+
 
 @router.post(
     "/",
