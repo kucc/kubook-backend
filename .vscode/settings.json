@@ -1,4 +1,7 @@
 {
-    "autopep8.args": ["--max-line-length", "400"],
-    "editor.formatOnSave": true
+    "autopep8.args": [
+        "--max-line-length",
+        "400"
+    ],
+    "editor.formatOnSave": true,
 }
