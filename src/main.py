@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.config import Settings
+from core.ssh import *
 
 from routes.endpoints.test import router as test_router
 
