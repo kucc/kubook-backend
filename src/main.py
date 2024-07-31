@@ -2,19 +2,16 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
-from ssh import get_ssh_connection
-from config import Settings
+from core.config import Settings
 
-from auth.router import router as auth_router
-from tests.test_router import router as test_router
-from admin.router import router as admin_router
+from routes.endpoints.test import router as test_router
 
 settings = Settings()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    if settings.ENVIRONMENT == "development":
+    if settings.ENVIRONMENT == "exp":
         # Open SSH Connection
         ssh_connection = get_ssh_connection()
         yield
@@ -55,9 +52,7 @@ app.add_middleware(
     allow_headers=["*"]
 )
 
-app.include_router(auth_router)
 app.include_router(test_router)
-app.include_router(admin_router)
 
 
 @app.get("/")
