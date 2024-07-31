@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from src.core.dependencies import get_db, get_current_active_user
-from src.domains.model.books_schemas import BookCreate, BookSearchResult
+from src.domain.schemas.books import BookCreate, BookSearchResult
+from src.domain.services.books import *
 
 router = APIRouter(
     prefix="/books",
@@ -33,8 +34,8 @@ router = APIRouter(
         404: {"description": "No books found"}
     }
 )
-async def search_books(db: Session = Depends(get_db)):
-    pass
+async def search_books_info(search_item: str, db: Session = Depends(get_db)):
+    return search_books(db, search_item)
 
 
 @router.get(
