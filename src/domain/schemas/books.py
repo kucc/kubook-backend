@@ -28,6 +28,11 @@ class BookInfo(BookInfoBase):
     is_valid: bool = Field(..., title="is_valid", description="유효 여부", example=True)
 
 
+class BookSearchResult(CustomBaseModel):
+    title: str = Field(..., title="title", description="책 제목", example="FastAPI Tutorial")
+    author: str = Field(..., title="author", description="저자", example="John Doe")
+
+
 class BookBase(CustomBaseModel):
     book_info_id: int = Field(..., title="book_info_id", description="책과 연결된 도서 정보 id", example=1, ge=0)
     book_status: int = Field(0, title="book_status", description="책 상태", example=1, le=0, ge=3)
