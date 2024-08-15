@@ -11,10 +11,12 @@ router = APIRouter(
 
 @router.post(
     "/",
-    summary="도서 예약 신청",
+    summary="도서 예약 신청 새로 추가한 부분 ㅇㅅㅇ",
 )
 async def create_reservation(db: Session = Depends(get_db), current_user=Depends(get_current_active_user)):
     pass
+
+print("예약 신청 부분 추가")
 
 
 @router.get(
