@@ -1,16 +1,10 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-
 from routes.request.update_book_request_request import UpdateBookRequest as route_update_bookreq_req
 from routes.response.book_request_response import BookRequestResponse as route_bookreq_res
-
 from domain.schemas.book_request_schemas import BookRequestUpdateRequest as domain_update_bookreq_req
 from domain.services.book_request_service import update
-
 from dependencies import get_current_active_user, get_db
-# from repositories.requested_book import RequestedBook
 
 router = APIRouter(
     prefix="/users",
