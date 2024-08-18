@@ -3,7 +3,7 @@ from datetime import datetime as _datetime
 from datetime import timedelta
 from typing import Optional, List
 
-from pydantic import Field, BaseModel
+from pydantic import BaseModel, Field
 
 
 class LoanBase(BaseModel):
