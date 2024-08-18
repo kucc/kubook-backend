@@ -24,4 +24,4 @@ router = APIRouter(
     status_code=status.HTTP_200_OK
 )
 async def update_user_book_request(user_id: int, request_id: int, request_data: req, db: Session = Depends(get_db), get_current_active_user=Depends(get_current_active_user)):
-    return await book_request_service.update(request_id, request_data, db)
+    return await book_request_service.update(user_id, request_id, request_data, db)
