@@ -1,9 +1,9 @@
 from datetime import date
 from datetime import datetime as _datetime
 from datetime import timedelta
-from typing import Optional
+from typing import Optional, List
 
-from pydantic import BaseModel, Field
+from pydantic import Field, BaseModel
 
 
 class LoanBase(BaseModel):
@@ -32,3 +32,25 @@ class LoanCreate(LoanBase):
 
 class LoanUpdate(LoanInfo.all_optional("LoanUpdate")):
     pass
+
+
+class LoanListItem(BaseModel):
+    id: int
+    user_id: int
+    book_id: int
+    loan_date: date
+    due_date: date
+    extend_status: bool
+    overdue_days: int
+    return_status: bool
+    return_date: Optional[date]
+
+
+class LoanListResponse(BaseModel):
+    data: List[LoanListItem] = Field(..., title="loan_list", description="대출 정보 리스트")
+
+
+class LoanExtendResponse(BaseModel):
+    id: int
+    due_date: date
+    extend_status: bool
