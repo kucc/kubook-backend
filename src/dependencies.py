@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from config import Settings
 from database import get_db_session
-from repositories.user_repository import User
+from repositories.models import User
 
 
 def get_db():

@@ -1,29 +1,23 @@
-from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
-
-from domain.schemas.food_schemas import Food, FoodCreation
-from repositories import food_repository
-from routes.request.create_food_request import CreateFoodRequest
+from domain.schemas import food_schemas
+from repositories.food_repository import FoodRepository
 
 
-async def get_food_list(db: Session) -> list[Food]:
-    foods = db.query(food_repository.Food).all()
-    print(foods)
-    print(foods)
-    print(foods)
-    return [Food.from_orm(food) for food in foods]
+class FoodService:
+    def __init__(self, food_repository: FoodRepository):
+        self.food_repository = food_repository
 
+    def create_food(self, db: Session, food: food_schemas.FoodCreate):
+        return self.food_repository.create_food(db, food)
 
-async def create_food(request: CreateFoodRequest, db: Session) -> Food:
-    food_creation = FoodCreation.from_request(request)
-    food = food_repository.Food(
-        food_name=food_creation.food_name,
-        food_type=food_creation.food_type,
-        food_price=food_creation.food_price,
-        food_description=food_creation.food_description,
-        food_image_url=food_creation.food_image_url
-    )
-    db.add(food)
-    db.commit()
-    db.refresh(food)
-    return Food.from_orm(food)
+    def get_food(self, db: Session, food_id: int):
+        return self.food_repository.get_food(db, food_id)
+
+    def get_foods(self, db: Session, skip: int = 0, limit: int = 100):
+        return self.food_repository.get_foods(db, skip, limit)
+
+    def update_food(self, db: Session, food_id: int, food: food_schemas.FoodUpdate):
+        return self.food_repository.update_food(db, food_id, food)
+
+    def delete_food(self, db: Session, food_id: int):
+        return self.food_repository.delete_food(db, food_id)

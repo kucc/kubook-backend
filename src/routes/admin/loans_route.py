@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 import domain.schemas.admin_schemas as s
 from dependencies import get_current_admin, get_db
 from domain.services.admin_service import *
-from repositories.loan_repository import Loan
+from repositories.models import Loan
 
 router = APIRouter(
     prefix="/admin/loan",

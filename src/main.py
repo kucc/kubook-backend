@@ -16,6 +16,7 @@ from routes.authentication_route import router as auth_router
 from routes.book_request_route import router as book_request_router
 from routes.book_route import router as book_router
 from routes.food_route import router as food_router
+from routes.food_order_route import router as food_order_router
 from routes.loan_route import router as loan_router
 from routes.reservation_route import router as reservation_router
 from routes.review_route import router as review_router
@@ -74,6 +75,7 @@ app.include_router(test_router)
 app.include_router(user_router)
 
 app.include_router(food_router)
+app.include_router(food_order_router)
 
 
 @app.get("/")

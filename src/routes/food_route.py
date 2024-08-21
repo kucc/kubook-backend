@@ -1,12 +1,11 @@
 from typing import List
-
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from dependencies import get_current_active_user, get_db
-from domain.services import food_service
-from routes.request.create_food_request import CreateFoodRequest
-from routes.response.food_response import FoodResponse
+from dependencies import get_db
+from domain.schemas import food_schemas
+from domain.services.food_service import FoodService
+from repositories.food_repository import FoodRepository
 
 router = APIRouter(
     prefix="/food",
@@ -14,32 +13,40 @@ router = APIRouter(
 )
 
 
-@router.get(
-    "/",
-    summary="음식 목록 조회",
-    response_model=List[FoodResponse],
-    response_description="음식 목록을 조회합니다.",
-    status_code=200
-)
-async def list_foods(
-        db: Session = Depends(get_db),
-        # current_user=Depends(get_current_active_user)
-):
-    foods = await food_service.get_food_list(db)
-    return [food.to_response() for food in foods]
+food_repository = FoodRepository()
+food_service = FoodService(food_repository)
 
 
-@router.post(
-    "/",
-    summary="음식 등록",
-    response_model=FoodResponse,
-    response_description="음식을 등록합니다.",
-    status_code=201
-)
-async def create_food(
-        request: CreateFoodRequest,
-        db: Session = Depends(get_db),
-        # current_user=Depends(get_current_active_user)
-):
-    food = await food_service.create_food(request, db)
-    return food.to_response()
+@router.post("/foods/", response_model=food_schemas.Food)
+def create_food(food: food_schemas.FoodCreate, db: Session = Depends(get_db)):
+    return food_service.create_food(db, food)
+
+
+@ router.get("/foods/", response_model=List[food_schemas.Food])
+def read_foods(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    foods = food_service.get_foods(db, skip=skip, limit=limit)
+    return foods
+
+
+@ router.get("/foods/{food_id}", response_model=food_schemas.Food)
+def read_food(food_id: int, db: Session = Depends(get_db)):
+    food = food_service.get_food(db, food_id=food_id)
+    if food is None:
+        raise HTTPException(status_code=404, detail="Food not found")
+    return food
+
+
+@ router.put("/foods/{food_id}", response_model=food_schemas.Food)
+def update_food(food_id: int, food: food_schemas.FoodUpdate, db: Session = Depends(get_db)):
+    updated_food = food_service.update_food(db, food_id=food_id, food=food)
+    if updated_food is None:
+        raise HTTPException(status_code=404, detail="Food not found")
+    return updated_food
+
+
+@ router.delete("/foods/{food_id}", response_model=food_schemas.Food)
+def delete_food(food_id: int, db: Session = Depends(get_db)):
+    deleted_food = food_service.delete_food(db, food_id=food_id)
+    if deleted_food is None:
+        raise HTTPException(status_code=404, detail="Food not found")
+    return deleted_food

@@ -1,19 +1,35 @@
-from sqlalchemy import (TIMESTAMP, Boolean, Column, ForeignKey, Integer,
-                        String, Text)
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
-
-from .base import Base
+from sqlalchemy.orm import Session
+from sqlalchemy.future import select
+from repositories import models
+from domain.schemas import food_schemas
 
 
-class Food(Base):
-    __tablename__ = "food"
+class FoodRepository:
+    def create_food(self, db: Session, food: food_schemas.FoodCreate):
+        db_food = models.Food(**food.model_dump())
+        db.add(db_food)
+        db.commit()
+        db.refresh(db_food)
+        return db_food
 
-    id = Column(Integer, primary_key=True, index=True)
-    food_name = Column(String(255), nullable=False)
-    food_type = Column(String(20), nullable=False)
-    food_price = Column(Integer, nullable=False)
-    food_description = Column(Text, nullable=False)
-    food_image_url = Column(String(255))
-    created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
-    updated_at = Column(TIMESTAMP, nullable=False, server_default=func.now(), onupdate=func.now())
+    def get_food(self, db: Session, food_id: int):
+        return db.query(models.Food).filter(models.Food.id == food_id).first()
+
+    def get_foods(self, db: Session, skip: int = 0, limit: int = 100):
+        return db.query(models.Food).offset(skip).limit(limit).all()
+
+    def update_food(self, db: Session, food_id: int, food: food_schemas.FoodUpdate):
+        db_food = db.query(models.Food).filter(models.Food.id == food_id).first()
+        if db_food:
+            for key, value in food.dict(exclude_unset=True).items():
+                setattr(db_food, key, value)
+            db.commit()
+            db.refresh(db_food)
+        return db_food
+
+    def delete_food(self, db: Session, food_id: int):
+        db_food = db.query(models.Food).filter(models.Food.id == food_id).first()
+        if db_food:
+            db.delete(db_food)
+            db.commit()
+        return db_food
