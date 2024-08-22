@@ -46,4 +46,4 @@ async def get_all_user_loans(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_active_user)
 ):
-    return await user_loan_service.get_all_user_loans(current_user, db)
+    return await user_loan_service.get_all_user_loans(current_user.id, db)

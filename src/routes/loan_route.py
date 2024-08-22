@@ -6,7 +6,8 @@ import domain.schemas.loan_schemas as loan_schemas
 import domain.services.loan_service as loan_service
 router = APIRouter(
     prefix="/loans",
-    tags=["loans"]
+    tags=["loans"],
+    dependencies=[Depends(get_current_active_user)]
 )
 
 
@@ -52,9 +53,14 @@ async def delete_loan(db: Session = Depends(get_db), current_user=Depends(get_cu
 
 @router.put(
     "/{loan_id}/extend",
-    response_model=loan_schemas.LoanExtendResponse,
+    response_model=loan_schemas.LoanItem,
     status_code=status.HTTP_200_OK,
     summary="대출 연장",
 )
-async def extend_loan(loan_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_active_user)):
-    return await loan_service.extend_loan(current_user, loan_id, db)
+async def extend_loan(
+    loan_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user)
+):
+    request = loan_schemas.LoanExtendRequest(user_id=current_user.id, loan_id=loan_id)
+    return await loan_service.extend_loan(request, db)

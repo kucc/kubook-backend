@@ -1,39 +1,58 @@
 from datetime import timedelta
-from fastapi import HTTPException
+from fastapi import HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 from repositories.loan_repository import Loan
+from domain.schemas.loan_schemas import LoanExtendRequest
 
 
-async def get_all_user_loans(current_user, db: Session):
-    user_id = current_user.id
+def get_all_user_loans(user_id, db: Session):
+    stmt = select(Loan).filter(Loan.user_id == user_id)
 
-    loans = db.query(Loan).filter(Loan.user_id == user_id).all()
+    try:
+        loans = db.scalars(stmt).all()
+        if loans[0] is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loans not found")
 
-    if not loans:
-        raise HTTPException(status_code=404, detail="No loans found")
-
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f"Unexpected error occurred during retrieve: {str(e)}")
     return loans
 
 
-async def extend_loan(current_user, loan_id, db: Session):
-    user_id = current_user.id
-    loan = db.query(Loan).filter(Loan.id == loan_id, Loan.user_id == user_id).first()
+def extend_loan(request: LoanExtendRequest, db: Session):
+    stmt = select(Loan).filter(Loan.user_id == request.user_id, Loan.id == request.loan_id)
 
-    if not loan:
-        raise HTTPException(status_code=404, detail="No loan found")
+    try:
+        loan = db.scalars(stmt.limit(1)).first()
+        if loan is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="Loan not found")
+        # 이미 반납된 도서인지 확인
+        if loan.return_status:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="This loan has already been returned.")
 
-    # 이미 반납된 도서인지 확인
-    if loan.return_status == "TRUE":
-        raise HTTPException(status_code=400, detail="This loan has already been returned.")
+        # 이미 연장된 도서인지 확인
+        if loan.extend_status:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="This loan has already been extended.")
 
-    # 이미 연장된 도서인지 확인
-    if loan.extend_status == "TRUE":
-        raise HTTPException(status_code=400, detail="This loan has already been extended.")
+        loan.due_date = loan.due_date + timedelta(days=7)
 
-    loan.due_date = loan.due_date + timedelta(days=7)
+        db.flush()
 
-    db.commit()
-    db.refresh(loan)
-
-    return loan
+    except IntegrityError as e:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            detail=f"Integrity Error occurred during update the new Loan item.: {str(e)}")
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f"Unexpected error occurred during update: {str(e)}")
+    else:
+        db.commit()
+        db.refresh(loan)
+        return loan
