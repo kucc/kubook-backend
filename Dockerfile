@@ -1,23 +1,19 @@
-# Use an official Python runtime as a parent image
-FROM python:3.10-slim
+FROM python:3.10
 
-# Set the working directory inside the container
-WORKDIR /app
+# 작업 디렉토리를 /app/src로 설정
+WORKDIR /app/src
 
-# Copy the requirements files to the container
-COPY requirements/prod.txt requirements/prod.txt
+# requirements.txt 파일을 /app 디렉토리로 복사
+COPY requirements.txt /app/
 
-# Install any needed packages specified in requirements files
-RUN pip install --no-cache-dir -r requirements/prod.txt
+# 의존성 설치
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# Copy the entire FastAPI project to the container
-COPY /src /app
+# src 폴더의 내용을 /app/src로 복사
+COPY src/ .
 
-# Expose the port that your FastAPI app will run on
-EXPOSE 8080
+# 필요한 경우 상위 디렉토리의 다른 파일들도 복사
+# 예: COPY config.py /app/
 
-# Define environment variables if needed
-# ENV MY_ENV_VARIABLE=my_value
-
-# Run main.py when the container launches
-CMD uvicorn --host=0.0.0.0 --port 8080 main:app
+# 애플리케이션 실행
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
