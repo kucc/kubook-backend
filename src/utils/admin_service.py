@@ -5,12 +5,11 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.orm import Session
 
-from domain.schemas.admin_schemas import *
-
-
 # Get the list of items
+
+
 def get_list(model, db: Session):
-    stmt = select(model).where((model.is_valid == True)).order_by(model.updated_at)
+    stmt = select(model).where((model.is_deleted == False)).order_by(model.updated_at)
     try:
         result = db.scalars(stmt).all()
         if result == None:
@@ -23,7 +22,7 @@ def get_list(model, db: Session):
 
 # Get the item by ID
 def get_item(model, index: int, db: Session):
-    stmt = select(model).where((model.id == index) and (model.is_valid == True))
+    stmt = select(model).where((model.id == index) and (model.is_deleted == False))
     try:
         result = db.execute(stmt).scalar_one()
     except NoResultFound:
@@ -99,7 +98,7 @@ def update_item(model, index: int, req_data, db: Session):
 # delete
 def delete_item(model, index: int, db: Session):
     item = get_item(model, index, db)
-    stmt = (update(model).where(model.id == index).values(is_valid=False))
+    stmt = (update(model).where(model.id == index).values(is_deleted=True))
     try:
         db.execute(stmt)
         db.flush()
