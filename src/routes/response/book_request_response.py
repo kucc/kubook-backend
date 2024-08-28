@@ -17,4 +17,4 @@ class BookRequest(BaseModel):
 
 
 class BookRequestResponse(BaseModel):
-    data: List[BookRequest]
+    data: BookRequest
