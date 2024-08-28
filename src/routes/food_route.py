@@ -25,6 +25,7 @@ def create_food(
     get_current_active_user=Depends(get_current_active_user)
 ):
     print(get_current_active_user)
+    print(get_current_active_user.user_name)
     return food_service.create_food(db, food)
 
 

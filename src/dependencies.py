@@ -30,8 +30,6 @@ async def get_current_user(token=Header(None), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise credentials_exception
-    # if not user.is_valid:
-    #     raise credentials_exception
     return user
 
 
