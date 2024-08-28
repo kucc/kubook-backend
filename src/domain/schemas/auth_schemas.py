@@ -14,9 +14,13 @@ class TokenResponse(BaseModel):
     token_type: str
 
 
-class LoginRequest(BaseModel):
+class FirebaseLoginRequest(BaseModel):
     email: str = Field(..., example="test@test.com")
     password: str = Field(..., example="asdf1234")
+
+
+class LoginRequest(BaseModel):
+    auth_id: str = Field(..., example="테스트 이름")
 
 
 class LoginResponse(BaseModel):

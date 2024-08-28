@@ -20,8 +20,8 @@ class User(Base):
     email = Column(String(100), nullable=False)
     user_name = Column(String(45), nullable=False)
     is_active = Column(String(20), nullable=False)
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=func.current_timestamp())
+    updated_at = Column(DateTime, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
     is_deleted = Column(Boolean, nullable=False, default=False)
 
     # Relationships

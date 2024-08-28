@@ -6,6 +6,7 @@ from dependencies import get_db
 from domain.schemas import food_schemas
 from domain.services.food_service import FoodService
 from repositories.food_repository import FoodRepository
+from dependencies import get_current_active_user
 
 router = APIRouter(
     prefix="/food",
@@ -17,8 +18,13 @@ food_repository = FoodRepository()
 food_service = FoodService(food_repository)
 
 
-@router.post("/foods/", response_model=food_schemas.Food)
-def create_food(food: food_schemas.FoodCreate, db: Session = Depends(get_db)):
+@router.post("", response_model=food_schemas.Food)
+def create_food(
+    food: food_schemas.FoodCreate,
+    db: Session = Depends(get_db),
+    get_current_active_user=Depends(get_current_active_user)
+):
+    print(get_current_active_user)
     return food_service.create_food(db, food)
 
 
