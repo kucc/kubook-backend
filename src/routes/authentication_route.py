@@ -6,6 +6,8 @@ import domain.services.auth_service as auth_service
 from config import Settings
 from dependencies import get_current_user, get_db
 
+from config import Settings
+
 router = APIRouter(
     prefix="/auth",
     tags=["auth"]
@@ -29,10 +31,9 @@ settings = Settings()
 )
 async def register(
     request: auth_schemas.RegisterRequest,
-    current_user=Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    return await auth_service.register(current_user, request, db)
+    return await auth_service.register(request, db)
 
 
 @router.post(
@@ -60,4 +61,7 @@ async def login(
     request: auth_schemas.LoginRequest,
     db: Session = Depends(get_db)
 ):
-    return await auth_service.login(request, db)
+    if settings.ENVIRONMENT == "development":
+        return await auth_service.login_with_username(request, db)
+    # elif settings.ENVIRONMENT == "production":
+    #     return await auth_service.login(request, db)
