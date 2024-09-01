@@ -36,5 +36,4 @@ async def update_user_book_request(
     )
 
     domain_res = await update_bookreq(domain_req, db)
-    route_res = route_bookreq_res(data=domain_res)
-    return route_res
+    return route_bookreq_res(domain_res)
