@@ -1,12 +1,7 @@
 from datetime import date
 from datetime import datetime as _datetime
 from typing import Optional
-
 from pydantic import Field, BaseModel
-
-
-class BookRequestCreate(BaseModel):
-    pass
 
 
 class BookRequestRequest(BaseModel):
