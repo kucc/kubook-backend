@@ -65,7 +65,7 @@ async def return_loan(loan_id: int, return_date: date | None,  db: Session = Dep
     if (return_date == None):
         return_date = date.today()
 
-    loan: LoanUpdate = {
+    loan: s.LoanUpdate = {
         "return_status": True,
         "return_date": return_date
     }

@@ -59,10 +59,10 @@ async def delete_user(user_id: int,  db: Session = Depends(get_db)):
 
     if (user_admin[0] != None):
         user_admin_id: int = user_admin[0].id
-        admin: AdminUpdate = {"admin_status": False}
+        admin: s.AdminUpdate = {"admin_status": False}
         update_item(Admin, user_admin_id, admin, db)
         delete_item(Admin, user_admin_id, db)
 
-    user: UserUpdate = {"is_active": False}
+    user: s.UserUpdate = {"is_active": False}
     update_item(User, user_id, user, db)
     return delete_item(User, user_id, db)
