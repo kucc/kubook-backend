@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from dependencies import get_current_admin
-from src.utils.admin_service import *
+from utils.admin_service import *
 
 router = APIRouter(
     prefix="/admin/settings",

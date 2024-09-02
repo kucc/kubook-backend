@@ -1,3 +1,4 @@
+from datetime import date
 from typing import List
 
 from fastapi import APIRouter, Depends, status
@@ -5,7 +6,7 @@ from sqlalchemy.orm import Session
 
 import domain.schemas.admin_schemas as s
 from dependencies import get_current_admin, get_db
-from src.utils.admin_service import *
+from utils.admin_service import *
 from repositories.loan_repository import Loan
 
 router = APIRouter(
@@ -41,7 +42,7 @@ async def get_loan(loan_id: int,  db: Session = Depends(get_db)):
     response_model=s.LoanRes,
     status_code=status.HTTP_200_OK
 )
-async def update_loan(loan_id: int, loan: LoanUpdate,  db: Session = Depends(get_db)):
+async def update_loan(loan_id: int, loan: s.LoanUpdate,  db: Session = Depends(get_db)):
     return update_item(Loan, loan_id, loan, db)
 
 

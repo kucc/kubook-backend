@@ -4,7 +4,7 @@ from domain.schemas.book_request_schemas import BookRequestRequest as bookreq_re
 from domain.schemas.book_request_schemas import BookRequestResponse as bookreq_res
 from repositories.requested_book import RequestedBook
 from repositories.user_repository import User
-from src.utils.user_service import update_item, get_item
+from utils.user_service import update_item, get_item
 
 
 async def update(request_data: bookreq_req, db: Session):

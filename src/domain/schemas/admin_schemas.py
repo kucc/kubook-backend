@@ -2,13 +2,10 @@ from datetime import date
 from datetime import datetime as _datetime
 from datetime import timedelta
 from typing import List, Optional
-
-from pydantic import Field
-
-from utils.common import CustomBaseModel
+from pydantic import Field, BaseModel
 
 
-class ItemBase(CustomBaseModel):
+class ItemBase(BaseModel):
     created_at: _datetime = Field(..., title="create_at", description="생성일시", example=_datetime.now())
     updated_at: _datetime = Field(..., title="update_at", description="수정일시", example=_datetime.now())
     is_valid: bool = Field(..., title="is_valid", description="유효 여부", example=True)
@@ -21,7 +18,7 @@ class ItemBase(CustomBaseModel):
 # ===============================================================
 
 
-class CategoryBase(CustomBaseModel):
+class CategoryBase(BaseModel):
     code: str = Field(..., title="code", description="카테고리 코드", example="A")
     name: str = Field(..., title="name", description="카테고리명", example="인공지능")
 
@@ -34,13 +31,13 @@ class CategoryCreate(CategoryBase):
     pass
 
 
-class CategoryUpdate(CategoryBase.all_optional("CategoryUpdate")):
+class CategoryUpdate(CategoryBase):
     pass
 
 # =======================================================================
 
 
-class BookInfoBase(CustomBaseModel):
+class BookInfoBase(BaseModel):
     title: str = Field(..., title="title", description="책 제목", example="FastAPI Tutorial")
     subtitle: Optional[str] = Field(None, title="subtitle", description="책 부제목", example="Build modern web APIs with Python and FastAPI")
     author: str = Field(..., title="author", description="저자", example="John Doe")
@@ -61,13 +58,13 @@ class BookInfoCreate(BookInfoBase):
     pass
 
 
-class BookInfoUpdate(BookInfoBase.all_optional("BookInfoUpdate")):
+class BookInfoUpdate(BookInfoBase):
     pass
 
 # ===============================================================
 
 
-class BookBase(CustomBaseModel):
+class BookBase(BaseModel):
     book_info_id: int = Field(..., title="book_info_id", description="책과 연결된 도서 정보 id", example=1, ge=0)
     book_status: int = Field(0, title="book_status", description="책 상태", example=1, ge=0, le=3)
     note: Optional[str] = Field(None, title="note", description="노트", example="기부된 책")
@@ -78,16 +75,16 @@ class Book(BookBase, ItemBase):
     pass
 
 
-class BookCreate(BookBase.omit_fields('BookCreate', ['book_status'])):
+class BookCreate(BookBase):
     pass
 
 
-class BookUpdate(BookBase.all_optional("BookUpdate")):
+class BookUpdate(BookBase):
     pass
 # ==================================================================
 
 
-class UserBase(CustomBaseModel):
+class UserBase(BaseModel):
     user_name: str = Field(..., title="user_name", description="사용자 이름", example="JohnDoe")
     is_active: bool = Field(True, title="is_active", description="활성 상태", example=True)
     email: str = Field(..., title="email", description="이메일", example="john.doe@example.com")
@@ -97,13 +94,13 @@ class User(UserBase, ItemBase):
     pass
 
 
-class UserUpdate(UserBase.all_optional("UserUpdate")):
+class UserUpdate(UserBase):
     pass
 
 # ===============================================================
 
 
-class BookRequestBase(CustomBaseModel):
+class BookRequestBase(BaseModel):
     user_id: int = Field(..., title="user_id", description="도서 구매를 요청한 사용자 ID", example=1, ge=0)
     book_title: str = Field(..., title="book_title", description="책 제목", example="FastAPI Tutorial")
     publication_year: Optional[int] = Field(..., title="publication_year", description="출판년도", example=2022, ge=0)
@@ -125,13 +122,13 @@ class BookRequestCreate(BookRequestBase):
     pass
 
 
-class BookRequestUpdate(BookRequestInfo.all_optional("BookRequestUpdate")):
+class BookRequestUpdate(BookRequestInfo):
     pass
 
 
 # ===============================================================
 
-class LoanBase(CustomBaseModel):
+class LoanBase(BaseModel):
     book_id: int = Field(..., title="book_id", description="대출한 책 ID", example=1, ge=0)
     user_id: int = Field(..., title="user_id", description="대출한 사용자 ID", example=1, ge=0)
 
@@ -153,13 +150,13 @@ class LoanCreate(LoanBase):
     pass
 
 
-class LoanUpdate(LoanInfo.all_optional("LoanUpdate")):
+class LoanUpdate(LoanInfo):
     pass
 
 
 # =======================================================================
 
-class ReservationBase(CustomBaseModel):
+class ReservationBase(BaseModel):
     book_id: int = Field(..., title="book_id", description="예약한 책 ID", example=1, ge=0)
     user_id: int = Field(..., title="user_id", description="예약한 사용자 ID", example=1, ge=0)
     reservation_date: date = Field(..., title="reservation_date", description="예약 날짜", example=_datetime.now().date())
@@ -170,17 +167,17 @@ class Reservation(ReservationBase, ItemBase):
     pass
 
 
-class ReservationCreate(ReservationBase.omit_fields("ReservationCreate", ["reservation_date", "reservation_status"])):
+class ReservationCreate(ReservationBase):
     pass
 
 
-class ReservationUpdate(ReservationBase.all_optional("ReservationUpdate")):
+class ReservationUpdate(ReservationBase):
     pass
 
 
 # =======================================================================
 
-class AdminBase(CustomBaseModel):
+class AdminBase(BaseModel):
     user_id: int = Field(..., title="user_id", description="관리자의 일반 ID", example=1, ge=0)
     admin_status: bool = Field(..., title="reservation_status", description="관리자 상태", example=True)
     expiration_date: date = Field(..., title="expiration_date", description="권한 기한", example=(_datetime.now() + timedelta(days=365)).date())
@@ -194,13 +191,13 @@ class AdminCreate(AdminBase):
     pass
 
 
-class AdminUpdate(AdminBase.all_optional("AdminUpdate")):
+class AdminUpdate(AdminBase):
     pass
 
 # ==============================================================
 
 
-class NoticeBase(CustomBaseModel):
+class NoticeBase(BaseModel):
     admin_id: int = Field(..., title="admin_id", description="작성자(관리자)의 관리자 ID", example=1, ge=0)
     title: str = Field(..., title="title", description="공지 제목", example="Scheduled Maintenance")
     notice_content: Optional[str] = Field(None, title="notice_content", description="공지 내용", example="The system will be down for maintenance.")
@@ -214,13 +211,13 @@ class NoticeCreate(NoticeBase):
     pass
 
 
-class NoticeUpdate(NoticeBase.all_optional("NoticeUpdate")):
+class NoticeUpdate(NoticeBase):
     pass
 
 
 # ==================================================================
 
-class ServiceSettingBase(CustomBaseModel):
+class ServiceSettingBase(BaseModel):
     name: str = Field(..., title="name", description="설정 이름", example="service_begin")
     data_type: str = Field(..., title="datatype", description="데이터 유형", example="datetime")
     value: str = Field(..., title="value", description="설정 값", example=_datetime.today())
@@ -235,7 +232,7 @@ class ServiceSettingCreate(ServiceSettingBase):
     pass
 
 
-class ServiceSettingUpdate(ServiceSetting.all_optional("ServiceSettingUpdate")):
+class ServiceSettingUpdate(ServiceSetting):
     pass
 
 

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 import domain.schemas.admin_schemas as s
 from dependencies import get_current_admin, get_db
-from src.utils.admin_service import *
+from utils.admin_service import *
 from repositories.admin_repository import Admin
 
 router = APIRouter(

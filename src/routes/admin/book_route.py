@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 import domain.schemas.admin_schemas as s
 from dependencies import get_current_admin, get_db
-from src.utils.admin_service import *
+from utils.admin_service import *
 from repositories.book_info_repository import BookInfo
 from repositories.book_repository import Book
 
@@ -94,7 +94,7 @@ async def get_book_info(book_id: int, db: Session = Depends(get_db)):
     response_model=s.Book,
     status_code=status.HTTP_201_CREATED
 )
-async def create_book(book_data: BookCreate, db: Session = Depends(get_db)):
+async def create_book(book_data: s.BookCreate, db: Session = Depends(get_db)):
     return create_item(Book, book_data, db)
 
 
@@ -104,7 +104,7 @@ async def create_book(book_data: BookCreate, db: Session = Depends(get_db)):
     response_model=s.Book,
     status_code=status.HTTP_200_OK
 )
-async def update_book(book_id: int, book_data: BookUpdate, db: Session = Depends(get_db)):
+async def update_book(book_id: int, book_data: s.BookUpdate, db: Session = Depends(get_db)):
     return update_item(Book, book_id, book_data, db)
 
 
@@ -113,5 +113,5 @@ async def update_book(book_id: int, book_data: BookUpdate, db: Session = Depends
     summary="책 정보 삭제",
     status_code=status.HTTP_204_NO_CONTENT
 )
-async def delete_book(book_id: int, current_user: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+async def delete_book(book_id: int, current_user: s.User = Depends(get_current_admin), db: Session = Depends(get_db)):
     return delete_item(Book, book_id, db)

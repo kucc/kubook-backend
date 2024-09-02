@@ -8,6 +8,10 @@ from sqlalchemy.orm import Session
 # Get the list of items
 
 
+class CustomBaseModel:
+    pass
+
+
 def get_list(model, db: Session):
     stmt = select(model).where((model.is_valid == True)).order_by(model.updated_at)
     try:

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 import domain.schemas.admin_schemas as s
 from dependencies import get_current_admin, get_db
-from src.utils.admin_service import *
+from utils.admin_service import *
 from repositories.notice_repository import Notice
 
 router = APIRouter(
@@ -41,7 +41,7 @@ async def get_notice(notice_id: int, db: Session = Depends(get_db)):
     response_model=s.Notice,
     status_code=status.HTTP_201_CREATED
 )
-async def create_notice(notice_data: NoticeCreate, current_user: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+async def create_notice(notice_data: s.NoticeCreate, current_user: s.User = Depends(get_current_admin), db: Session = Depends(get_db)):
     notice_data.admin_id = current_user.admin.id
     return create_item(Notice, notice_data, db)
 
@@ -52,7 +52,7 @@ async def create_notice(notice_data: NoticeCreate, current_user: User = Depends(
     response_model=s.Notice,
     status_code=status.HTTP_200_OK
 )
-async def update_notice(notice_id: int, notice_data: NoticeUpdate, current_user: User = Depends(get_current_admin), db: Session = Depends(get_db)):
+async def update_notice(notice_id: int, notice_data: s.NoticeUpdate, current_user: s.User = Depends(get_current_admin), db: Session = Depends(get_db)):
     notice_data.admin_id = current_user.admin.id
     return update_item(Notice, notice_id, notice_data, db)
 

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 import domain.schemas.admin_schemas as s
 from dependencies import get_current_admin, get_db
-from src.utils.admin_service import *
+from utils.admin_service import *
 from repositories.requested_book import RequestedBook
 
 router = APIRouter(
@@ -41,7 +41,7 @@ async def get_book_request(request_id: int, db: Session = Depends(get_db)):
     response_model=s.BookRequest,
     status_code=status.HTTP_200_OK
 )
-async def update_book_request(request_id: int, request_data: BookRequestUpdate, db: Session = Depends(get_db)):
+async def update_book_request(request_id: int, request_data: s.BookRequestUpdate, db: Session = Depends(get_db)):
     return update_item(RequestedBook, request_id, request_data, db)
 
 

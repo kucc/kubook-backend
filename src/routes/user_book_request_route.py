@@ -14,7 +14,7 @@ router = APIRouter(
 
 
 @router.put(
-    "/{user_id}/book-requests/{requests_id}",
+    "/{user_id}/book-requests/{request_id}",
     summary="도서 구매 요청 수정",
     response_model=route_bookreq_res,
     status_code=status.HTTP_200_OK
