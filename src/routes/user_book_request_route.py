@@ -24,7 +24,7 @@ async def update_user_book_request(
     request_id: int,
     request_data: route_bookreq_req,
     db: Session = Depends(get_db),
-    get_current_active_user=Depends(get_current_active_user)
+    status_code=status.HTTP_200_OK
 ):
     domain_req = domain_bookreq_req(
         user_id=user_id,
