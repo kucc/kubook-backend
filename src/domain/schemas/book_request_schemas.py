@@ -4,7 +4,11 @@ from typing import Optional
 from pydantic import Field, BaseModel
 
 
-class BookRequestRequest(BaseModel):
+class ReadBookRequestRequest(BaseModel):
+    user_id: int = Field(title="user_id", description="도서 구매를 요청한 사용자 ID", example=1, ge=0)
+
+
+class UpdateBookRequestRequest(BaseModel):
     user_id: int = Field(title="user_id", description="도서 구매를 요청한 사용자 ID", example=1, ge=0)
     request_id: int = Field(title="book_request_id", description="도서 구매 요청 정보 id", example=1, ge=0)
     book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")

@@ -1,9 +1,12 @@
+from datetime import date
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from routes.request.update_book_request_request import UpdateBookRequest as route_bookreq_req
 from routes.response.book_request_response import BookRequestResponse as route_bookreq_res
-from domain.schemas.book_request_schemas import BookRequestRequest as domain_bookreq_req
-from domain.services.book_request_service import update as update_bookreq
+from routes.response.book_request_response import BookRequestListResponse as route_bookreq_list_res
+from domain.schemas.book_request_schemas import UpdateBookRequestRequest as domain_update_req
+from domain.schemas.book_request_schemas import ReadBookRequestRequest as domain_read_req
+from domain.services.book_request_service import update_bookreq, read_bookreq
 from dependencies import get_current_active_user, get_db
 
 router = APIRouter(
@@ -11,6 +14,22 @@ router = APIRouter(
     tags=["users"],
     dependencies=[Depends(get_current_active_user)]
 )
+
+
+@router.get(
+    "/{user_id}/book-requests",
+    summary="도서 구매 요청 목록 조회",
+    response_model=route_bookreq_list_res,
+    status_code=status.HTTP_200_OK
+)
+async def read_user_book_requests(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_active_user)
+):
+    domain_req = domain_read_req(user_id=user_id)
+    domain_res = await read_bookreq(domain_req, db)
+    return route_bookreq_list_res(data=domain_res, count=len(domain_res))
 
 
 @router.put(
@@ -24,9 +43,9 @@ async def update_user_book_request(
     request_id: int,
     request_data: route_bookreq_req,
     db: Session = Depends(get_db),
-    status_code=status.HTTP_200_OK
+    current_user=Depends(get_current_active_user),
 ):
-    domain_req = domain_bookreq_req(
+    domain_req = domain_update_req(
         user_id=user_id,
         request_id=request_id,
         book_title=request_data.book_title,
