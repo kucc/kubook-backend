@@ -42,7 +42,6 @@ def extend_loan(request: LoanExtendRequest, db: Session):
                                 detail="This loan has already been extended.")
 
         loan.due_date = loan.due_date + timedelta(days=7)
-        loan.overdue_days = 0
 
         db.flush()
     except NoResultFound:
