@@ -1,0 +1,11 @@
+[project]
+requires-python = ">=3.10"
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["A", "B", "C","E", "F", "W", "I", "UP"]
+exclude = ["venv", ".git", "__pycache__", "**/__init__.py"]
+ignore = ["C0111", "E712", "UP017"]
