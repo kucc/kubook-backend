@@ -151,10 +151,9 @@ class Notice(Base):
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     title = Column(String(255), nullable=False)
     content = Column(String, nullable=False)
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=func.current_timestamp())
+    updated_at = Column(DateTime, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
     is_deleted = Column(Boolean, nullable=False, default=False)
-
     # Relationships
     admin = relationship("Admin", foreign_keys=[admin_id])
     user = relationship("User", foreign_keys=[user_id])
