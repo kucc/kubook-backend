@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config import Settings
 from routes.authentication_route import router as auth_router
+from routes.admin.notice_route import router as admin_notice_router
 
 settings = Settings()
 
@@ -37,6 +38,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(admin_notice_router)
 
 
 @app.get("/")
