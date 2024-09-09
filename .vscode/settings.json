@@ -12,7 +12,7 @@
   "ruff.configuration": "../pyproject.toml",
   "ruff.lineLength": 120,
   "ruff.nativeServer": "on",
-  "ruff.lint.select": ["A", "B", "C", "E", "F", "W", "I", "UP"],
+  "ruff.lint.select": ["ANN", "B", "C", "E", "F", "W", "I", "UP"],
   "ruff.exclude": ["venv", ".git", "__pycache__", "__init__.py"],
-  "ruff.lint.ignore": ["C0111", "E712", "UP017"]
+  "ruff.lint.ignore": ["E712", "UP017"]
 }
