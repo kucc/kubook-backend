@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql import func
 
@@ -154,36 +154,3 @@ class Notice(Base):
     # Relationships
     admin = relationship("Admin", foreign_keys=[admin_id])
     user = relationship("User", foreign_keys=[user_id])
-
-
-# 여기서부터는 예시로 작성한 코드입니다.
-
-
-class Food(Base):
-    __tablename__ = "food"
-
-    id = Column(Integer, primary_key=True, index=True)
-    food_name = Column(String(255), nullable=False)
-    food_type = Column(String(20), nullable=False)
-    food_price = Column(Integer, nullable=False)
-    food_description = Column(Text, nullable=False)
-    food_image_url = Column(String(255))
-    created_at = Column(DateTime, nullable=False, server_default=func.now())
-    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
-
-    orders = relationship("FoodOrder", back_populates="food")
-
-
-class FoodOrder(Base):
-    __tablename__ = "food_order"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    food_id = Column(Integer, ForeignKey("food.id"), nullable=False)
-    user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
-    quantity = Column(Integer, nullable=False)
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
-    is_deleted = Column(Boolean, nullable=False, default=False)
-
-    user = relationship("User", back_populates="food_orders")
-    food = relationship("Food", back_populates="orders")
