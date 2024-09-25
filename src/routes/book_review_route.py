@@ -2,14 +2,11 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_current_active_user, get_db
-from routes.request.book_review_request import BookReviewUpdateRouteRequest
 from routes.response.book_review_response import BookReviewListResponse
-from domain.schemas.book_review_schemas import BookReviewItem, BookReviewCreateRequest, BookReviewCreateResponse, BookReviewUpdateRequest
+from domain.schemas.book_review_schemas import BookReviewCreateRequest, BookReviewCreateResponse
 from domain.services.book_review_service import get_all_user_reviews as service_get_all_user_reviews
 from domain.services.book_review_service import delete_review as service_delete_review
 from domain.services.book_review_service import create_review as service_create_review
-from domain.services.book_review_service import update_review as service_update_review
-
 router = APIRouter(
     prefix="/reviews",
     tags=["reviews"],
@@ -69,24 +66,3 @@ async def delete_reivew(
 ):
     await service_delete_review(review_id, current_user.id, db)
     return
-
-
-@router.put(
-    "/{review_id}",
-    response_model=BookReviewItem,
-    status_code=status.HTTP_200_OK,
-    summary="리뷰 수정"
-)
-async def update_review(
-    review_id: int,
-    review_update_data: BookReviewUpdateRouteRequest,
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_active_user)
-):
-    domain_req = BookReviewUpdateRequest(
-        review_id=review_id,
-        review_content=review_update_data.review_content,
-        user_id=current_user.id
-    )
-    result = await service_update_review(domain_req, db)
-    return result

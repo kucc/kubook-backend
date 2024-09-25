@@ -2,9 +2,9 @@ from datetime import datetime as _datetime
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import select, and_
-from sqlalchemy.exc import NoResultFound, IntegrityError
+from sqlalchemy.exc import NoResultFound
 
-from domain.schemas.book_review_schemas import BookReviewItem, BookReviewCreateRequest, BookReviewCreateResponse, BookReviewUpdateRequest
+from domain.schemas.book_review_schemas import BookReviewCreateRequest, BookReviewCreateResponse, BookReviewItem
 from repositories.models import BookReview, User, BookInfo
 from utils.crud_utils import get_item
 
@@ -105,44 +105,3 @@ async def create_review(request: BookReviewCreateRequest, db: Session):
             created_at=review.created_at,
         )
         return result
-
-
-async def update_review(request: BookReviewUpdateRequest, db: Session):
-    stmt = select(BookReview).where(and_(BookReview.id == request.review_id, BookReview.is_deleted == False))
-
-    try:
-        review = db.execute(stmt).scalar_one()
-
-        if review.user_id != request.user_id:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                                detail="You do not have permission to access this review.")
-
-        review.review_content = request.review_content
-        review.updated_at = _datetime.now()
-
-        db.flush()
-    except NoResultFound:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Review not found")
-    except IntegrityError as e:
-        db.rollback()
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                            detail=f"Integrity Error occurred during update the Review item.: {str(e)}")
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail=f"Unexpected error occurred during update: {str(e)}")
-    else:
-        db.commit()
-        db.refresh(review)
-
-        response = BookReviewItem(
-            review_id=review.id,
-            user_id=review.user_id,
-            book_info_id=review.book_info_id,
-            review_content=review.review_content,
-            created_at=review.created_at,
-            updated_at=review.updated_at
-        )
-
-        return response

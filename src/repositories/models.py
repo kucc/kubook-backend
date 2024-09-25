@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import TIMESTAMP, Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql import func
 
@@ -13,9 +13,11 @@ class User(Base):
     auth_type = Column(String(20), nullable=False, default="FIREBASE")
     email = Column(String(100), nullable=False)
     user_name = Column(String(45), nullable=False)
-    is_active = Column(Boolean, nullable=False)
-    created_at = Column(DateTime, nullable=False, default=func.current_timestamp())
-    updated_at = Column(DateTime, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    github_id = Column(String(100), nullable=True)
+    instagram_id = Column(String(100), nullable=True)
+    is_active = Column(String(20), nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
     is_deleted = Column(Boolean, nullable=False, default=False)
 
     # Relationships
@@ -33,8 +35,8 @@ class Admin(Base):
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     admin_status = Column(Boolean, nullable=False)
     expiration_date = Column(Date, nullable=False)
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
     is_deleted = Column(Boolean, nullable=False, default=False)
 
     # Relationship
@@ -50,12 +52,12 @@ class RequestedBook(Base):
     publication_year = Column(Integer)
     reject_reason = Column(String(20))
     request_link = Column(String(255), nullable=False)
-    reason = Column(String, nullable=False)
+    reason = Column(Text, nullable=False)
     requested_at = Column(DateTime, nullable=False)
-    processing_status = Column(Integer, nullable=False)
+    processing_status = Column(Integer, nullable=False, default=0)
     processed_at = Column(DateTime)
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
     is_deleted = Column(Boolean, nullable=False, default=False)
 
     # Relationship
@@ -68,14 +70,14 @@ class Loan(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     book_id = Column(Integer, ForeignKey("book.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
-    loan_date = Column(DateTime, nullable=False)
-    due_date = Column(DateTime, nullable=False)
+    loan_date = Column(Date, nullable=False)
+    due_date = Column(Date, nullable=False)
     extend_status = Column(Boolean, nullable=False, default=False)
     return_status = Column(Boolean, nullable=False, default=False)
-    return_date = Column(DateTime)
+    return_date = Column(Date)
     overdue_days = Column(Integer, nullable=False, default=0)
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
     is_deleted = Column(Boolean, nullable=False, default=False)
 
     # Relationships
@@ -90,10 +92,9 @@ class BookReview(Base):
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     book_info_id = Column(Integer, ForeignKey("book_info.id"), nullable=False)
     review_content = Column(String, nullable=False)
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
     is_deleted = Column(Boolean, nullable=False, default=False)
-
     # Relationships
     user = relationship("User", back_populates="book_reviews")
     book_info = relationship("BookInfo", back_populates="book_reviews")
@@ -114,8 +115,8 @@ class BookInfo(Base):
     version = Column(String(45))
     major = Column(Boolean, default=False)
     language = Column(String(20), nullable=False, default="KOREAN")
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
     is_deleted = Column(Boolean, nullable=False, default=False)
 
     # Relationships
@@ -128,11 +129,11 @@ class Book(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     book_info_id = Column(Integer, ForeignKey("book_info.id"), nullable=False)
-    book_status = Column(String(20), nullable=False)
+    book_status = Column(Boolean, nullable=False, default=True)
     note = Column(String(255))
-    donor_name = Column(String(255))
-    created_at = Column(DateTime, nullable=False)
-    updated_at = Column(DateTime, nullable=False)
+    donor_name = Column(String(20))
+    created_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
     is_deleted = Column(Boolean, nullable=False, default=False)
 
     # Relationships
@@ -147,9 +148,9 @@ class Notice(Base):
     admin_id = Column(Integer, ForeignKey("admin.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
     title = Column(String(255), nullable=False)
-    content = Column(String, nullable=False)
-    created_at = Column(DateTime, nullable=False, default=func.current_timestamp())
-    updated_at = Column(DateTime, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
+    content = Column(Text, nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp())
+    updated_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
     is_deleted = Column(Boolean, nullable=False, default=False)
     # Relationships
     admin = relationship("Admin", foreign_keys=[admin_id])
