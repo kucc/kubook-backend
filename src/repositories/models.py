@@ -103,7 +103,7 @@ class BookInfo(Base):
     __tablename__ = "book_info"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    title = Column(String(255), nullable=False)
+    book_title = Column(String(255), nullable=False)
     code = Column(String(20), nullable=False)
     category_name = Column(String(50), nullable=False)
     subtitle = Column(String(255))

@@ -44,7 +44,7 @@ class Settings(BaseSettings):
     def DATABASE_URL(self):
         if self.ENVIRONMENT == "production":
             return f"mysql+pymysql://{self.PROD_DB_USER}:{self.PROD_DB_PASSWORD}@{self.PROD_DB_HOST}:{self.PROD_DB_PORT}/{self.PROD_DB_NAME}"
-        else:  # exp or development
+        elif self.ENVIRONMENT == "development":  # exp or development
             return f"mysql+pymysql://{self.EXP_DB_USER}:{self.EXP_DB_PASSWORD}@{self.EXP_DB_HOST}:{self.EXP_DB_PORT}/{self.EXP_DB_NAME}"
 
 

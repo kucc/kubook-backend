@@ -3,14 +3,14 @@ from datetime import timedelta
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-import domain.schemas.auth_schemas as auth_schemas
+from domain.schemas.auth_schemas import RegisterRequest, LoginRequest
 from config import Settings
 from domain.services.token_service import create_user_tokens
 from externals.firebase import sign_in_with_email_and_password
 from repositories.models import User
 
 
-async def register(request: auth_schemas.RegisterRequest, db: Session):
+async def register(request: RegisterRequest, db: Session):
 
     # Check if user information exists in the DB
     user = db.query(User).filter(User.user_name == request.user_name).first()
@@ -54,7 +54,7 @@ async def login_with_firebase(request, db: Session):
     local_id = firebase_response["localId"]
 
     # Check if user information exists in the DB
-    user = db.query(User).filter(User.auth_id == local_id).first()
+    user = db.query(User).filter(User.auth_id == request.auth_id).first()
 
     # If user information does not exist in the DB, create a new user
     user_info_required = False
@@ -90,7 +90,7 @@ async def login_with_firebase(request, db: Session):
 
 
 async def login_with_username(
-        request: auth_schemas.LoginRequest,
+        request: LoginRequest,
         db: Session):
     # Authenticate user
     # Check if user information exists in the DB
