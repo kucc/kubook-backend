@@ -14,5 +14,5 @@
   "ruff.nativeServer": "on",
   "ruff.lint.select": ["B", "C", "E", "F", "W", "I", "UP"],
   "ruff.exclude": ["venv", ".git", "__pycache__", "__init__.py"],
-  "ruff.lint.ignore": ["B008","E712","UP017"]
+  "ruff.lint.ignore": ["B008", "E712", "UP017"]
 }
