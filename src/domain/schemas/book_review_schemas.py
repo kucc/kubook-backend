@@ -12,7 +12,7 @@ class DomainResGetReviewByInfoId(BaseModel):
     updated_at: _datetime = Field(title="update_at", description="수정일시", example=_datetime.now())
 
 
-class DomainResGetReview(BaseModel):
+class Review(BaseModel):
     id: int = Field(title="book_review_id", description="리뷰 정보 id", example=1, gt=0)
     user_id: int = Field(title="user_id", description="리뷰한 사용자 ID", example=1, gt=0)
     book_info_id: int = Field(title="book_info_id", description="리뷰한 책 정보 ID", example=1, gt=0)
