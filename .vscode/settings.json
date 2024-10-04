@@ -9,7 +9,7 @@
         }
     },
     "ruff.configuration": "../pyproject.toml",
-    "ruff.lineLength": 130,
+    "ruff.lineLength": 120,
     "ruff.nativeServer": "on",
     "ruff.lint.select": [
         "B",
