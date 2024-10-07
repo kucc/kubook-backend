@@ -67,6 +67,9 @@ async def service_read_books(db: Session):
                 BookInfo.category_name, 
                 BookInfo.image_url
             )
+        )
+        .where(
+            Book.is_deleted == False,
         ).order_by(BookInfo.updated_at)
     )
     try:
