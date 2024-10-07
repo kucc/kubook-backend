@@ -18,6 +18,7 @@ class DomainResGetBookItem(BaseModel):
     book_info_id: int = Field(title="book_info_id", description="도서 정보 id", example=1, gt=0)
     book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")
     category_name: str = Field(title="category_name", description="카테고리 이름", example="웹")
+    image_url: str | None = Field(title="image_url", description="도서 표지 이미지")
     book_status: bool = Field(title="book_stauts", description="도서 대출 상태", example=True)
     created_at: _datetime = Field(title="create_at", description="생성일시", example=_datetime.now())
     updated_at: _datetime = Field(title="update_at", description="수정일시", example=_datetime.now())

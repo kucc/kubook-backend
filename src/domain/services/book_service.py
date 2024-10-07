@@ -12,7 +12,7 @@ async def service_search_books(searching_keyword: str, db: Session):
     stmt = (
         select(Book)
         .join(BookInfo)
-        .options(joinedload(Book.book_info).load_only(BookInfo.book_title, BookInfo.category_name))
+        .options(joinedload(Book.book_info).load_only(BookInfo.book_title, BookInfo.category_name, BookInfo.image_url))
         .where(
             and_(
                 Book.is_deleted == False,
@@ -42,6 +42,7 @@ async def service_search_books(searching_keyword: str, db: Session):
             book_info_id=book.book_info_id,
             book_title=book.book_info.book_title,
             category_name=book.book_info.category_name,
+            image_url=book.book_info.image_url,
             book_status=book.book_status,
             created_at=book.created_at,
             updated_at=book.updated_at,

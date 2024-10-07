@@ -3,7 +3,6 @@ from datetime import timedelta
 
 from fastapi import HTTPException, status
 from sqlalchemy import and_, select
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from domain.schemas.loan_schemas import (
@@ -65,13 +64,6 @@ async def service_extend_loan(request: DomainReqPutLoan, db: Session):
         loan.updated_at = _datetime.now()
 
         db.flush()
-
-    except IntegrityError as e:
-        db.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Integrity Error occurred during update the Review item.: {str(e)}",
-        ) from e
 
     except Exception as e:
         db.rollback()
