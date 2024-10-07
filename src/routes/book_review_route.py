@@ -2,21 +2,18 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_current_active_user, get_db
-from domain.schemas.book_review_schemas import (
-    DomainReqPostReview,
-    DomainReqPutReview,
-    DomainResGetReviewItem,
-    DomainResPostReview,
-)
+from domain.schemas.book_review_schemas import (DomainReqPostReview,
+                                                DomainReqPutReview,
+                                                DomainResGetReviewItem,
+                                                DomainResPostReview)
 from domain.services.book_review_service import (
-    service_create_review,
-    service_delete_review,
-    service_read_reviews_by_bookinfo_id,
-    service_read_reviews_by_user_id,
-    service_update_review,
-)
-from routes.request.book_review_request import RouteReqPostReview, RouteReqPutReview
-from routes.response.book_review_response import RouteResGetReviewList, RouteResGetReviewListByInfoId
+    service_create_review, service_delete_review,
+    service_read_reviews_by_bookinfo_id, service_read_reviews_by_user_id,
+    service_update_review)
+from routes.request.book_review_request import (RouteReqPostReview,
+                                                RouteReqPutReview)
+from routes.response.book_review_response import (
+    RouteResGetReviewList, RouteResGetReviewListByInfoId)
 
 router = APIRouter(
     prefix="/reviews",

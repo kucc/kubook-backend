@@ -5,13 +5,11 @@ from sqlalchemy import and_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
-from domain.schemas.book_review_schemas import (
-    DomainReqPostReview,
-    DomainReqPutReview,
-    DomainResGetReviewByInfoId,
-    DomainResGetReviewItem,
-    DomainResPostReview,
-)
+from domain.schemas.book_review_schemas import (DomainReqPostReview,
+                                                DomainReqPutReview,
+                                                DomainResGetReviewByInfoId,
+                                                DomainResGetReviewItem,
+                                                DomainResPostReview)
 from repositories.models import BookReview, User
 from utils.crud_utils import delete_item, get_item
 

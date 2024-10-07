@@ -1,34 +1,19 @@
 {
-    "editor.formatOnSave": true,
-    "[python]": {
-        "editor.defaultFormatter": null,
-        "editor.formatOnType": true,
-        "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit",
-            "source.fixAll.ruff": "explicit"
-        }
-    },
-    "ruff.configuration": "../pyproject.toml",
-    "ruff.lineLength": 120,
-    "ruff.nativeServer": "on",
-    "ruff.lint.select": [
-        "B",
-        "C",
-        "E",
-        "F",
-        "W",
-        "I",
-        "UP"
-    ],
-    "ruff.exclude": [
-        "venv",
-        ".git",
-        "__pycache__",
-        "__init__.py"
-    ],
-    "ruff.lint.ignore": [
-        "E712",
-        "UP017",
-        "B008"
-    ]
+  "editor.formatOnSave": true,
+
+  "[python]": {
+    "editor.defaultFormatter": null,
+    "editor.formatOnType": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit",
+      "source.fixAll.ruff": "explicit"
+    }
+  },
+  "ruff.configuration": "../pyproject.toml",
+  "ruff.lineLength": 120,
+  "ruff.nativeServer": "on",
+  "ruff.lint.select": ["B", "C", "E", "F", "W", "I", "UP"],
+  "ruff.exclude": ["venv", ".git", "__pycache__", "__init__.py"],
+  "ruff.lint.ignore": ["B008", "E712", "UP017"]
 }
+

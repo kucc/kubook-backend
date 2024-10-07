@@ -48,8 +48,6 @@ app.include_router(user_router)
 app.include_router(loan_router)
 app.include_router(review_router)
 
-app.include_router(my_bookrequest_router)
-app.include_router(bookrequest_router)
 
 
 @app.get("/")
