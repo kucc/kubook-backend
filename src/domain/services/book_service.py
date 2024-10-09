@@ -1,9 +1,10 @@
 from fastapi import HTTPException, status
 from sqlalchemy import and_, or_, select
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
-from domain.schemas.book_schemas import DomainResGetBookItem
-from repositories.models import Book, BookInfo
+from domain.schemas.book_schemas import DomainReqGetBook, DomainResGetBook
+from repositories.models import Book
+from utils.crud_utils import get_item
 
 
 async def service_search_books(searching_keyword: str, db: Session):
@@ -11,19 +12,18 @@ async def service_search_books(searching_keyword: str, db: Session):
 
     stmt = (
         select(Book)
-        .join(BookInfo)
-        .options(joinedload(Book.book_info).load_only(BookInfo.book_title, BookInfo.category_name, BookInfo.image_url))
         .where(
             and_(
                 Book.is_deleted == False,
                 or_(
-                    BookInfo.book_title.ilike(keyword),
-                    BookInfo.author.ilike(keyword),
-                    BookInfo.publisher.ilike(keyword),
+                    Book.book_title.ilike(keyword),
+                    Book.author.ilike(keyword),
+                    Book.publisher.ilike(keyword),
+                    Book.category_name.ilike(keyword),
                 ),
             )
         )
-        # .order_by(BookInfo.updated_at)
+        .order_by(Book.updated_at)
     )
     try:
         books = db.execute(stmt).scalars().all()
@@ -37,17 +37,48 @@ async def service_search_books(searching_keyword: str, db: Session):
         ) from e
 
     response = [
-        DomainResGetBookItem(
+        DomainResGetBook(
             book_id=book.id,
-            book_info_id=book.book_info_id,
-            book_title=book.book_info.book_title,
-            category_name=book.book_info.category_name,
-            image_url=book.book_info.image_url,
+            book_title=book.book_title,
+            code=book.code,
+            category_name=book.category_name,
+            subtitle=book.subtitle,
+            author=book.author,
+            publisher=book.publisher,
+            publcation_year=book.publication_year,
+            image_url=book.image_url,
+            version=book.version,
+            major=book.major,
+            language=book.language,
+            donor_name=book.donor_name,
             book_status=book.book_status,
-            created_at=book.created_at,
-            updated_at=book.updated_at,
         )
         for book in books
     ]
 
+    return response
+
+
+async def service_read_book(request_data: DomainReqGetBook, db: Session):
+    book = get_item(Book, request_data.book_id, db)
+
+    if not book:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Requested book not found")
+
+    response = DomainResGetBook(
+        book_id=book.id,
+        book_title=book.book_title,
+        code=book.code,
+        category_name=book.category_name,
+        subtitle=book.subtitle,
+        author=book.author,
+        publisher=book.publisher,
+        publcation_year=book.publication_year,
+        image_url=book.image_url,
+        version=book.version,
+        major=book.major,
+        language=book.language,
+        donor_name=book.donor_name,
+        book_status=book.book_status,
+    )
     return response

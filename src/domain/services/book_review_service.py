@@ -5,20 +5,22 @@ from sqlalchemy import and_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
-from domain.schemas.book_review_schemas import (DomainReqPostReview,
-                                                DomainReqPutReview,
-                                                DomainResGetReviewByInfoId,
-                                                DomainResGetReviewItem,
-                                                DomainResPostReview)
+from domain.schemas.book_review_schemas import (
+    DomainReqPostReview,
+    DomainReqPutReview,
+    DomainResGetReviewByInfoId,
+    DomainResGetReviewItem,
+    DomainResPostReview,
+)
 from repositories.models import BookReview, User
 from utils.crud_utils import delete_item, get_item
 
 
-async def service_read_reviews_by_bookinfo_id(book_info_id, db: Session):
+async def service_read_reviews_by_book_id(book_id, db: Session):
     stmt = (
         select(BookReview)
         .options(selectinload(BookReview.user))
-        .where(and_(BookReview.book_info_id == book_info_id, BookReview.is_deleted == False))
+        .where(and_(BookReview.book_id == book_id, BookReview.is_deleted == False))
         .order_by(BookReview.updated_at)
     )
     try:
@@ -64,7 +66,7 @@ async def service_read_reviews_by_user_id(user_id, db: Session):
             DomainResGetReviewItem(
                 review_id=review.id,
                 user_id=review.user_id,
-                book_info_id=review.book_info_id,
+                book_id=review.book_id,
                 review_content=review.review_content,
                 created_at=review.created_at,
                 updated_at=review.updated_at,
@@ -93,14 +95,14 @@ async def service_delete_review(review_id, user_id, db: Session):
 
 
 async def service_create_review(request: DomainReqPostReview, db: Session):
-    valid_book_info = get_item(BookReview, request.book_info_id, db)
+    valid_book = get_item(BookReview, request.book_id, db)
 
-    if not valid_book_info:
+    if not valid_book:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid book info ID")
 
     review = BookReview(
         user_id=request.user_id,
-        book_info_id=request.book_info_id,
+        book_id=request.book_id,
         review_content=request.review_content,
     )
 
@@ -123,7 +125,7 @@ async def service_create_review(request: DomainReqPostReview, db: Session):
             review_id=review.id,
             user_id=review.user_id,
             user_name=user.user_name,
-            book_info_id=review.book_info_id,
+            book_id=review.book_id,
             review_content=review.review_content,
             created_at=review.created_at,
         )
@@ -165,7 +167,7 @@ async def service_update_review(request: DomainReqPutReview, db: Session):
     response = DomainResGetReviewItem(
         review_id=review.id,
         user_id=review.user_id,
-        book_info_id=review.book_info_id,
+        book_id=review.book_id,
         review_content=review.review_content,
         created_at=review.created_at,
         updated_at=review.updated_at,

@@ -4,9 +4,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from config import Settings
 from routes.authentication_route import router as auth_router
 from routes.book_review_route import router as review_router
+
 from routes.books_route import router as books_router
 from routes.loan_route import router as loan_router
 from routes.user_bookrequest_route import router as user_bookrequest_router
+from routes.bookrequest_route import router as bookrequest_router
+
 from routes.user_route import router as user_router
 
 settings = Settings()
@@ -47,7 +50,7 @@ app.include_router(user_router)
 app.include_router(user_bookrequest_router)
 app.include_router(loan_router)
 app.include_router(review_router)
-
+app.include_router(bookrequest_router)
 
 
 @app.get("/")
