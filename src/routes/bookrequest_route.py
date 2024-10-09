@@ -41,7 +41,7 @@ async def create_book_request(
         book_title=result.book_title,
         publication_year=result.publication_year,
         request_link=result.request_link,
-        requested_at=result.requested_at,
+        request_date=result.request_date,
         reason=result.reason,
         processing_status=result.processing_status
     )
