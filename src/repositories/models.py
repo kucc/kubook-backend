@@ -1,5 +1,4 @@
-from sqlalchemy import (TIMESTAMP, Boolean, Column, Date, DateTime, ForeignKey,
-                        Integer, String, Text)
+from sqlalchemy import TIMESTAMP, Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql import func
 
@@ -54,11 +53,12 @@ class RequestedBook(Base):
     reject_reason = Column(String(20))
     request_link = Column(String(255), nullable=False)
     reason = Column(Text, nullable=False)
-    requested_at = Column(DateTime, nullable=False)
+    request_date = Column(Date, nullable=False)
     processing_status = Column(Integer, nullable=False, default=0)
-    processed_at = Column(DateTime)
+    processed_date = Column(Date)
     created_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp())
     updated_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
+
     is_deleted = Column(Boolean, nullable=False, default=False)
 
     # Relationship
@@ -91,18 +91,18 @@ class BookReview(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
-    book_info_id = Column(Integer, ForeignKey("book_info.id"), nullable=False)
+    book_id = Column(Integer, ForeignKey("book.id"), nullable=False)
     review_content = Column(String, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp())
     updated_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
     is_deleted = Column(Boolean, nullable=False, default=False)
     # Relationships
     user = relationship("User", back_populates="book_reviews")
-    book_info = relationship("BookInfo", back_populates="book_reviews")
+    book = relationship("Book", back_populates="book_reviews")
 
 
-class BookInfo(Base):
-    __tablename__ = "book_info"
+class Book(Base):
+    __tablename__ = "book"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     book_title = Column(String(255), nullable=False)
@@ -116,30 +116,14 @@ class BookInfo(Base):
     version = Column(String(45))
     major = Column(Boolean, default=False)
     language = Column(String(20), nullable=False, default="KOREAN")
-    created_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp())
-    updated_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
-    is_deleted = Column(Boolean, nullable=False, default=False)
-
-    # Relationships
-    book_reviews = relationship("BookReview", back_populates="book_info")
-    books = relationship("Book", back_populates="book_info")
-
-
-class Book(Base):
-    __tablename__ = "book"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    book_info_id = Column(Integer, ForeignKey("book_info.id"), nullable=False)
     book_status = Column(Boolean, nullable=False, default=True)
-    note = Column(String(255))
     donor_name = Column(String(20))
     created_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp())
     updated_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
     is_deleted = Column(Boolean, nullable=False, default=False)
 
     # Relationships
-    book_info = relationship("BookInfo", back_populates="books")
-    loans = relationship("Loan", back_populates="book")
+    book_reviews = relationship("BookReview", back_populates="book")
 
 
 class Notice(Base):

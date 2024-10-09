@@ -11,7 +11,7 @@ from domain.schemas.book_review_schemas import (
 from domain.services.book_review_service import (
     service_create_review,
     service_delete_review,
-    service_read_reviews_by_bookinfo_id,
+    service_read_reviews_by_book_id,
     service_read_reviews_by_user_id,
     service_update_review,
 )
@@ -31,12 +31,12 @@ router = APIRouter(
     status_code=status.HTTP_200_OK,
     summary="책에 대한 리뷰 조회"
 )
-async def get_all_reviews_by_bookinfo_id(
-    book_info_id: int = Query(alias="books"),
+async def get_all_reviews_by_book_id(
+    book_id: int = Query(alias="books"),
     db: Session = Depends(get_db),
     current_user=Depends(get_current_active_user)
 ):
-    domain_res = await service_read_reviews_by_bookinfo_id(book_info_id, db)
+    domain_res = await service_read_reviews_by_book_id(book_id, db)
 
     result = RouteResGetReviewListByInfoId(
         data=domain_res,
@@ -77,7 +77,7 @@ async def create_review(
 ):
     domain_req = DomainReqPostReview(
         user_id=current_user.id,
-        book_info_id=route_req.book_info_id,
+        book_id=route_req.book_id,
         review_content=route_req.review_content
     )
     result = await service_create_review(domain_req, db)

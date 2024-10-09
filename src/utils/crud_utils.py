@@ -4,9 +4,8 @@ from sqlalchemy import and_, delete, select, update
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session
 
+
 # Get the list of items
-
-
 def get_list(model, db: Session):
     stmt = select(model).where(
         model.is_deleted == False).order_by(model.updated_at)
@@ -36,6 +35,37 @@ def get_item(model, index: int, db: Session):
     return result
 
 
+# delete
+def delete_item(model, index: int, db: Session):
+    get_item(model, index, db)
+    stmt = (update(model).where(model.id == index).values(is_deleted=True))
+    try:
+        db.execute(stmt)
+        db.flush()
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f"Unexpected error occurred during delete: {str(e)}") from e
+    else:
+        db.commit()
+
+
+# delete for dba
+def delete_item_dba(model, index: int, db: Session):
+    get_item(model, index, db)
+    stmt = (delete(model).where(model.id == index))
+    try:
+        db.execute(stmt)
+        db.flush()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail=f"Unexpected error occurred during delete: {str(e)}") from e
+    else:
+        db.commit()
+
+
 # # CREATE
 # def create_item(model, req_data, db: Session):
 #     item = model(**req_data.dict())
@@ -58,7 +88,7 @@ def get_item(model, index: int, db: Session):
 #         db.refresh(item)
 #         return item
 
-# # update
+# # # update
 
 
 # def update_item(model, index: int, req_data, db: Session):
@@ -97,40 +127,7 @@ def get_item(model, index: int, db: Session):
 #         return item
 
 
-# delete
-def delete_item(model, index: int, db: Session):
-    get_item(model, index, db)
-    stmt = (update(model).where(model.id == index).values(is_deleted=True))
-    try:
-        db.execute(stmt)
-        db.flush()
-
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail=f"Unexpected error occurred during delete: {str(e)}") from e
-    else:
-        db.commit()
-
-# delete for dba
-
-
-def delete_item_dba(model, index: int, db: Session):
-    get_item(model, index, db)
-    stmt = (delete(model).where(model.id == index))
-    try:
-        db.execute(stmt)
-        db.flush()
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail=f"Unexpected error occurred during delete: {str(e)}") from e
-    else:
-        db.commit()
-
 # column 이름과 value 값을 이용하여 filtering
-
-
 # def get_item_by_column(*, model, columns: dict[str, Any], db: Session):
 #     stmt = select(model)
 
