@@ -108,7 +108,7 @@ async def service_update_bookrequest(request_data: DomainReqPutBookRequest, db: 
             request_link=requested_book.request_link,
             reason=requested_book.reason,
             processing_status=requested_book.processing_status,
-            request_date=requested_book.requested_at.date(),
+            request_date=requested_book.request_date,
             reject_reason=requested_book.reject_reason,
         )
     return response
@@ -140,7 +140,7 @@ async def service_read_bookrequest(request_data: DomainReqGetBookRequest, db: Se
             request_link=book.request_link,
             reason=book.reason,
             processing_status=book.processing_status,
-            request_date=book.requested_at.date(),
+            request_date=book.request_date,
             reject_reason=book.reject_reason,
         )
         for book in requested_book_list
