@@ -124,6 +124,7 @@ class Book(Base):
 
     # Relationships
     book_reviews = relationship("BookReview", back_populates="book")
+    loans = relationship("Loan", back_populates="book")
 
 
 class Notice(Base):
