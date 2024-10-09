@@ -1,12 +1,12 @@
 {
-  "editor.formatOnSave": true,
+  "editor.formatOnSave": false,
 
   "[python]": {
     "editor.defaultFormatter": null,
     "editor.formatOnType": true,
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit",
-      "source.fixAll.ruff": "explicit"
+      "source.fixAll.ruff": "never" 
     }
   },
   "ruff.configuration": "../pyproject.toml",
@@ -16,3 +16,4 @@
   "ruff.exclude": ["venv", ".git", "__pycache__", "__init__.py"],
   "ruff.lint.ignore": ["B008", "E712", "UP017"]
 }
+

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 import domain.schemas.auth_schemas as auth_schemas
 import domain.services.auth_service as auth_service
 from config import Settings
-from dependencies import get_current_user, get_db
+from dependencies import get_db
 
 router = APIRouter(
     prefix="/auth",

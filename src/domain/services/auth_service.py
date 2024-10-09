@@ -1,10 +1,8 @@
-from datetime import timedelta
-
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from domain.schemas.auth_schemas import RegisterRequest, LoginRequest
 from config import Settings
+from domain.schemas.auth_schemas import LoginRequest, RegisterRequest
 from domain.services.token_service import create_user_tokens
 from externals.firebase import sign_in_with_email_and_password
 from repositories.models import User
