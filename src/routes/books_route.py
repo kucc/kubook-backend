@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from dependencies import get_db
 from domain.schemas.book_schemas import DomainReqGetBook
-from domain.services.book_service import service_read_book, service_search_books
+from domain.services.book_service import service_read_book, service_read_books, service_search_books
 from routes.response.book_response import RouteResGetBook, RouteResGetBookList
 
 router = APIRouter(
@@ -55,21 +55,25 @@ async def search_books(
     db: Session = Depends(get_db)
 ):
     domain_res = await service_search_books(searching_keyword, db)
-    result = RouteResGetBookList(data=domain_res, count=len(domain_res))
+    result = RouteResGetBookList(
+        data=domain_res,
+        count=len(domain_res)
+    )
 
     return result
 
 @router.get(
     "",
     summary="전체 도서 목록 조회",
-    response_model=RouteResGetBook,
+    response_model=RouteResGetBookList,
     status_code=status.HTTP_200_OK
 )
 async def get_books(
+    page: int = Query(1, gt=0),
     db: Session = Depends(get_db)
 ):
-    domain_res = await service_read_books(db)
-    result = RouteResGetBook(
+    domain_res = await service_read_books(page, db)
+    result = RouteResGetBookList(
         data=domain_res,
         count=len(domain_res)
     )

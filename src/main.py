@@ -7,10 +7,6 @@ from routes.book_review_route import router as review_router
 from routes.bookrequest_route import router as bookrequest_router
 from routes.books_route import router as books_router
 from routes.loan_route import router as loan_router
-<<<<<<< HEAD
-from routes.user_bookrequest_route import router as user_bookrequest_router
-=======
->>>>>>> origin/exp
 from routes.user_route import router as user_router
 
 settings = Settings()
