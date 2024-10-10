@@ -52,9 +52,10 @@ async def get_book_by_book_id(
 )
 async def search_books(
     searching_keyword: str = Query(alias="search"),
+    page: int = Query(1, gt=0),
     db: Session = Depends(get_db)
 ):
-    domain_res = await service_search_books(searching_keyword, db)
+    domain_res = await service_search_books(searching_keyword, page, db)
     result = RouteResGetBookList(
         data=domain_res,
         count=len(domain_res)

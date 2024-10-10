@@ -7,8 +7,11 @@ from repositories.models import Book
 from utils.crud_utils import get_item
 
 
-async def service_search_books(searching_keyword: str, db: Session):
+async def service_search_books(searching_keyword: str, page: int, db: Session):
     keyword = f"%{searching_keyword}%"
+
+    limit = 16 # This implementation follows the Figma design
+    offset = (page - 1) * limit # Calculate offset based on the page numbe
 
     stmt = (
         select(Book)
@@ -24,6 +27,8 @@ async def service_search_books(searching_keyword: str, db: Session):
             )
         )
         .order_by(Book.updated_at)
+        .limit(limit)
+        .offset(offset)
     )
     try:
         books = db.execute(stmt).scalars().all()
