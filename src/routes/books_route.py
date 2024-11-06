@@ -53,9 +53,10 @@ async def get_book_by_book_id(
 async def search_books(
     searching_keyword: str = Query(alias="search"),
     page: int = Query(1, gt=0),
+    limit: int = Query(10, gt=0), # 차후 기본 값은 적당히 변경할 예정
     db: Session = Depends(get_db)
 ):
-    domain_res = await service_search_books(searching_keyword, page, db)
+    domain_res = await service_search_books(searching_keyword, page, limit, db)
     result = RouteResGetBookList(
         data=domain_res,
         count=len(domain_res)
@@ -71,9 +72,10 @@ async def search_books(
 )
 async def get_books(
     page: int = Query(1, gt=0),
+    limit: int = Query(10, gt=0), # 차후 기본 값은 적당히 변경할 예정
     db: Session = Depends(get_db)
 ):
-    domain_res = await service_read_books(page, db)
+    domain_res = await service_read_books(page, limit, db)
     result = RouteResGetBookList(
         data=domain_res,
         count=len(domain_res)

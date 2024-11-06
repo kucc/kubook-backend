@@ -7,10 +7,9 @@ from repositories.models import Book
 from utils.crud_utils import get_item
 
 
-async def service_search_books(searching_keyword: str, page: int, db: Session):
+async def service_search_books(searching_keyword: str, page: int, limit: int, db: Session):
     keyword = f"%{searching_keyword}%"
 
-    limit = 16 # This implementation follows the Figma design
     offset = (page - 1) * limit # Calculate offset based on the page numbe
 
     stmt = (
@@ -84,8 +83,7 @@ async def service_read_book(request_data: DomainReqGetBook, db: Session):
     )
     return response
 
-async def service_read_books(page: int, db: Session):
-    limit = 16 # This implementation follows the Figma design
+async def service_read_books(page: int, limit: int, db: Session):
     offset = (page - 1) * limit # Calculate offset based on the page number
 
     stmt = (
