@@ -19,12 +19,12 @@ async def service_admin_create_book(request: DomainReqAdminPostBook, db: Session
 
     new_book = Book(
         book_title = request.book_title,
-        code=request.code,
+        code = request.code,
         category_name = request.category_name,
-        subtitle=request.subtitle,
-        author=request.autor,
-        publisher=request.publisher,
-        publication_year=request.publication_year,
+        subtitle = request.subtitle,
+        author = request.author,
+        publisher = request.publisher,
+        publication_year = request.publication_year,
         image_url = request.image_url,
         version = request.version,
         major = request.major,
@@ -37,12 +37,11 @@ async def service_admin_create_book(request: DomainReqAdminPostBook, db: Session
 
     try:
         db.add(new_book)
-        db.flush()
+        db.commit()
+        db.refresh(new_book)
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail=f"Unexpected error occurred: {str(e)}") from e
-    else:
-        db.commit()
-        db.refresh(new_book)
+                             detail=f"Unexpected error occurred: {str(e)}") from e
+
     return
