@@ -114,7 +114,7 @@ async def service_update_bookrequest(request_data: DomainReqPutBookRequest, db: 
     return response
 
 
-async def service_read_bookrequest(request_data: DomainReqGetBookRequest, db: Session) -> list[DomainResBookRequest]:
+async def service_read_bookrequest_list(request_data: DomainReqGetBookRequest, db: Session) -> list[DomainResBookRequest]:
     stmt = (
         select(RequestedBook)
         .where(and_(RequestedBook.user_id == request_data.user_id, RequestedBook.is_deleted == False))
