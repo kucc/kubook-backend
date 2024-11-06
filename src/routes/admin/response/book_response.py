@@ -3,11 +3,7 @@ from datetime import datetime as _datetime
 from pydantic import BaseModel, Field
 
 
-class DomainReqGetBook(BaseModel):
-    book_id: int = Field(title="book_id", description="책 ID", example=1, gt=0)
-
-
-class DomainResGetBook(BaseModel):
+class RouteAdminGetBookItem(BaseModel):
     book_id: int = Field(title="book_id", description="책 ID", example=1, gt=0)
     book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")
     code: str = Field(title="code", description="책 코드", example="A3")
@@ -24,3 +20,9 @@ class DomainResGetBook(BaseModel):
     book_status: bool = Field(title="book_stauts", description="책 상태", example=True)
     created_at: _datetime = Field(title="create_at", description="생성일시", example=_datetime.now())
     updated_at: _datetime = Field(title="update_at", description="수정일시", example=_datetime.now())
+
+
+class RouteResAdminGetBookList(BaseModel):
+    data: list[RouteAdminGetBookItem]
+    count: int
+

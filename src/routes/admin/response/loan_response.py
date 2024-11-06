@@ -18,6 +18,7 @@ class RouteAdminGetLoanItem(BaseModel):
     created_at: _datetime = Field(title="create_at", description="생성일시", example=_datetime.now())
     updated_at: _datetime = Field(title="update_at", description="수정일시", example=_datetime.now())
 
+
 class RouteResAdminGetLoanList(BaseModel):
     data: list[RouteAdminGetLoanItem]
     count: int

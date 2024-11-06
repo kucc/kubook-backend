@@ -15,6 +15,7 @@ class RouteAdminsGetUserItem(BaseModel):
     created_at: _datetime = Field(title="create_at", description="생성일시")
     updated_at: _datetime = Field(title="update_at", description="수정일시")
 
+
 class RouteResAdminGetUserList(BaseModel):
     data: list[RouteAdminsGetUserItem]
     count: int
