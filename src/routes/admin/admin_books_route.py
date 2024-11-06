@@ -31,7 +31,7 @@ async def create_admin_book(
       publisher=request.publisher,
       publication_year=request.publication_year,
       image_url = request.image_url if request.subtitle is not None else None,
-      version = request.version,
+      version = request.version if request.subtitle is not None else None,
       major = request.major,
       language=request.language,
       donor_name = request.donor_name if request.subtitle is not None else None
