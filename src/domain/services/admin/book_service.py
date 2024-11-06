@@ -8,7 +8,7 @@ from domain.schemas.book_schemas import DomainReqAdminPostBook
 from repositories.models import Book
 
 
-async def service_create_book(request: DomainReqAdminPostBook, db: Session):
+async def service_admin_create_book(request: DomainReqAdminPostBook, db: Session):
     # check if the book already exists in database
     stmt = select(Book).where(Book.book_title == request.book_title)
     exist_request = db.execute(stmt).scalar_one_or_none()
