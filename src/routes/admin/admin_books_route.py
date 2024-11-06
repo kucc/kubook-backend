@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_current_admin, get_db
