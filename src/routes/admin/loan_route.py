@@ -6,7 +6,7 @@ from domain.services.admin.loan_service import service_admin_read_loans
 from routes.admin.response.loan_response import RouteResAdminGetLoanList
 
 router = APIRouter(
-    prefix="/admin",
+    prefix="/admin/loans",
     tags=["admin"],
     dependencies=[Depends(get_current_active_user)]
 )
@@ -15,7 +15,7 @@ router = APIRouter(
 """
 
 @router.get(
-    "/loans",
+    "",
     response_model=RouteResAdminGetLoanList,
     status_code=status.HTTP_200_OK,
     summary="전체 대출 목록 조회",

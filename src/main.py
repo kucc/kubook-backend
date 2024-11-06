@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import Settings
-from routes.admin.loan_route import router as admin_router
+from routes.admin.loan_route import router as admin_loan_router
+from routes.admin.user_route import router as admin_user_router
 from routes.authentication_route import router as auth_router
 from routes.book_review_route import router as review_router
 from routes.bookrequest_route import router as bookrequest_router
@@ -49,7 +50,8 @@ app.include_router(user_router)
 app.include_router(loan_router)
 app.include_router(review_router)
 app.include_router(bookrequest_router)
-app.include_router(admin_router)
+app.include_router(admin_loan_router)
+app.include_router(admin_user_router)
 
 
 @app.get("/")

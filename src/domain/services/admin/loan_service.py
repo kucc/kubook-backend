@@ -24,7 +24,7 @@ async def service_admin_read_loans(db: Session):
         if not loans:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loans not found")
 
-        response = [
+        search_loans = [
             RouteAdminGetLoanItem(
                 book_id=loan.id,
                 user_id=loan.user_id,
@@ -43,8 +43,8 @@ async def service_admin_read_loans(db: Session):
         ]
 
         response = RouteResAdminGetLoanList(
-            data=response,
-            count=len(response)
+            data=search_loans,
+            count=len(search_loans)
         )
 
     except Exception as e:
