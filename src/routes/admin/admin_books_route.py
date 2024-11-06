@@ -26,14 +26,15 @@ async def create_admin_book(
       book_title = request.book_title,
       code=request.code,
       category_name = request.category_name,
-      subtitle=request.subtitle,
-      author=request.autor,
+      subtitle=request.subtitle if request.subtitle is not None else None,
+      author=request.author,
       publisher=request.publisher,
       publication_year=request.publication_year,
-      image_url = request.image_url,
+      image_url = request.image_url if request.subtitle is not None else None,
       version = request.version,
       major = request.major,
-      donor_name = request.donor_name
+      language=request.language,
+      donor_name = request.donor_name if request.subtitle is not None else None
     )
     await service_admin_create_book(domain_req, db)
     return
