@@ -3,46 +3,29 @@ from sqlalchemy import and_, select
 from sqlalchemy.orm import Session, selectinload
 
 from repositories.models import Loan
-from routes.admin.response.loan_response import AdminBaseLoan, GetAdminLoanList, RouteResGetAdminLoanList
+from routes.admin.response.loan_response import RouteAdminGetLoanItem, RouteResAdminGetLoanList
 
 
 async def service_admin_read_loans(db: Session):
-    """
-        DB loan 테이블에 존재하지 않는 user, book이 있으면 오류 발생함.
-    """
-    stmt_current = (
+    stmt = (
         select(Loan)
         .options(selectinload(Loan.user), selectinload(Loan.book))
         .where(
             and_(
-                Loan.return_status == False,
                 Loan.is_deleted == False
             )
         )
         .order_by(Loan.updated_at)
     )
 
-    stmt_completed = (
-        select(Loan)
-        .options(selectinload(Loan.user), selectinload(Loan.book))
-        .where(
-            and_(
-                Loan.return_status == True,
-                Loan.is_deleted == False
-            )
-        )
-        .order_by(Loan.updated_at)
-    )
     try:
-        loans_current = db.execute(stmt_current).scalars().all()
+        loans = db.execute(stmt).scalars().all()
 
-        loans_completed = db.execute(stmt_completed).scalars().all()
-
-        if not loans_current and not loans_completed:
+        if not loans:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loans not found")
 
-        current_response = [
-            AdminBaseLoan(
+        response = [
+            RouteAdminGetLoanItem(
                 book_id=loan.id,
                 user_id=loan.user_id,
                 user_name=loan.user.user_name,
@@ -51,37 +34,17 @@ async def service_admin_read_loans(db: Session):
                 loan_date=loan.loan_date,
                 due_date=loan.due_date,
                 extend_status=loan.extend_status,
+                return_status=loan.return_status,
+                return_date=loan.return_date,
                 created_at=loan.created_at,
                 updated_at=loan.updated_at,
             )
-            for loan in loans_current
+            for loan in loans
         ]
 
-        completed_response = [
-            AdminBaseLoan(
-                book_id=loan.id,
-                user_id=loan.user_id,
-                user_name=loan.user.user_name,
-                code=loan.book.code,
-                book_title=loan.book.book_title,
-                loan_date=loan.loan_date,
-                due_date=loan.due_date,
-                extend_status=loan.extend_status,
-                created_at=loan.created_at,
-                updated_at=loan.updated_at,
-            )
-            for loan in loans_completed
-        ]
-
-        response = RouteResGetAdminLoanList(
-            current=GetAdminLoanList(
-                data=current_response,
-                count=len(current_response)
-            ),
-            completed=GetAdminLoanList(
-                data=completed_response,
-                count=len(completed_response)
-            )
+        response = RouteResAdminGetLoanList(
+            data=response,
+            count=len(response)
         )
 
     except Exception as e:
