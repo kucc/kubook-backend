@@ -73,12 +73,14 @@ async def service_read_book(request_data: DomainReqGetBook, db: Session):
         subtitle=book.subtitle,
         author=book.author,
         publisher=book.publisher,
-        publcation_year=book.publication_year,
+        publication_year=book.publication_year,
         image_url=book.image_url,
         version=book.version,
         major=book.major,
         language=book.language,
         donor_name=book.donor_name,
         book_status=book.book_status,
+        created_at=book.created_at,
+        updated_at=book.updated_at,
     )
     return response

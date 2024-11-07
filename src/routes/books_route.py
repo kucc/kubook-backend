@@ -22,7 +22,7 @@ async def get_book_by_book_id(
     book_id: int,
     db: Session = Depends(get_db),
 ):
-    domain_req = DomainReqGetBook(book_id)
+    domain_req = DomainReqGetBook(book_id=book_id)
     domain_res = await service_read_book(domain_req, db)
     result = RouteResGetBook(
         book_id=domain_res.book_id,
