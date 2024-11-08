@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from dependencies import get_current_admin, get_db
 from domain.services.admin.notice_service import service_admin_read_notices, service_admin_read_notice
-from routes.admin.response.notice_response import RouteResponseAdminGetNoticeItem, RouteResponseAdminGetNoticeList
+from routes.admin.response.notice_response import RouteResAdminGetNoticeItem, RouteResAdminGetNoticeList
 
 router=APIRouter(
     prefix="/admin/notice",
@@ -13,7 +13,7 @@ router=APIRouter(
 
 @router.get(
     "",
-    response_model=RouteResponseAdminGetNoticeList,
+    response_model=RouteResAdminGetNoticeList,
     status_code=status.HTTP_200_OK,
     summary="공지사항 리스트 전체 조회",
     )
@@ -25,7 +25,7 @@ async def get_all_notices(
     current_admin=Depends(get_current_admin)
 ):
     domain_res = await service_admin_read_notices(page, limit, db)
-    response = RouteResponseAdminGetNoticeList(
+    response = RouteResAdminGetNoticeList(
         data=domain_res,
         count=len(domain_res)
     )
@@ -35,7 +35,7 @@ async def get_all_notices(
 
 @router.get(
     "/{notice_id}",
-    response_model=RouteResponseAdminGetNoticeItem,
+    response_model=RouteResAdminGetNoticeItem,
     status_code=status.HTTP_200_OK,
     summary="공지사항 상세 조회",
     )
@@ -46,7 +46,7 @@ async def get_notice(
     current_admin=Depends(get_current_admin)
 ):
     domain_res = await service_admin_read_notice(notice_id, db)
-    response = RouteResponseAdminGetNoticeItem(
+    response = RouteResAdminGetNoticeItem(
         notice_id=domain_res.notice_id,
         admin_id=domain_res.admin_id,
         admin_name=domain_res.admin_name,

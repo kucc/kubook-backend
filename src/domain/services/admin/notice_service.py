@@ -4,7 +4,7 @@ from sqlalchemy.orm.session import Session
 from datetime import datetime
 
 from repositories.models import Notice, User
-from domain.schemas.notice_schemas import DomainResAdminGetNoticeItem, DomainResponseAdminGetNoticeList
+from domain.schemas.notice_schemas import DomainResAdminGetNoticeItem, DomainResAdminGetNoticeList
 
 async def service_admin_read_notices(page: int, limit: int, db: Session):
     if page < 1:
@@ -28,30 +28,14 @@ async def service_admin_read_notices(page: int, limit: int, db: Session):
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
     
-    temp=[]
-    for notice in notices:
-        user = db.execute(select(User).where(User.id == notice.admin_id)).scalar()
-        admin_name = user.user_name
-
-        temp.append(
-            DomainResAdminGetNoticeItem(
-                notice_id=notice.id,
-                admin_id=notice.admin_id,
-                admin_name=admin_name,
-                title=notice.title,
-                notice_content=notice.content,
-                created_at=notice.created_at.date()
-            )
-        )
-    
-    response=[
-        DomainResponseAdminGetNoticeList(
+    response = [
+        DomainResAdminGetNoticeList(
             notice_id=notice.id,
             admin_id=notice.admin_id,
-            admin_name=admin_name,
+            admin_name=db.execute(select(User.user_name).where(User.id == notice.admin_id)).scalar(),
             title=notice.title,
             notice_content=notice.content,
-            created_at=notice.created_at.date()
+            created_at=notice.created_at.date(),
         )
         for notice in notices
     ]
