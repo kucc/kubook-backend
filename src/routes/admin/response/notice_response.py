@@ -2,6 +2,8 @@ from datetime import date
 
 from pydantic import BaseModel, Field
 
+from domain.schemas.notice_schemas import DomainResponseAdminGetNoticeList
+
 class RouteResponseAdminGetNoticeItem(BaseModel):
     notice_id: int = Field(title="notice_id", description="공지사항 ID", example=1, gt=0)
     admin_id: int = Field(title="admin_id", description="관리자 ID", example=1, gt=0)
@@ -11,6 +13,6 @@ class RouteResponseAdminGetNoticeItem(BaseModel):
     created_at: date = Field(title="created_at", description="공지사항 생성일", example=date.today())
 
 class RouteResponseAdminGetNoticeList(BaseModel):
-    data: list[RouteResponseAdminGetNoticeItem]
+    data: list[DomainResponseAdminGetNoticeList]
     count: int
 

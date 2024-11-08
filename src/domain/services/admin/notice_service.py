@@ -28,12 +28,12 @@ async def service_admin_read_notices(page: int, limit: int, db: Session):
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
     
-    response=[]
+    temp=[]
     for notice in notices:
         user = db.execute(select(User).where(User.id == notice.admin_id)).scalar()
         admin_name = user.user_name
 
-        response.append(
+        temp.append(
             DomainResAdminGetNoticeItem(
                 notice_id=notice.id,
                 admin_id=notice.admin_id,
@@ -43,8 +43,41 @@ async def service_admin_read_notices(page: int, limit: int, db: Session):
                 created_at=notice.created_at.date()
             )
         )
-    response= DomainResponseAdminGetNoticeList(
-        data=response, 
-        count=len(response))
+    
+    response=[
+        DomainResponseAdminGetNoticeList(
+            notice_id=notice.id,
+            admin_id=notice.admin_id,
+            admin_name=admin_name,
+            title=notice.title,
+            notice_content=notice.content,
+            created_at=notice.created_at.date()
+        )
+        for notice in notices
+    ]
+
+    return response
+
+
+
+
+async def service_admin_read_notice(notice_id: int, db: Session):
+    stmt = select(Notice).where(Notice.id == notice_id)
+    notice = db.execute(stmt).scalar()
+
+    if not notice:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notice not found")
+
+    user = db.execute(select(User).where(User.id == notice.admin_id)).scalar()
+    admin_name = user.user_name
+
+    response = DomainResAdminGetNoticeItem(
+        notice_id=notice.id,
+        admin_id=notice.admin_id,
+        admin_name=admin_name,
+        title=notice.title,
+        notice_content=notice.content,
+        created_at=notice.created_at.date()
+    )
 
     return response
