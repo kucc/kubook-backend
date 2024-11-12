@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+
 
 class RouteResGetUser(BaseModel):
     user_id: int = Field(title="user_id", description="유저 고유 ID", example=1111, gt=0)
