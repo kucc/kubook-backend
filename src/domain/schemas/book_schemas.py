@@ -1,4 +1,4 @@
-from datetime import datetime as _datetime
+from datetime import datetime
 
 from pydantic import BaseModel, Field
 
@@ -22,5 +22,15 @@ class DomainResGetBook(BaseModel):
     language: str = Field(title="language", description="언어", example="영문")
     donor_name: str | None = Field(title="donor_name", description="책 기증자 성함", example="김철수")
     book_status: bool = Field(title="book_stauts", description="책 상태", example=True)
-    created_at: _datetime = Field(title="create_at", description="생성일시", example=_datetime.now())
-    updated_at: _datetime = Field(title="update_at", description="수정일시", example=_datetime.now())
+    created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
+    updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
+
+
+class DomainResGetBookList(BaseModel):
+    book_id: int = Field(title="book_id", description="책 ID", example=1, gt=0)
+    book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")
+    category_name: str = Field(title="category_name", description="카테고리 이름", example="웹")
+    image_url: str | None = Field(title="image_url", description="책 이미지 링크", example="https://example.com/img")
+    book_status: bool = Field(title="book_stauts", description="책 상태", example=True)
+    created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
+    updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
