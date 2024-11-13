@@ -4,6 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from domain.enums.book_category import BookCategoryStatus
 from domain.schemas.book_schemas import DomainReqAdminPostBook, DomainResAdminPostBook
 from repositories.models import Book
 
@@ -16,7 +17,9 @@ async def service_admin_create_book(request: DomainReqAdminPostBook, db: Session
     if exist_request:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Already exists")
-
+    if request.code[0] not in {category.name for category in BookCategoryStatus}:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Invalid Category")
     new_book = Book(
         book_title = request.book_title,
         code = request.code,
