@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from domain.schemas.book_schemas import DomainReqAdminPostBook
+from domain.schemas.book_schemas import DomainReqAdminPostBook, DomainResAdminPostBook
 from repositories.models import Book
 
 
@@ -44,4 +44,22 @@ async def service_admin_create_book(request: DomainReqAdminPostBook, db: Session
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                              detail=f"Unexpected error occurred: {str(e)}") from e
 
-    return
+    domain_res = DomainResAdminPostBook(
+        book_id=new_book.id,
+        book_title=new_book.book_title,
+        code=new_book.code,
+        category_name=new_book.category_name,
+        subtitle=new_book.subtitle,
+        author=new_book.author,
+        publisher=new_book.publisher,
+        publication_year=new_book.publication_year,
+        image_url=new_book.image_url,
+        version=new_book.version,
+        major=new_book.major,
+        language=new_book.language,
+        book_status=new_book.book_status,
+        donor_name=new_book.donor_name,
+        created_at=new_book.created_at,
+        updated_at=new_book.updated_at
+    )
+    return domain_res
