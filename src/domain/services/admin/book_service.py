@@ -135,5 +135,4 @@ async def service_admin_update_book(request: DomainReqAdminPutBook, db: Session)
         updated_at=request_book.updated_at
     )
 
-
     return domain_res
