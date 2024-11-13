@@ -67,3 +67,6 @@ class DomainResAdminPostBook(BaseModel):
     donor_name: Optional[str] = Field(title="donor_name", description="기부자명", default=None)
     created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
     updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
+
+class DomainReqAdminDelBook(BaseModel):
+    book_id: int = Field(title="book_id", description="책 ID", gt=0)
