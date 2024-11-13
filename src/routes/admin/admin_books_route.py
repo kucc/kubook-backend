@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_current_admin, get_db
-from domain.schemas.book_schemas import DomainReqAdminPostBook
-from domain.services.admin.book_service import service_admin_create_book
+from domain.schemas.book_schemas import DomainReqAdminDelBook, DomainReqAdminPostBook
+from domain.services.admin.book_service import service_admin_create_book, service_admin_delete_book
 from routes.admin.request.book_request import RouteReqAdminPostBook
 from routes.admin.response.book_response import RouteResAdminPostBook
 
@@ -57,3 +57,18 @@ async def create_admin_book(
         updated_at=domain_res.updated_at
     )
     return result
+
+@router.delete(
+    "/{book_id}",
+    summary="관리자 도서 정보 등록",
+    status_code=status.HTTP_204_NO_CONTENT
+)
+async def delete_admin_book(
+    book_id: int,
+    db: Session = Depends(get_db),
+):
+    domain_req = DomainReqAdminDelBook(
+      book_id=book_id
+    )
+    await service_admin_delete_book(domain_req, db)
+    return
