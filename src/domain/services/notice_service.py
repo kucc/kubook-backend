@@ -3,9 +3,9 @@ from sqlalchemy import select
 from sqlalchemy.orm.session import Session
 
 from repositories.models import Notice, User
-from domain.schemas.notice_schemas import DomainResAdminGetNotice
+from domain.schemas.notice_schemas import DomainResGetNotice
 
-async def service_admin_read_notices(page: int, limit: int, db: Session):
+async def service_read_notices(page: int, limit: int, db: Session):
    
     offset=(page-1)*limit
 
@@ -27,7 +27,7 @@ async def service_admin_read_notices(page: int, limit: int, db: Session):
     
     
     response = [
-        DomainResAdminGetNotice(
+        DomainResGetNotice(
             notice_id=notice.id,
             admin_id=notice.admin_id,
             admin_name=notice.user[0].user_name,
@@ -43,7 +43,7 @@ async def service_admin_read_notices(page: int, limit: int, db: Session):
 
 
 
-async def service_admin_read_notice(notice_id: int, db: Session):
+async def service_read_notice(notice_id: int, db: Session):
     stmt = select(Notice).where(Notice.id == notice_id)
     notice = db.execute(stmt).scalar()
 
@@ -52,7 +52,7 @@ async def service_admin_read_notice(notice_id: int, db: Session):
 
     admin_name = notice.user[0].user_name
 
-    response = DomainResAdminGetNotice(
+    response = DomainResGetNotice(
         notice_id=notice.id,
         admin_id=notice.admin_id,
         admin_name=admin_name,
