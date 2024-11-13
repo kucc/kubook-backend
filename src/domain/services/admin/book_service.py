@@ -5,7 +5,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from domain.enums.book_category import BookCategoryStatus
-from domain.schemas.book_schemas import DomainReqAdminPostBook, DomainResAdminPostBook
+from domain.schemas.book_schemas import (
+    DomainReqAdminPostBook,
+    DomainReqAdminPutBook,
+    DomainResAdminPostBook,
+    DomainResAdminPutBook,
+)
 from repositories.models import Book
 
 
@@ -68,4 +73,66 @@ async def service_admin_create_book(request: DomainReqAdminPostBook, db: Session
         created_at=new_book.created_at,
         updated_at=new_book.updated_at
     )
+    return domain_res
+
+async def service_admin_update_book(request: DomainReqAdminPutBook, db: Session):
+    stmt = select(Book).where(Book.id == request.book_id)
+    request_book = db.execute(stmt).scalar_one_or_none()
+
+    if not request_book:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Requested Book Not Found")
+    if request.code[0] not in {category.name for category in BookCategoryStatus}:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Invalid Category")
+    if request.category_name not in {category.category for category in BookCategoryStatus}:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Invalid Category")
+
+    requested_book = request_book.__dict__
+    updated_book = request.__dict__
+
+    try:
+        for key, value in updated_book.items():
+            if value is not None and key in requested_book:
+                if isinstance(value, type(requested_book[key])):
+                    setattr(request_book, key, value)
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                        detail=f"Invalid value type for column {key}. \
+                        Expected {type(request_book[key])}, got {type(value)}."
+                    )
+        db.add(request_book)
+        db.flush()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error occurred during update: {str(e)}",
+        ) from e
+    else:
+        db.commit()
+        db.refresh(request_book)
+
+        domain_res = DomainResAdminPutBook(
+        book_id=request_book.id,
+        book_title=request_book.book_title,
+        code=request_book.code,
+        category_name=request_book.category_name,
+        subtitle=request_book.subtitle,
+        author=request_book.author,
+        publisher=request_book.publisher,
+        publication_year=request_book.publication_year,
+        image_url=request_book.image_url,
+        version=request_book.version,
+        major=request_book.major,
+        language=request_book.language,
+        book_status=request_book.book_status,
+        donor_name=request_book.donor_name,
+        created_at=request_book.created_at,
+        updated_at=request_book.updated_at
+    )
+
+
     return domain_res
