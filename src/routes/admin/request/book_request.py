@@ -13,6 +13,6 @@ class RouteReqAdminPostBook(BaseModel):
     publication_year: int = Field(title="publication_year", description="출판연도", gt=0)
     image_url: Optional[str] = Field(title="image_url", description="책 표지", default=None)
     version: Optional[str] = Field(title="version", description="판본", default=None)
-    major: bool = Field(title="major", description="전공 책 여부")
-    language: str = Field(title="language", description="언어")
+    major: bool = Field(title="major", description="전공 책 여부", default=False)
+    language: str = Field(title="language", description="언어", default="KOREAN")
     donor_name: Optional[str] = Field(title="donor_name", description="기부자명", default=None)
