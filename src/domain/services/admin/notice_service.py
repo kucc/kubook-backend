@@ -1,7 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm.session import Session
-from datetime import datetime
 
 from repositories.models import Notice, User
 from domain.schemas.notice_schemas import DomainResAdminGetNotice
@@ -11,7 +10,7 @@ async def service_admin_read_notices(page: int, limit: int, db: Session):
     offset=(page-1)*limit
 
     stmt =(select(Notice)
-           .order_by(Notice.created_at)
+           .order_by(Notice.created_at.desc())
            .limit(limit)
            .offset(offset)
            )
@@ -34,7 +33,7 @@ async def service_admin_read_notices(page: int, limit: int, db: Session):
             admin_name=notice.user[0].user_name,
             title=notice.title,
             notice_content=notice.content,
-            created_at=notice.created_at.date(),
+            created_at=notice.created_at,
         )
         for notice in notices
     ]
@@ -51,7 +50,6 @@ async def service_admin_read_notice(notice_id: int, db: Session):
     if not notice:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notice not found")
 
-    #user = db.execute(select(User).where(User.id == notice.admin_id)).scalar()
     admin_name = notice.user[0].user_name
 
     response = DomainResAdminGetNotice(
@@ -60,7 +58,7 @@ async def service_admin_read_notice(notice_id: int, db: Session):
         admin_name=admin_name,
         title=notice.title,
         notice_content=notice.content,
-        created_at=notice.created_at.date()
+        created_at=notice.created_at
     )
 
     return response
