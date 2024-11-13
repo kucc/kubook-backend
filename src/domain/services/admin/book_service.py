@@ -103,6 +103,7 @@ async def service_admin_update_book(request: DomainReqAdminPutBook, db: Session)
                         detail=f"Invalid value type for column {key}. \
                         Expected {type(request_book[key])}, got {type(value)}."
                     )
+        request_book.updated_at = datetime.now()
         db.add(request_book)
         db.flush()
     except Exception as e:
