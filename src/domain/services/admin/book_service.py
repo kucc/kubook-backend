@@ -5,8 +5,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from domain.enums.book_category import BookCategoryStatus
-from domain.schemas.book_schemas import DomainReqAdminPostBook, DomainResAdminPostBook
+from domain.schemas.book_schemas import DomainReqAdminDelBook, DomainReqAdminPostBook, DomainResAdminPostBook
 from repositories.models import Book
+from src.utils.crud_utils import delete_item
 
 
 async def service_admin_create_book(request: DomainReqAdminPostBook, db: Session):
@@ -69,3 +70,7 @@ async def service_admin_create_book(request: DomainReqAdminPostBook, db: Session
         updated_at=new_book.updated_at
     )
     return domain_res
+
+async def service_admin_delete_book(request: DomainReqAdminDelBook, db: Session):
+    delete_item(Book, request.book_id, db)
+    return
