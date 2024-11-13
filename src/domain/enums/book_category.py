@@ -17,6 +17,3 @@ class BookCategoryStatus(Enum):
     def __init__(self, category, description):
         self.category = category
         self.description = description
-
-    def __str__(self):
-        return self.category
