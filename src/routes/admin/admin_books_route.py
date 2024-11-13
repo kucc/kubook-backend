@@ -17,6 +17,7 @@ router = APIRouter(
 @router.post(
     "/",
     summary="관리자 도서 정보 등록",
+    response_model=RouteResAdminPostBook,
     status_code=status.HTTP_201_CREATED
 )
 async def create_admin_book(
