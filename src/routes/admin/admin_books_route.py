@@ -27,15 +27,15 @@ async def create_admin_book(
       book_title = request.book_title,
       code=request.code,
       category_name = request.category_name,
-      subtitle=request.subtitle if request.subtitle is not None else None,
+      subtitle=request.subtitle,
       author=request.author,
       publisher=request.publisher,
       publication_year=request.publication_year,
-      image_url = request.image_url if request.image_url is not None else None,
-      version = request.version if request.version is not None else None,
+      image_url = request.image_url,
+      version = request.version,
       major = request.major,
       language=request.language,
-      donor_name = request.donor_name if request.donor_name is not None else None
+      donor_name = request.donor_name
     )
     domain_res = await service_admin_create_book(domain_req, db)
     result = RouteResAdminPostBook(
