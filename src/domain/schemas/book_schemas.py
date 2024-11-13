@@ -69,6 +69,7 @@ class DomainResAdminPostBook(BaseModel):
     updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
 
 class DomainReqAdminPutBook(BaseModel):
+    book_id: int = Field(title="book_id", description="책 ID", gt=0)
     book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")
     code: str = Field(title="code", description="책 코드", examples="A3")
     category_name: str = Field(title="category_name", description="카테고리명", examples="웹")
