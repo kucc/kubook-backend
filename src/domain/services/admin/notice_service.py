@@ -4,12 +4,10 @@ from sqlalchemy.orm.session import Session
 from datetime import datetime
 
 from repositories.models import Notice, User
-from domain.schemas.notice_schemas import DomainResAdminGetNoticeItem, DomainResAdminGetNoticeList
+from domain.schemas.notice_schemas import DomainResAdminGetNotice
 
 async def service_admin_read_notices(page: int, limit: int, db: Session):
-    if page < 1:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="page는 1 이상이어야 합니다.")
-
+   
     offset=(page-1)*limit
 
     stmt =(select(Notice)
@@ -28,11 +26,12 @@ async def service_admin_read_notices(page: int, limit: int, db: Session):
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
     
+    
     response = [
-        DomainResAdminGetNoticeList(
+        DomainResAdminGetNotice(
             notice_id=notice.id,
             admin_id=notice.admin_id,
-            admin_name=db.execute(select(User.user_name).where(User.id == notice.admin_id)).scalar(),
+            admin_name=notice.user[0].user_name,
             title=notice.title,
             notice_content=notice.content,
             created_at=notice.created_at.date(),
@@ -52,10 +51,10 @@ async def service_admin_read_notice(notice_id: int, db: Session):
     if not notice:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notice not found")
 
-    user = db.execute(select(User).where(User.id == notice.admin_id)).scalar()
-    admin_name = user.user_name
+    #user = db.execute(select(User).where(User.id == notice.admin_id)).scalar()
+    admin_name = notice.user[0].user_name
 
-    response = DomainResAdminGetNoticeItem(
+    response = DomainResAdminGetNotice(
         notice_id=notice.id,
         admin_id=notice.admin_id,
         admin_name=admin_name,

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from dependencies import get_current_admin, get_db
 from domain.services.admin.notice_service import service_admin_read_notices, service_admin_read_notice
-from routes.admin.response.notice_response import RouteResAdminGetNoticeItem, RouteResAdminGetNoticeList
+from routes.admin.response.notice_response import RouteResAdminGetNotice, RouteResAdminGetNoticeList
 
 router=APIRouter(
     prefix="/admin/notice",
@@ -19,8 +19,8 @@ router=APIRouter(
     )
 
 async def get_all_notices(
-    page: int = Query(1, gt=0),
-    limit: int = Query(10, ge=0),
+    page: int = Query(7, ge=1),
+    limit: int = Query(10, le=50),
     db: Session=Depends(get_db),
     current_user=Depends(get_current_admin)
 ):
@@ -35,7 +35,7 @@ async def get_all_notices(
 
 @router.get(
     "/{notice_id}",
-    response_model=RouteResAdminGetNoticeItem,
+    response_model=RouteResAdminGetNotice,
     status_code=status.HTTP_200_OK,
     summary="공지사항 상세 조회",
     )
@@ -46,7 +46,7 @@ async def get_notice(
     current_user=Depends(get_current_admin)
 ):
     domain_res = await service_admin_read_notice(notice_id, db)
-    response = RouteResAdminGetNoticeItem(
+    response = RouteResAdminGetNotice(
         notice_id=domain_res.notice_id,
         admin_id=domain_res.admin_id,
         admin_name=domain_res.admin_name,
