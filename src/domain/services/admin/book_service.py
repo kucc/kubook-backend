@@ -39,7 +39,7 @@ async def service_admin_create_book(request: DomainReqAdminPostBook, db: Session
         image_url = request.image_url,
         version = request.version,
         major = request.major,
-        book_status = True,
+        book_status = request.book_status,
         donor_name = request.donor_name,
         created_at = datetime.now(),
         updated_at = datetime.now(),
