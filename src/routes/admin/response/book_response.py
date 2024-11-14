@@ -7,8 +7,8 @@ from pydantic import BaseModel, Field
 class RouteResAdminPostBook(BaseModel):
   book_id: int = Field(title="book_id", description="책 ID", gt=0)
   book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")
-  code: str = Field(title="code", description="책 코드", examples="A3")
-  category_name: str = Field(title="category_name", description="카테고리명", examples="웹")
+  code: str = Field(title="code", description="책 코드", example="A3")
+  category_name: str = Field(title="category_name", description="카테고리명", example="웹")
   subtitle: Optional[str] = Field(title="subtitle", description="책 부제", default=None)
   author : str = Field(title="author", description="저자")
   publisher: str = Field(title="publisher", description="출판사")
@@ -25,8 +25,8 @@ class RouteResAdminPostBook(BaseModel):
 class RouteResAdminPutBook(BaseModel):
   book_id: int = Field(title="book_id", description="책 ID", gt=0)
   book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")
-  code: str = Field(title="code", description="책 코드", examples="A3")
-  category_name: str = Field(title="category_name", description="카테고리명", examples="웹")
+  code: str = Field(title="code", description="책 코드", example="A3")
+  category_name: str = Field(title="category_name", description="카테고리명", example="웹")
   subtitle: Optional[str] = Field(title="subtitle", description="책 부제", default=None)
   author : str = Field(title="author", description="저자")
   publisher: str = Field(title="publisher", description="출판사")
