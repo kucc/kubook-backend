@@ -1,29 +1,35 @@
 from fastapi import HTTPException, status
-from sqlalchemy import and_, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from repositories.models import User
 from routes.admin.response.user_response import RouteAdminsGetUserItem, RouteResAdminGetUserList
 
 
-async def service_admin_read_users(user_name: str, authority: bool, active: bool, db: Session):
+async def service_admin_read_users(
+        user_name: str,
+        authority: bool,
+        active: bool,
+        db: Session
+):
     keyword = f"%{user_name}%"
 
     stmt = (
         select(User)
         .where(
-            and_(
                 User.is_deleted == False,
-                User.user_name.ilike(keyword),
-                User.admin[0].admin_status == authority,
-                User.is_active == active,
-            )
         )
-        .order_by(User.updated_at.desc()) # 최신 업데이트 순으로 정렬
     )
 
+    if user_name:
+        stmt = stmt.where(User.user_name.ilike(keyword))
+    if authority is not None:
+        stmt = stmt.where(User.admin[0].admin_status == authority)
+    if active is not None:
+        stmt = stmt.where(User.is_active == active)
+
     try:
-        users = db.execute(stmt).scalars().all()
+        users = db.execute(stmt.order_by(User.updated_at.desc())).scalars().all()
 
         if not users:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Users not found")
