@@ -7,7 +7,7 @@ from repositories.models import Notice
 
 
 async def service_admin_read_notices(page: int, limit: int, db: Session):
-   
+
     offset=(page-1)*limit
 
     stmt =(select(Notice)
@@ -25,8 +25,8 @@ async def service_admin_read_notices(page: int, limit: int, db: Session):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
-    
-    
+
+
     response = [
         DomainResAdminGetNotice(
             notice_id=notice.id,
@@ -71,7 +71,7 @@ async def service_admin_create_notice(request: DomainReqAdminPostNotice, db: Ses
 
     if not request.title.strip() or not request.notice_content.strip():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="title or notice_content is empty")
-    
+
     notice = Notice(
         admin_id=request.admin_id,
         title=request.title,
@@ -98,4 +98,3 @@ async def service_admin_create_notice(request: DomainReqAdminPostNotice, db: Ses
             created_at=notice.created_at
         )
     return result
-    
