@@ -84,6 +84,7 @@ async def update_admin_book(
         version = request.version,
         major = request.major,
         language=request.language,
+        book_status=request.book_status,
         donor_name = request.donor_name
     )
     domain_res = await service_admin_update_book(domain_req, db)
