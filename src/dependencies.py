@@ -43,22 +43,20 @@ def get_current_active_user(user: User = Depends(get_current_user)):
 
 
 def get_current_admin(user: User = Depends(get_current_active_user)):
-    if not user.admin or not user.admin.admin_status or not user.admin.is_valid:
+    """
+        get_current_admin 사용법 예시
+
+        def example(current_user: User = Depends(get_current_admin)):
+            return {"message": "Welcome Admin!"}
+    """
+    if not user.admin or not user.admin[0].admin_status or user.admin[0].is_deleted:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="The user doesn't have enough privileges"
         )
-    if user.admin.expiration_date < date.today():
+    if user.admin[0].expiration_date < date.today():
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="The user's admin status has expired"
         )
     return user
-
-
-"""
-get_current_admin 사용법 예시
-
-def example(current_user: User = Depends(get_current_admin)):
-    return {"message": "Welcome Admin!"}
-"""

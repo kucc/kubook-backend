@@ -22,7 +22,7 @@ def create_jwt(
 
     Returns:
         str: The encoded JWT token.
-    """
+    """  # noqa: E501
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta

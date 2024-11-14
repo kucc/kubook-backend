@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 import domain.schemas.auth_schemas as auth_schemas
 import domain.services.auth_service as auth_service
 from config import Settings
-from dependencies import get_current_user, get_db
+from dependencies import get_db
 
 router = APIRouter(
     prefix="/auth",
@@ -45,7 +45,7 @@ async def register(
     - Firebase에 사용자 정보가 존재할 경우 쿠책책의 DB에 사용자 정보가 있는지 확인
     - 만약 사용자 정보가 있다면 로그인 처리
     - 사용자 정보가 없다면 회원가입 페이지로 이동
-        - 그런데 회원가입 페이지에서 추가로 입력할 내용이 거의 없어서 회원가입 API POST /auth/register는 Deprecated 처리함
+        - 그런데 회원가입 페이지에서 추가로 입력할 내용이 거의 없어서 회원가입 API POST /auth/register는 Deprecated 처리
         - 추후 회원가입 시 기입할 정보가 늘어난다면 POST /auth/register를 다시 활성화할 것
     """,
     response_description={
