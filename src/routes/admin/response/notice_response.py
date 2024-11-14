@@ -19,14 +19,14 @@ class RouteResAdminGetNoticeList(BaseModel):
 
 class RouteResAdminPostNotice(BaseModel):
     notice_id: int = Field(title="notice_id", description="공지사항 ID", examples=[1, 2, 3], gt=0)
-    user_name: str = Field(title="user_name", description="사용자 성명", examples=["사용자1", "사용자2"])
+    admin_name: str = Field(title="admin_name", description="관리자 성명", examples=["관리자1"])
     title: str = Field(title="title", description="공지사항 제목", examples=["공지사항 제목1", "공지사항 제목2"])
     notice_content: str = Field(title="notice content", description="공지사항 내용", examples=["공지사항 내용1"])
     created_at: date = Field(title="created_at", description="공지사항 생성일", examples=[date.today()])
 
 class RouteResAdminPutNotice(BaseModel):
     notice_id: int = Field(title="notice_id", description="공지사항 ID", examples=[1, 2, 3], gt=0)
-    user_name: str = Field(title="user_name", description="사용자 성명", examples=["사용자1", "사용자2"])
+    admin_name: str = Field(title="admin_name", description="관리자 성명", examples=["관리자1"])
     title: str = Field(title="title", description="공지사항 제목", examples=["공지사항 제목1", "공지사항 제목2"])
     notice_content: str = Field(title="notice content", description="공지사항 내용", examples=["공지사항 내용1"])
     created_at: date = Field(title="created_at", description="공지사항 생성일", examples=[date.today()])

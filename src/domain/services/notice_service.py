@@ -2,8 +2,9 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm.session import Session
 
-from repositories.models import Notice, User
 from domain.schemas.notice_schemas import DomainResGetNotice
+from repositories.models import Notice
+
 
 async def service_read_notices(page: int, limit: int, db: Session):
    

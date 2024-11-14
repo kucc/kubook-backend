@@ -2,8 +2,9 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm.session import Session
 
-from repositories.models import Notice, User
-from domain.schemas.notice_schemas import DomainResAdminGetNotice
+from domain.schemas.notice_schemas import DomainReqAdminPostNotice, DomainResAdminGetNotice, DomainResAdminPostNotice
+from repositories.models import Notice
+
 
 async def service_admin_read_notices(page: int, limit: int, db: Session):
    
@@ -62,3 +63,39 @@ async def service_admin_read_notice(notice_id: int, db: Session):
     )
 
     return response
+
+
+
+
+async def service_admin_create_notice(request: DomainReqAdminPostNotice, db: Session):
+
+    if not request.title.strip() or not request.notice_content.strip():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="title or notice_content is empty")
+    
+    notice = Notice(
+        admin_id=request.admin_id,
+        title=request.title,
+        content=request.notice_content
+    )
+    try:
+        db.add(notice)
+        db.flush()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Unexpected error occurred: {str(e)}"
+        ) from e
+
+    else:
+        db.commit()
+        db.refresh(notice)
+
+        result = DomainResAdminPostNotice(
+            notice_id=notice.id,
+            admin_name=notice.user[0].user_name,
+            title=notice.title,
+            notice_content=notice.content,
+            created_at=notice.created_at
+        )
+    return result
+    
