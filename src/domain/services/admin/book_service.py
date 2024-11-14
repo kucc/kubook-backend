@@ -13,7 +13,7 @@ from domain.schemas.book_schemas import (
     DomainResAdminPutBook,
 )
 from repositories.models import Book
-from src.utils.crud_utils import delete_item
+from utils.crud_utils import delete_item
 
 
 async def service_admin_create_book(request: DomainReqAdminPostBook, db: Session):

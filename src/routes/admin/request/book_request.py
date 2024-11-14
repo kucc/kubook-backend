@@ -15,7 +15,7 @@ class RouteReqAdminPostBook(BaseModel):
     version: Optional[str] = Field(title="version", description="판본", default=None)
     major: bool = Field(title="major", description="전공 책 여부", default=False)
     language: str = Field(title="language", description="언어", default="KOREAN")
-    book_status = Field(title="book_status", description="도서 상태", default=True)
+    book_status: bool = Field(title="book_status", description="도서 상태", default=True)
     donor_name: Optional[str] = Field(title="donor_name", description="기부자명", default=None)
 
 class RouteReqAdminPutBook(BaseModel):
@@ -30,5 +30,5 @@ class RouteReqAdminPutBook(BaseModel):
     version: Optional[str] = Field(title="version", description="판본", default=None)
     major: bool = Field(title="major", description="전공 책 여부", default=False)
     language: str = Field(title="language", description="언어", default="KOREAN")
-    book_status = Field(title="book_status", description="도서 상태", default=True)
+    book_status: bool = Field(title="book_status", description="도서 상태", default=True)
     donor_name: Optional[str] = Field(title="donor_name", description="기부자명", default=None)
