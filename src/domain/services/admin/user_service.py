@@ -6,7 +6,7 @@ from repositories.models import User
 from routes.admin.response.user_response import RouteAdminsGetUserItem, RouteResAdminGetUserList
 
 
-async def service_admin_read_users(user_name: str, db: Session):
+async def service_admin_read_users(user_name: str, authority: bool, active: bool, db: Session):
     keyword = f"%{user_name}%"
 
     stmt = (
@@ -14,10 +14,12 @@ async def service_admin_read_users(user_name: str, db: Session):
         .where(
             and_(
                 User.is_deleted == False,
-                User.user_name.ilike(keyword)
+                User.user_name.ilike(keyword),
+                User.admin[0].admin_status == authority,
+                User.is_active == active,
             )
         )
-        .order_by(User.updated_at)
+        .order_by(User.updated_at.desc()) # 최신 업데이트 순으로 정렬
     )
 
     try:

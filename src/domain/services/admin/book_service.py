@@ -1,13 +1,20 @@
 from fastapi import HTTPException, status
-from sqlalchemy import and_, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from repositories.models import Book
 from routes.admin.response.book_response import RouteAdminGetBookItem, RouteResAdminGetBookList
 
 
-async def service_admin_read_books(book_title: str, db: Session):
-    if len(book_title) < 2:
+async def service_admin_read_books(
+        book_title: str,
+        category_name: str,
+        author: str,
+        publisher: str,
+        return_status: bool,
+        db: Session
+):
+    if book_title is not None and len(book_title) < 2:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="도서 제목은 최소 2글자 이상이어야 합니다."
@@ -17,16 +24,23 @@ async def service_admin_read_books(book_title: str, db: Session):
     stmt = (
         select(Book)
         .where(
-            and_(
-                Book.is_deleted == False,
-                Book.book_title.ilike(keyword)
-            )
+            Book.is_deleted == False,
         )
-        .order_by(Book.updated_at)
     )
 
+    if book_title:
+        stmt = stmt.where(Book.book_title.ilike(keyword))
+    if category_name:
+        stmt = stmt.where(Book.category_name.ilike(f"%{category_name}%"))
+    if author:
+        stmt = stmt.where(Book.author.ilike(f"%{author}%"))
+    if publisher:
+        stmt = stmt.where(Book.publisher.ilike(f"%{publisher}%"))
+    if return_status is not None:
+        stmt = stmt.where(Book.loans.return_status == return_status)
+
     try:
-        books = db.execute(stmt).scalars().all()
+        books = db.execute(stmt.order_by(Book.updated_at.desc())).scalars().all() # 최신 업데이트 순으로 정렬
 
         if not books:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Books not found")

@@ -1,4 +1,4 @@
-from datetime import datetime as _datetime
+from datetime import datetime
 
 from pydantic import BaseModel, Field
 
@@ -12,8 +12,8 @@ class RouteAdminsGetUserItem(BaseModel):
     github_id: str | None = Field(default=None, title="github_id", description="깃허브 ID", max_length=100)
     instagram_id: str | None = Field(default=None, title="instagram_id", description="인스타그램 ID", max_length=100)
     is_active: bool = Field(title="is_active", description="활동 상태")
-    created_at: _datetime = Field(title="create_at", description="생성일시")
-    updated_at: _datetime = Field(title="update_at", description="수정일시")
+    created_at: datetime = Field(title="create_at", description="생성일시")
+    updated_at: datetime = Field(title="update_at", description="수정일시")
 
 
 class RouteResAdminGetUserList(BaseModel):
