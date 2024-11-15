@@ -1,12 +1,12 @@
 from fastapi import HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from repositories.models import User
 from routes.admin.response.user_response import RouteAdminsGetUserItem, RouteResAdminGetUserList
 
 
-async def service_admin_read_users(
+async def service_admin_search_users(
         user_name: str,
         authority: bool,
         active: bool,
@@ -16,6 +16,7 @@ async def service_admin_read_users(
 
     stmt = (
         select(User)
+        .options(selectinload(User.admin))
         .where(
                 User.is_deleted == False,
         )

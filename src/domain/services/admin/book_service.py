@@ -1,12 +1,12 @@
 from fastapi import HTTPException, status
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from repositories.models import Book
 from routes.admin.response.book_response import RouteAdminGetBookItem, RouteResAdminGetBookList
 
 
-async def service_admin_read_books(
+async def service_admin_search_books(
         book_title: str,
         category_name: str,
         author: str,
@@ -23,6 +23,7 @@ async def service_admin_read_books(
 
     stmt = (
         select(Book)
+        .options(selectinload(Book.loans))
         .where(
             Book.is_deleted == False,
         )
