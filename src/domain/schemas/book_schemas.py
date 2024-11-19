@@ -48,6 +48,7 @@ class DomainReqAdminPostBook(BaseModel):
     version: Optional[str] = Field(title="version", description="판본", default=None)
     major: bool = Field(title="major", description="전공 책 여부", default=False)
     language: str = Field(title="language", description="언어", default="KOREAN")
+    book_status: bool = Field(title="book_status", description="도서 상태", default=True)
     donor_name: Optional[str] = Field(title="donor_name", description="기부자명", default=None)
 
 class DomainResAdminPostBook(BaseModel):
@@ -63,12 +64,14 @@ class DomainResAdminPostBook(BaseModel):
     version: Optional[str] = Field(title="version", description="판본", default=None)
     major: bool = Field(title="major", description="전공 책 여부", default=False)
     language: str = Field(title="language", description="언어", default="KOREAN")
-    book_status : bool = Field(title="book_status", description="도서 상태", default=True)
+    book_status: bool = Field(title="book_status", description="도서 상태", default=True)
+
     donor_name: Optional[str] = Field(title="donor_name", description="기부자명", default=None)
     created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
     updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
 
 class DomainReqAdminPutBook(BaseModel):
+    book_id: int = Field(title="book_id", description="책 ID", gt=0)
     book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")
     code: str = Field(title="code", description="책 코드", examples="A3")
     category_name: str = Field(title="category_name", description="카테고리명", examples="웹")
@@ -80,6 +83,7 @@ class DomainReqAdminPutBook(BaseModel):
     version: Optional[str] = Field(title="version", description="판본", default=None)
     major: bool = Field(title="major", description="전공 책 여부", default=False)
     language: str = Field(title="language", description="언어", default="KOREAN")
+    book_status: bool = Field(title="book_status", description="도서 상태", default=True)
     donor_name: Optional[str] = Field(title="donor_name", description="기부자명", default=None)
 
 class DomainResAdminPutBook(BaseModel):
@@ -95,7 +99,10 @@ class DomainResAdminPutBook(BaseModel):
     version: Optional[str] = Field(title="version", description="판본", default=None)
     major: bool = Field(title="major", description="전공 책 여부", default=False)
     language: str = Field(title="language", description="언어", default="KOREAN")
-    book_status : bool = Field(title="book_status", description="도서 상태", default=True)
+    book_status: bool = Field(title="book_status", description="도서 상태", default=True)
     donor_name: Optional[str] = Field(title="donor_name", description="기부자명", default=None)
     created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
     updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
+
+class DomainReqAdminDelBook(BaseModel):
+    book_id: int = Field(title="book_id", description="책 ID", gt=0)
