@@ -18,6 +18,7 @@
   "ruff.lint.ignore": [
     "B008",
     "E712",
+    "UP007",
     "UP017"
   ],
   "editor.defaultFormatter": null
