@@ -31,10 +31,10 @@ async def service_admin_read_notices(page: int, limit: int, db: Session):
         DomainResAdminGetNotice(
             notice_id=notice.id,
             admin_id=notice.admin_id,
-            admin_name=notice.user[0].user_name,
+            admin_name=notice.user.user_name,
             title=notice.title,
             notice_content=notice.content,
-            created_at=notice.created_at,
+            created_at=notice.created_at.date(),
         )
         for notice in notices
     ]
@@ -51,7 +51,7 @@ async def service_admin_read_notice(notice_id: int, db: Session):
     if not notice:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notice not found")
 
-    admin_name = notice.user[0].user_name
+    admin_name = notice.user.user_name
 
     response = DomainResAdminGetNotice(
         notice_id=notice.id,
@@ -59,7 +59,7 @@ async def service_admin_read_notice(notice_id: int, db: Session):
         admin_name=admin_name,
         title=notice.title,
         notice_content=notice.content,
-        created_at=notice.created_at
+        created_at=notice.created_at.date(),
     )
 
     return response
@@ -93,9 +93,9 @@ async def service_admin_create_notice(request: DomainReqAdminPostNotice, db: Ses
 
         result = DomainResAdminPostNotice(
             notice_id=notice.id,
-            admin_name=notice.user[0].user_name,
+            admin_name=notice.user.user_name,
             title=notice.title,
             notice_content=notice.content,
-            created_at=notice.created_at
+            created_at=notice.created_at.date(),
         )
     return result
