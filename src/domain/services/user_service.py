@@ -22,15 +22,15 @@ async def service_read_user(user_id:int, db: Session):
     )
     return response
 
-async def service_update_user(user_id:int, db: Session, update_data: DomainReqPutUser):
+async def service_update_user(user_id:int, db: Session, request_data: DomainReqPutUser):
     user = get_item(User, user_id, db)
 
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Requested user not found")
 
-    user.user_name = update_data.user_name or user.user_name
-    user.github_id = update_data.github or user.github_id
-    user.instagram_id = update_data.instagram or user.instagram_id
+    user.user_name = request_data.user_name or user.user_name
+    user.github_id = request_data.github or user.github_id
+    user.instagram_id = request_data.instagram or user.instagram_id
 
     db.commit()
     db.refresh(user)

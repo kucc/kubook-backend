@@ -34,7 +34,7 @@ async def get_all_user_loans(
     return response
 
 @router.get(
-    "/{user_id}",
+    "/my-info",
     response_model=RouteResGetUser,
     status_code=status.HTTP_200_OK,
     summary="내 회원정보 조회"
@@ -57,17 +57,17 @@ async def get_user(
     return response
 
 @router.put(
-    "/{user_id}",
+    "/my-info",
     response_model=RouteResPutUser,
     status_code=status.HTTP_200_OK,
     summary="내 회원정보 수정"
 )
 async def put_user(
-    update_data: RouteReqPutUser,
+    request_data: RouteReqPutUser,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_active_user)
 ):
-    result = await service_update_user(current_user.id, db, update_data)
+    result = await service_update_user(current_user.id, db, request_data)
 
     response = RouteResPutUser(
         user_id=result.user_id,
