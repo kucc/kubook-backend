@@ -7,7 +7,7 @@ from repositories.models import Notice
 
 
 async def service_read_notices(page: int, limit: int, db: Session):
-   
+
     offset=(page-1)*limit
 
     stmt =(select(Notice)
@@ -18,23 +18,25 @@ async def service_read_notices(page: int, limit: int, db: Session):
 
     try:
         notices = db.execute(stmt).scalars().all()
+
         if not notices:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notices not found")
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
-    
-    
+
+
     response = [
         DomainResGetNotice(
             notice_id=notice.id,
             admin_id=notice.admin_id,
-            admin_name=notice.user[0].user_name,
+            admin_name=notice.user.user_name,
             title=notice.title,
             notice_content=notice.content,
-            created_at=notice.created_at,
+            created_at=notice.created_at.date(),
         )
         for notice in notices
     ]
@@ -51,7 +53,7 @@ async def service_read_notice(notice_id: int, db: Session):
     if not notice:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notice not found")
 
-    admin_name = notice.user[0].user_name
+    admin_name = notice.user.user_name
 
     response = DomainResGetNotice(
         notice_id=notice.id,
@@ -59,7 +61,7 @@ async def service_read_notice(notice_id: int, db: Session):
         admin_name=admin_name,
         title=notice.title,
         notice_content=notice.content,
-        created_at=notice.created_at
+        created_at=notice.created_at.date()
     )
 
     return response
