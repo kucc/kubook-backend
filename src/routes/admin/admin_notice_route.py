@@ -2,17 +2,19 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_current_admin, get_db
-from domain.schemas.notice_schemas import DomainReqAdminPostNotice
+from domain.schemas.notice_schemas import DomainReqAdminPostNotice, DomainReqAdminPutNotice
 from domain.services.admin.notice_service import (
     service_admin_create_notice,
     service_admin_read_notice,
     service_admin_read_notices,
+    service_admin_update_notice,
 )
-from routes.admin.request.notice_request import RouteReqAdminPostNotice
+from routes.admin.request.notice_request import RouteReqAdminPostNotice, RouteReqAdminPutNotice
 from routes.admin.response.notice_response import (
     RouteResAdminGetNotice,
     RouteResAdminGetNoticeList,
     RouteResAdminPostNotice,
+    RouteResAdminPutNotice,
 )
 
 router=APIRouter(
@@ -96,3 +98,32 @@ async def create_notice(
 
     return response
 
+@router.put(
+    "/{notice_id}",
+    response_model=RouteResAdminPutNotice,
+    status_code=status.HTTP_200_OK,
+    summary="공지사항 수정",
+)
+async def update_notice(
+    notice_id: int,
+    notice_update: RouteReqAdminPutNotice,
+    db: Session=Depends(get_db),
+    current_user=Depends(get_current_admin)
+):
+    domain_req = DomainReqAdminPutNotice(
+        notice_id=notice_id,
+        admin_id=current_user.admin[0].id,
+        title=notice_update.title,
+        notice_content=notice_update.notice_content
+    )
+
+    domain_res = await service_admin_update_notice(notice_id, domain_req, db)
+    response = RouteResAdminPutNotice(
+        notice_id=domain_res.notice_id,
+        admin_name=domain_res.admin_name,
+        title=domain_res.title,
+        notice_content=domain_res.notice_content,
+        created_at=domain_res.created_at
+    )
+
+    return response

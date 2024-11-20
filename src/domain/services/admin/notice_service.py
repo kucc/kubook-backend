@@ -2,7 +2,13 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm.session import Session
 
-from domain.schemas.notice_schemas import DomainReqAdminPostNotice, DomainResAdminGetNotice, DomainResAdminPostNotice
+from domain.schemas.notice_schemas import (
+    DomainReqAdminPostNotice,
+    DomainReqAdminPutNotice,
+    DomainResAdminGetNotice,
+    DomainResAdminPostNotice,
+    DomainResAdminPutNotice,
+)
 from repositories.models import Notice
 
 
@@ -99,3 +105,35 @@ async def service_admin_create_notice(request: DomainReqAdminPostNotice, db: Ses
             created_at=notice.created_at.date(),
         )
     return result
+
+
+async def service_admin_update_notice(notice_id: int, request: DomainReqAdminPutNotice, db: Session):
+    stmt = select(Notice).where(Notice.id == notice_id)
+    notice = db.execute(stmt).scalar_one_or_none()
+
+    if not notice:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Notice not found")
+
+    try:
+        notice.title = request.title
+        notice.content = request.notice_content
+        db.add(notice)
+        db.flush()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Unexpected error occurred: {str(e)}"
+        ) from e
+    else:
+        db.commit()
+        db.refresh(notice)
+
+        domain_res = DomainResAdminPutNotice(
+            notice_id=notice.id,
+            title=notice.title,
+            notice_content=notice.content,
+            admin_name=notice.user.user_name,
+            created_at=notice.created_at.date(),
+        )
+    return domain_res
+

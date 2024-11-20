@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_current_active_user, get_db
-from domain.services.notice_service import service_read_notices, service_read_notice
+from domain.services.notice_service import service_read_notice, service_read_notices
 from routes.response.notice_response import RouteResGetNotice, RouteResGetNoticeList
 
 router=APIRouter(

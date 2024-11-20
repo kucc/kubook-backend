@@ -33,7 +33,7 @@ class DomainResAdminPostNotice(BaseModel):
     created_at: date = Field(title="created_at", description="공지사항 생성일", examples=[date.today()])
 
 class DomainReqAdminPutNotice(BaseModel):
-    notice_id: int = Field(title="notice_id", description="공지사항 ID", example=1, gt=0)
+    notice_id: int = Field(title="notice_id", description="공지사항 ID", examples=[1, 2, 3], gt=0)
     admin_id: int = Field(title="admin_id", description="관리자 ID", example=1, gt=0)
     title: str = Field(title="title", description="공지사항 제목", examples=["공지사항 제목1"])
     notice_content: str = Field(title="notice content", description="공지사항 내용", examples=["공지사항 내용1"])
