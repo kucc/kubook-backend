@@ -63,11 +63,11 @@ async def get_user(
     summary="내 회원정보 수정"
 )
 async def put_user(
-    request_data: RouteReqPutUser,
+    request: RouteReqPutUser,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_active_user)
 ):
-    result = await service_update_user(current_user.id, db, request_data)
+    result = await service_update_user(current_user.id, db, request)
 
     response = RouteResPutUser(
         user_id=result.user_id,
