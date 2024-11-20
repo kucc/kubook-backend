@@ -73,6 +73,7 @@ async def service_admin_create_notice(request: DomainReqAdminPostNotice, db: Ses
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="title or notice_content is empty")
 
     notice = Notice(
+        user_id=request.user_id,
         admin_id=request.admin_id,
         title=request.title,
         content=request.notice_content

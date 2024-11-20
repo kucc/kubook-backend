@@ -79,7 +79,8 @@ async def create_notice(
     current_user=Depends(get_current_admin)
 ):
     domain_req = DomainReqAdminPostNotice(
-        admin_id=current_user.id,
+        user_id=current_user.id,
+        admin_id=current_user.admin[0].id,
         title=notice_create.title,
         notice_content=notice_create.notice_content
     )
