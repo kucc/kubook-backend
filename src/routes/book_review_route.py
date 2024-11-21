@@ -46,7 +46,7 @@ async def get_all_reviews_by_book_id(
     return result
 
 @router.get(
-    "/{user_id}/reviews",
+    "/list",
     response_model=RouteResGetReviewList,
     status_code=status.HTTP_200_OK,
     summary="회원의 전체 리뷰 목록 조회",
