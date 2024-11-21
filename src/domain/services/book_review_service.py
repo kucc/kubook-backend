@@ -54,31 +54,35 @@ async def service_read_reviews_by_user_id(user_id, db: Session):
     stmt = (
         select(BookReview)
         .where(and_(BookReview.user_id == user_id, BookReview.is_deleted == False))
-        .order_by(BookReview.updated_at)
+        .order_by(BookReview.updated_at.desc())
     )
 
     try:
         reviews = db.scalars(stmt).all()  # loans를 리스트로 반환
-        if not reviews:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reviews not found")
-
-        result = [
-            DomainResGetReviewItem(
-                review_id=review.id,
-                user_id=review.user_id,
-                book_id=review.book_id,
-                review_content=review.review_content,
-                created_at=review.created_at,
-                updated_at=review.updated_at,
-            )
-            for review in reviews
-        ]
-
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
+
+    if not reviews:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Reviews not found"
+        )
+
+    result = [
+        DomainResGetReviewItem(
+            review_id=review.id,
+            user_id=review.user_id,
+            book_id=review.book_id,
+            review_content=review.review_content,
+            created_at=review.created_at,
+            updated_at=review.updated_at,
+        )
+        for review in reviews
+    ]
+
     return result
 
 
