@@ -32,7 +32,7 @@ app = FastAPI(
 # CORS
 origins = [
     "http://localhost:10242",
-    "http://localhost:5173"
+    "http://localhost:5173",
     "http://localhost:3000",
     "http://localhost:8000"
 ]
