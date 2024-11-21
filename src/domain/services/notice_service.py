@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.orm.session import Session
 
 from domain.schemas.notice_schemas import DomainResGetNotice
@@ -11,6 +11,7 @@ async def service_read_notices(page: int, limit: int, db: Session):
     offset=(page-1)*limit
 
     stmt =(select(Notice)
+           .where(Notice.is_deleted == False)
            .order_by(Notice.created_at.desc())
            .limit(limit)
            .offset(offset)
@@ -18,9 +19,13 @@ async def service_read_notices(page: int, limit: int, db: Session):
 
     try:
         notices = db.execute(stmt).scalars().all()
+        total=len(db.execute(stmt).scalars().all())
 
         if not notices:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notices not found")
+        elif not total:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Fetch incorrect total value")
+
         response = [
         DomainResGetNotice(
             notice_id=notice.id,
@@ -39,13 +44,13 @@ async def service_read_notices(page: int, limit: int, db: Session):
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    return response
+    return response, total
 
 
 
 
 async def service_read_notice(notice_id: int, db: Session):
-    stmt = select(Notice).where(Notice.id == notice_id)
+    stmt = select(Notice).where(and_(Notice.id == notice_id, Notice.is_deleted == False))
     notice = db.execute(stmt).scalar()
 
     if not notice:

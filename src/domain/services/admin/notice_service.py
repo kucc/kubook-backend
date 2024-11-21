@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.orm.session import Session
 
 from domain.schemas.notice_schemas import (
@@ -17,26 +17,33 @@ async def service_admin_read_notices(page: int, limit: int, db: Session):
     offset=(page-1)*limit
 
     stmt =(select(Notice)
+           .where(Notice.is_deleted == False)
            .order_by(Notice.created_at.desc())
            .limit(limit)
            .offset(offset)
            )
 
+    count_stmt=select(Notice).where(Notice.is_deleted == False)
+
     try:
         notices = db.execute(stmt).scalars().all()
+        total=len(db.execute(count_stmt).scalars().all())
         if not notices:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notices not found")
-        response =[
-        DomainResAdminGetNotice(
-            notice_id=notice.id,
-            admin_id=notice.admin_id,
-            admin_name=notice.user.user_name,
-            title=notice.title,
-            notice_content=notice.content,
-            created_at=notice.created_at.date(),
-        )
-        for notice in notices
-    ]
+        elif not total:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Fetch incorrect total value")
+        response = [
+            DomainResAdminGetNotice(
+                notice_id=notice.id,
+                admin_id=notice.admin_id,
+                admin_name=notice.user.user_name,
+                title=notice.title,
+                notice_content=notice.content,
+                created_at=notice.created_at.date(),
+            )
+            for notice in notices
+        ]
+
 
     except Exception as e:
         raise HTTPException(
@@ -44,13 +51,13 @@ async def service_admin_read_notices(page: int, limit: int, db: Session):
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    return response
+    return response, total
 
 
 
 
 async def service_admin_read_notice(notice_id: int, db: Session):
-    stmt = select(Notice).where(Notice.id == notice_id)
+    stmt = select(Notice).where(and_(Notice.id == notice_id, Notice.is_deleted == False))
     notice = db.execute(stmt).scalar()
 
     if not notice:
@@ -89,7 +96,8 @@ async def service_admin_create_notice(request: DomainReqAdminPostNotice, db: Ses
     except Exception as e:
         db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Unexpected error occurred: {str(e)}"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error occurred while creating notice: {str(e)}"
         ) from e
 
     else:
@@ -121,7 +129,8 @@ async def service_admin_update_notice(notice_id: int, request: DomainReqAdminPut
     except Exception as e:
         db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Unexpected error occurred: {str(e)}"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error occurred while updating notice: {str(e)}"
         ) from e
     else:
         db.commit()

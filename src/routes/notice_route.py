@@ -24,10 +24,11 @@ async def get_all_notices(
     db: Session=Depends(get_db),
     current_user=Depends(get_current_active_user)
 ):
-    domain_res = await service_read_notices(page, limit, db)
+    domain_res, total = await service_read_notices(page, limit, db)
     response = RouteResGetNoticeList(
         data=domain_res,
-        total=len(domain_res)
+        total=total,
+        count=len(domain_res)
     )
 
     return response

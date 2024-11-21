@@ -15,5 +15,6 @@ class RouteResGetNotice(BaseModel):
 
 class RouteResGetNoticeList(BaseModel):
     data: list[DomainResGetNotice]
+    count: int
     total: int
 

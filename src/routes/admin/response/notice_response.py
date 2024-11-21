@@ -15,6 +15,7 @@ class RouteResAdminGetNotice(BaseModel):
 
 class RouteResAdminGetNoticeList(BaseModel):
     data: list[DomainResAdminGetNotice]
+    count: int
     total: int
 
 class RouteResAdminPostNotice(BaseModel):
