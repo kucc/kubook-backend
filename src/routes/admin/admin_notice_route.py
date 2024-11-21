@@ -31,8 +31,8 @@ router=APIRouter(
     )
 
 async def get_all_notices(
-    page: int = Query(7, ge=1),
-    limit: int = Query(10, le=50),
+    page: int = Query(1, ge=1),
+    limit: int = Query(7, le=50),
     db: Session=Depends(get_db),
     current_user=Depends(get_current_admin)
 ):
