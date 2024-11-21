@@ -27,7 +27,7 @@ async def get_all_notices(
     domain_res = await service_read_notices(page, limit, db)
     response = RouteResGetNoticeList(
         data=domain_res,
-        count=len(domain_res)
+        total=len(domain_res)
     )
 
     return response

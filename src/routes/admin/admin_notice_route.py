@@ -39,7 +39,7 @@ async def get_all_notices(
     domain_res = await service_admin_read_notices(page, limit, db)
     response = RouteResAdminGetNoticeList(
         data=domain_res,
-        count=len(domain_res)
+        total=len(domain_res)
     )
 
     return response

@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 
 from domain.schemas.notice_schemas import DomainResGetNotice
 
+
 class RouteResGetNotice(BaseModel):
     notice_id: int = Field(title="notice_id", description="공지사항 ID", example=1, gt=0)
     admin_id: int = Field(title="admin_id", description="관리자 ID", example=1, gt=0)
@@ -14,5 +15,5 @@ class RouteResGetNotice(BaseModel):
 
 class RouteResGetNoticeList(BaseModel):
     data: list[DomainResGetNotice]
-    count: int
+    total: int
 

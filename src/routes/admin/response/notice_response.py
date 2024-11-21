@@ -15,7 +15,7 @@ class RouteResAdminGetNotice(BaseModel):
 
 class RouteResAdminGetNoticeList(BaseModel):
     data: list[DomainResAdminGetNotice]
-    count: int
+    total: int
 
 class RouteResAdminPostNotice(BaseModel):
     notice_id: int = Field(title="notice_id", description="공지사항 ID", examples=[1, 2, 3], gt=0)
