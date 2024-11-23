@@ -1,7 +1,7 @@
 from datetime import date
 
 from fastapi import Depends, Header, HTTPException, status
-from jose import jwt
+from jose import ExpiredSignatureError, JWTError, jwt
 from sqlalchemy.orm import Session
 
 from config import Settings
@@ -32,12 +32,12 @@ async def get_current_user(token=Header(None), db: Session = Depends(get_db)):
         if user is None:
             raise credentials_exception
         return user
-    except jwt.ExpiredSignatureError as err:
+    except ExpiredSignatureError as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired",
         ) from err
-    except jwt.InvalidTokenError as err:
+    except JWTError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid token",
