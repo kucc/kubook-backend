@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Request, status
+from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
