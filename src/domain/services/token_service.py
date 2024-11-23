@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
-from jose import jwt
+from jose import ExpiredSignatureError, JWTError, jwt
 
 from config import Settings
 
@@ -76,18 +76,23 @@ def refresh_user_tokens(access_token: str, refresh_token: str) -> dict:
     try:
         # access token 유효성 검사
         payload_access = jwt.decode(access_token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
+        if datetime.fromtimestamp(payload_access.get("exp")) >= datetime.now():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Access token has not expired",
+            )
         # refresh token 유효성, 만료 여부 검사
         payload = jwt.decode(refresh_token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
         user_id = payload.get("sub")
         refresh_token = create_user_tokens(user_id=user_id)
         return refresh_token
 
-    except jwt.ExpiredSignatureError as err:
+    except ExpiredSignatureError as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh Token has expired",
         ) from err
-    except jwt.InvalidTokenError as err:
+    except JWTError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid token",
