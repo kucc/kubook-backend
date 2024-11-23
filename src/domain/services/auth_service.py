@@ -38,6 +38,8 @@ async def register(request: RegisterRequest, db: Session):
         "email": user.email
     }, status_code=status.HTTP_201_CREATED)
     response.headers["Authorization"] = token_response["access_token"]
+    response.set_cookie(key="refresh_token", value=token_response["refresh_token"],
+                        httponly = True, secure=False, samesite="Lax")
     return response
 
 # firebase를 사용한 로그인
