@@ -105,7 +105,7 @@ async def login_with_username(
 
     # Create JWT tokens
     token_response = create_user_tokens(user.id)
-
-    return {
-        "token": token_response,
-    }
+    response = JSONResponse()
+    response.headers["Authorization"] = token_response["access_token"]
+    response.set_cookie(key="refresh_token", value=token_response["refresh_token"])
+    return response
