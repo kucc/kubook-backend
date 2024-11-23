@@ -25,7 +25,7 @@ async def get_current_user(token=Header(None), db: Session = Depends(get_db)):
     )
     payload = jwt.decode(token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
     user_id: int = int(payload.get("sub"))
-    if payload.get("exp") < datetime.now():
+    if datetime.fromtimestamp(payload.get("exp")) < datetime.now():
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token expired",
