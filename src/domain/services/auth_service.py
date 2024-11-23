@@ -1,10 +1,10 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from config import Settings
 from domain.schemas.auth_schemas import LoginRequest, RegisterRequest
-from domain.services.token_service import create_user_tokens
+from domain.services.token_service import create_user_tokens, refresh_user_tokens
 from externals.firebase import sign_in_with_email_and_password
 from repositories.models import User
 
@@ -105,7 +105,12 @@ async def login_with_username(
 
     # Create JWT tokens
     token_response = create_user_tokens(user.id)
-    response = JSONResponse()
+    response = JSONResponse(content={
+        "id": user.id,
+        "user_name": user.user_name,
+        "is_active": user.is_active,
+        "email": user.email
+    }, status_code=status.HTTP_200_OK)
     response.headers["Authorization"] = token_response["access_token"]
     response.set_cookie(key="refresh_token", value=token_response["refresh_token"])
     return response
