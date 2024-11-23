@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from fastapi import Depends, Header, HTTPException, status
 from jose import jwt
@@ -25,6 +25,11 @@ async def get_current_user(token=Header(None), db: Session = Depends(get_db)):
     )
     payload = jwt.decode(token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
     user_id: int = int(payload.get("sub"))
+    if payload.get("exp") < datetime.now():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token expired",
+        )
     if user_id is None:
         raise credentials_exception
     user = db.query(User).filter(User.id == user_id).first()
