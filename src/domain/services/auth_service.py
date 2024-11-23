@@ -37,7 +37,7 @@ async def register(request: RegisterRequest, db: Session):
         "is_active": user.is_active,
         "email": user.email
     }, status_code=status.HTTP_201_CREATED)
-    response.headers["Authentication"] = token_response["access_token"]
+    response.headers["Authorization"] = token_response["access_token"]
     return response
 
 # firebase를 사용한 로그인
