@@ -23,19 +23,25 @@ async def get_current_user(token=Header(None), db: Session = Depends(get_db)):
         detail="Invalid credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    payload = jwt.decode(token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
-    user_id: int = int(payload.get("sub"))
-    if datetime.fromtimestamp(payload.get("exp")) < datetime.now():
+    try:
+        payload = jwt.decode(token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
+        user_id: int = int(payload.get("sub"))
+        if user_id is None:
+            raise credentials_exception
+        user = db.query(User).filter(User.id == user_id).first()
+        if user is None:
+            raise credentials_exception
+        return user
+    except jwt.ExpiredSignatureError as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token expired",
-        )
-    if user_id is None:
-        raise credentials_exception
-    user = db.query(User).filter(User.id == user_id).first()
-    if user is None:
-        raise credentials_exception
-    return user
+            detail="Token has expired",
+        ) from err
+    except jwt.InvalidTokenError as err:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
+        ) from err
 
 
 def get_current_active_user(user: User = Depends(get_current_user)):
