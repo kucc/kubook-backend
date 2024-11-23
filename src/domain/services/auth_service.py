@@ -1,4 +1,5 @@
 from fastapi import HTTPException, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from config import Settings
@@ -30,16 +31,14 @@ async def register(request: RegisterRequest, db: Session):
 
     # Create JWT tokens
     token_response = create_user_tokens(user.id)
-
-    return {
-        "token": token_response,
-        "user": {
-            "id": user.id,
-            "user_name": user.user_name,
-            "is_active": user.is_active,
-            "email": user.email
-        }
-    }
+    response = JSONResponse(content={
+        "id": user.id,
+        "user_name": user.user_name,
+        "is_active": user.is_active,
+        "email": user.email
+    }, status_code=status.HTTP_201_CREATED)
+    response.headers["Authentication"] = token_response["access_token"]
+    return response
 
 # firebase를 사용한 로그인
 
@@ -107,10 +106,4 @@ async def login_with_username(
 
     return {
         "token": token_response,
-        "user": {
-            "id": user.id,
-            "user_name": user.user_name,
-            "is_active": user.is_active,
-            "email": user.email
-        }
     }
