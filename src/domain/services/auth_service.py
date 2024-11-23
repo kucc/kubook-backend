@@ -114,3 +114,15 @@ async def login_with_username(
     response.headers["Authorization"] = token_response["access_token"]
     response.set_cookie(key="refresh_token", value=token_response["refresh_token"])
     return response
+
+async def service_refresh_token(access_token: str, refresh_token: str):
+    if not refresh_token or not access_token:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token is missed"
+        )
+    token_response = refresh_user_tokens(access_token, refresh_token)
+    response = JSONResponse(status_code=status.HTTP_202_ACCEPTED)
+    response.headers["Authorization"]= token_response["access_token"]
+    response.set_cookie(key="refresh_token", value=token_response["refresh_token"])
+    return response
