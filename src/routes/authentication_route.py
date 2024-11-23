@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Header, status
 from sqlalchemy.orm import Session
 
 import domain.schemas.auth_schemas as auth_schemas
@@ -63,3 +63,15 @@ async def login(
         return await auth_service.login_with_username(request, db)
     # elif settings.ENVIRONMENT == "production":
     #     return await auth_service.login(request, db)
+
+@router.post(
+    "/refresh-token",
+    status_code=status.HTTP_201_CREATED,
+    summary="토큰 재발급",
+    description="refresh_token 만료 이전에만 토큰 재발급 가능"
+)
+async def refresh_token(
+    access_token: str = Header(),
+    refresh_token: str = Header(),
+):
+    return await auth_service.service_refresh_token(access_token = access_token, refresh_token = refresh_token)
