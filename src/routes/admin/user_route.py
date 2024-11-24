@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
@@ -20,10 +22,16 @@ router = APIRouter(
 )
 async def search_users(
     db: Session = Depends(get_db),
-    user_name: str = Query(description="사용자 이름", example="test"),
-    authority: bool = Query(description="권한 여부", example=False, default=False),
-    active: bool = Query(description="관리자 활성 여부", example=False, default=False),
-    current_user=Depends(get_current_admin)
+    user_name: Annotated[
+        str, Query(description="사용자 이름", example="test")
+    ] = None,
+    authority: Annotated[
+        bool, Query(description="권한 여부", example=False)
+    ] = None,
+    active: Annotated[
+        bool, Query(description="관리자 활성 여부", example=False)
+    ] = None,
+    current_user: Annotated = Depends(get_current_admin)
 ):
     response = await service_admin_search_users(
         user_name=user_name,
@@ -46,9 +54,6 @@ async def get_all_users(
     current_user=Depends(get_current_admin)
 ):
     response = await service_admin_search_users(
-        user_name="",
-        authority=None,
-        active=None,
         db=db
     )
 

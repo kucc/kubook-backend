@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
@@ -20,11 +22,21 @@ router = APIRouter(
 )
 async def search_books(
     db: Session = Depends(get_db),
-    book_title: str = Query(description="도서 제목", example="book"),
-    category_name: str = Query(description="카테고리 이름", example="category"),
-    author: str = Query(description="저자", example="author"),
-    publisher: str = Query(description="출판사", example="publisher"),
-    return_status: bool = Query(description="반납 여부", example=False),
+    book_title: Annotated[
+        str | None, Query(description="도서 제목", example="book", min_length=2, max_length=50)
+    ] = None,
+    category_name: Annotated[
+        str | None, Query(description="카테고리 이름", example="category", min_length=2, max_length=50)
+    ] = None,
+    author: Annotated[
+        str, Query(description="저자", example="author", min_length=2, max_length=50)
+    ] = None,
+    publisher: Annotated[
+        str, Query(description="출판사", example="publisher", min_length=2, max_length=50)
+    ] = None,
+    return_status: Annotated[
+        bool, Query(description="반납 여부", example=False)
+    ] = None,
     current_user=Depends(get_current_admin)
 ):
 

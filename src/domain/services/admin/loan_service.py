@@ -6,7 +6,13 @@ from repositories.models import Loan
 from routes.admin.response.loan_response import RouteAdminGetLoanItem, RouteResAdminGetLoanList
 
 
-async def service_admin_search_loans(user_name, book_title, category_name, return_status, db: Session):
+async def service_admin_search_loans(
+    user_name: str | None,
+    book_title: str | None,
+    category_name: str | None,
+    return_status: str | None,
+    db: Session
+):
     stmt = (
         select(Loan)
         .options(selectinload(Loan.user), selectinload(Loan.book))
@@ -15,11 +21,6 @@ async def service_admin_search_loans(user_name, book_title, category_name, retur
         )
     )
 
-    if book_title is not None and len(book_title) < 2:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="도서 제목은 최소 2글자 이상이어야 합니다."
-        )
     keyword = f"%{book_title}%"
 
     if user_name:

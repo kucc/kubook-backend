@@ -7,9 +7,9 @@ from routes.admin.response.user_response import RouteAdminsGetUserItem, RouteRes
 
 
 async def service_admin_search_users(
-        user_name: str,
-        authority: bool,
-        active: bool,
+        user_name: str | None,
+        authority: bool | None,
+        active: bool | None,
         db: Session
 ):
     keyword = f"%{user_name}%"
