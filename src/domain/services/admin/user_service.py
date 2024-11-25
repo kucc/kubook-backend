@@ -11,7 +11,7 @@ async def service_admin_search_users(
         authority: bool | None,
         active: bool | None,
         db: Session
-) -> DomainAdminGetUserItem:
+) -> list[DomainAdminGetUserItem]:
     stmt = (
         select(User)
         .options(selectinload(User.admin))

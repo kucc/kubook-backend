@@ -13,7 +13,7 @@ async def service_admin_search_books(
         publisher: str | None,
         return_status: bool | None,
         db: Session
-) -> DomainAdminGetBookItem:
+) -> list[DomainAdminGetBookItem]:
     stmt = (select(Book).options(selectinload(Book.loans)).where(Book.is_deleted == False,))
 
     if book_title:

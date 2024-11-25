@@ -12,7 +12,7 @@ async def service_admin_search_loans(
     category_name: str | None,
     return_status: str | None,
     db: Session
-) -> DomainAdminGetLoanItem:
+) -> list[DomainAdminGetLoanItem]:
     stmt = (
         select(Loan)
         .options(joinedload(Loan.user), joinedload(Loan.book))
