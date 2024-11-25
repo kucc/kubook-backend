@@ -1,9 +1,9 @@
 from fastapi import HTTPException, status
-from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy import select, text
+from sqlalchemy.orm import Session, joinedload
 
+from domain.schemas.admin.loan_schema import DomainAdminGetLoanItem
 from repositories.models import Loan
-from routes.admin.response.loan_response import RouteAdminGetLoanItem, RouteResAdminGetLoanList
 
 
 async def service_admin_search_loans(
@@ -12,23 +12,32 @@ async def service_admin_search_loans(
     category_name: str | None,
     return_status: str | None,
     db: Session
-):
+) -> DomainAdminGetLoanItem:
     stmt = (
         select(Loan)
-        .options(selectinload(Loan.user), selectinload(Loan.book))
+        .options(joinedload(Loan.user), joinedload(Loan.book))
+        .join(Loan.user)
+        .join(Loan.book)
         .where(
             Loan.is_deleted == False
         )
     )
 
-    keyword = f"%{book_title}%"
-
-    if user_name:
-        stmt = stmt.where(Loan.user.user_name.ilike(f"%{user_name}%"))
     if book_title:
-        stmt = stmt.where(Loan.book.book_title.ilike(keyword))
+        stmt = (
+            stmt.where(text("MATCH(book.book_title) AGAINST(:book_title IN BOOLEAN MODE)"))
+                .params(book_title=f"{book_title}*")
+        )
+    if user_name:
+        stmt = (
+            stmt.where(text("MATCH(user.user_name) AGAINST(:user_name IN BOOLEAN MODE)"))
+                .params(user_name=f"{user_name}*")
+        )
     if category_name:
-        stmt = stmt.where(Loan.book.category_name.ilike(f"%{category_name}%"))
+        stmt = (
+            stmt.where(text("MATCH(category_name) AGAINST(:category_name IN BOOLEAN MODE)"))
+                .params(category_name=f"{category_name}*")
+        )
     if return_status is not None:
         stmt = stmt.where(Loan.return_status == return_status)
 
@@ -39,8 +48,9 @@ async def service_admin_search_loans(
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loans not found")
 
         search_loans = [
-            RouteAdminGetLoanItem(
-                book_id=loan.id,
+            DomainAdminGetLoanItem(
+                loan_id=loan.id,
+                book_id=loan.book_id,
                 user_id=loan.user_id,
                 user_name=loan.user.user_name,
                 code=loan.book.code,
@@ -56,15 +66,12 @@ async def service_admin_search_loans(
             for loan in loans
         ]
 
-        response = RouteResAdminGetLoanList(
-            data=search_loans,
-            count=len(search_loans)
-        )
-
+    except HTTPException as e:
+            raise e
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    return response
+    return search_loans

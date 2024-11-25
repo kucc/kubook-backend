@@ -40,7 +40,12 @@ async def search_users(
         db=db
     )
 
-    return response
+    result = RouteResAdminGetUserList(
+        data=response,
+        count=len(response)
+    )
+
+    return result
 
 
 @router.get(
@@ -57,4 +62,9 @@ async def get_all_users(
         db=db
     )
 
-    return response
+    result = RouteResAdminGetUserList(
+        data=response,
+        count=len(response)
+    )
+
+    return result

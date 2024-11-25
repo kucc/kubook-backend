@@ -20,11 +20,11 @@ router = APIRouter(
     summary="전체 대출 목록 검색",
 )
 async def search_loans(
-    user_name: Annotated[
-        str | None, Query(description="사용자 이름", example="test", min_length=2, max_length=45)
-    ] = None,
     book_title: Annotated[
         str, Query(description="도서 제목", example="book", min_length=2, max_length=50)
+    ] = None,
+    user_name: Annotated[
+        str | None, Query(description="사용자 이름", example="test", min_length=2, max_length=45)
     ] = None,
     category_name: Annotated[
         str, Query(description="카테고리 이름", example="category", min_length=2, max_length=50)
@@ -43,7 +43,12 @@ async def search_loans(
         db = db
     )
 
-    return response
+    result = RouteResAdminGetLoanList(
+            data=response,
+            count=len(response)
+        )
+
+    return result
 
 
 
@@ -61,4 +66,9 @@ async def get_all_loans(
         db = db
     )
 
-    return response
+    result = RouteResAdminGetLoanList(
+            data=response,
+            count=len(response)
+        )
+
+    return result

@@ -1,9 +1,9 @@
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session, selectinload
 
+from domain.schemas.admin.user_schema import DomainAdminGetUserItem
 from repositories.models import User
-from routes.admin.response.user_response import RouteAdminsGetUserItem, RouteResAdminGetUserList
 
 
 async def service_admin_search_users(
@@ -11,9 +11,7 @@ async def service_admin_search_users(
         authority: bool | None,
         active: bool | None,
         db: Session
-):
-    keyword = f"%{user_name}%"
-
+) -> DomainAdminGetUserItem:
     stmt = (
         select(User)
         .options(selectinload(User.admin))
@@ -23,7 +21,10 @@ async def service_admin_search_users(
     )
 
     if user_name:
-        stmt = stmt.where(User.user_name.ilike(keyword))
+        stmt = (
+            stmt.where(text("MATCH(user_name) AGAINST(:user_name IN BOOLEAN MODE)"))
+                .params(user_name=f"{user_name}*")
+        )
     if authority is not None:
         stmt = stmt.where(User.admin[0].admin_status == authority)
     if active is not None:
@@ -36,7 +37,7 @@ async def service_admin_search_users(
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Users not found")
 
         search_users = [
-            RouteAdminsGetUserItem(
+            DomainAdminGetUserItem(
                 user_id=user.id,
                 auth_id=user.auth_id,
                 auth_type=user.auth_type,
@@ -51,15 +52,12 @@ async def service_admin_search_users(
             for user in users
         ]
 
-        response = RouteResAdminGetUserList(
-            data=search_users,
-            count=len(search_users)
-        )
-
+    except HTTPException as e:
+            raise e
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    return response
+    return search_users

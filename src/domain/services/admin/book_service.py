@@ -4,7 +4,6 @@ from sqlalchemy.orm import Session, selectinload
 
 from domain.schemas.admin.book_schema import DomainAdminGetBookItem
 from repositories.models import Book
-from routes.admin.response.book_response import RouteResAdminGetBookList
 
 
 async def service_admin_search_books(
@@ -14,7 +13,7 @@ async def service_admin_search_books(
         publisher: str | None,
         return_status: bool | None,
         db: Session
-):
+) -> DomainAdminGetBookItem:
     stmt = (select(Book).options(selectinload(Book.loans)).where(Book.is_deleted == False,))
 
     if book_title:
@@ -76,11 +75,6 @@ async def service_admin_search_books(
                 )
             )
 
-        response = RouteResAdminGetBookList(
-            data=search_books,
-            count=len(search_books)
-        )
-
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -89,4 +83,4 @@ async def service_admin_search_books(
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    return response
+    return search_books

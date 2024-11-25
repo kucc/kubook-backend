@@ -49,7 +49,12 @@ async def search_books(
         db=db
     )
 
-    return response
+    result = RouteResAdminGetBookList(
+            data=response,
+            count=len(response)
+    )
+
+    return result
 
 
 @router.get(
@@ -63,12 +68,12 @@ async def get_all_books(
     current_user=Depends(get_current_admin)
 ):
     response = await service_admin_search_books(
-        book_title="",
-        category_name="",
-        author="",
-        publisher="",
-        return_status=None,
         db=db
     )
 
-    return response
+    result = RouteResAdminGetBookList(
+            data=response,
+            count=len(response)
+    )
+
+    return result
