@@ -38,7 +38,9 @@ async def get_book_by_book_id(
         major=domain_res.major,
         language=domain_res.language,
         donor_name=domain_res.donor_name,
-        book_status=domain_res.book_status
+        book_status=domain_res.book_status,
+        created_at=domain_res.created_at,
+        updated_at=domain_res.updated_at
     )
 
     return result

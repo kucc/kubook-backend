@@ -11,7 +11,7 @@ from domain.schemas.bookrequest_schemas import (
 from domain.services.bookrequest_service import (
     service_create_bookrequest,
     service_delete_bookrequest,
-    service_read_bookrequest,
+    service_read_bookrequest_list,
     service_update_bookrequest,
 )
 from routes.request.bookrequest_request import RouteReqPostBookRequest, RouteReqPutBookRequest
@@ -68,7 +68,7 @@ async def get_user_bookrequests(
     db: Session = Depends(get_db), current_user=Depends(get_current_active_user)
 ):
     domain_req = DomainReqGetBookRequest(user_id=current_user.id)
-    domain_res = await service_read_bookrequest(domain_req, db)
+    domain_res = await service_read_bookrequest_list(domain_req, db)
     converted_res = [
         RouteResBookRequest(
             user_id=item.user_id,

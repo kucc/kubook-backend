@@ -25,7 +25,7 @@ async def service_search_books(searching_keyword: str, page: int, limit: int, db
                 ),
             )
         )
-        .order_by(Book.updated_at)
+        .order_by(Book.updated_at.desc())
         .limit(limit)
         .offset(offset)
     )
@@ -81,7 +81,7 @@ async def service_read_book(request_data: DomainReqGetBook, db: Session):
         donor_name=book.donor_name,
         book_status=book.book_status,
         created_at=book.created_at,
-        updated_at=book.updated_at,
+        updated_at=book.updated_at
     )
     return response
 
@@ -93,7 +93,7 @@ async def service_read_books(page: int, limit: int, db: Session):
         .where(
             Book.is_deleted == False
         )
-        .order_by(Book.updated_at)
+        .order_by(Book.updated_at.desc())
         .limit(limit)
         .offset(offset)
     )
