@@ -2,6 +2,7 @@ from datetime import date
 
 from fastapi import Depends, Header, HTTPException, status
 from jose import ExpiredSignatureError, JWTError, jwt
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from config import Settings
@@ -28,7 +29,8 @@ async def get_current_user(token=Header(None), db: Session = Depends(get_db)):
         user_id: int = int(payload.get("sub"))
         if user_id is None:
             raise credentials_exception
-        user = db.query(User).filter(User.id == user_id).first()
+        stmt = select(User).where(User.id == user_id)
+        user = db.execute(stmt).scalar_one()
         if user is None:
             raise credentials_exception
         return user
