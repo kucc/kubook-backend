@@ -1,7 +1,8 @@
 from datetime import date
 
 from fastapi import Depends, Header, HTTPException, status
-from jose import jwt
+from jose import ExpiredSignatureError, JWTError, jwt
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from config import Settings
@@ -23,14 +24,26 @@ async def get_current_user(token=Header(None), db: Session = Depends(get_db)):
         detail="Invalid credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    payload = jwt.decode(token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
-    user_id: int = int(payload.get("sub"))
-    if user_id is None:
-        raise credentials_exception
-    user = db.query(User).filter(User.id == user_id).first()
-    if user is None:
-        raise credentials_exception
-    return user
+    try:
+        payload = jwt.decode(token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
+        user_id: int = int(payload.get("sub"))
+        if user_id is None:
+            raise credentials_exception
+        stmt = select(User).where(User.id == user_id)
+        user = db.execute(stmt).scalar_one()
+        if user is None:
+            raise credentials_exception
+        return user
+    except ExpiredSignatureError as err:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has expired",
+        ) from err
+    except JWTError as err:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid token",
+        ) from err
 
 
 def get_current_active_user(user: User = Depends(get_current_user)):
