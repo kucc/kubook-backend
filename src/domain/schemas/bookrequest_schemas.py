@@ -51,7 +51,7 @@ class DomainResBookRequest(BaseModel):
     request_date: date = Field(title="request_date", description="요청 일자", example=date.today())
     reject_reason: str | None = Field(None, title="reject_reason", description="거절 사유", example="Not available")
 
-class DomainResAdminBookRequest(BaseModel):
+class DomainResAdminGetBookRequest(BaseModel):
     data: list[DomainResBookRequest]
     count: int
 
