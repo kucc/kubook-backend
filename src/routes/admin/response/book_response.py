@@ -3,6 +3,13 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
+from domain.schemas.book_schemas import DomainAdminGetBookItem
+
+
+class RouteResAdminGetBookList(BaseModel):
+    data: list[DomainAdminGetBookItem]
+    count: int
+
 
 class RouteResAdminPostBook(BaseModel):
   book_id: int = Field(title="book_id", description="책 ID", gt=0)
@@ -39,3 +46,4 @@ class RouteResAdminPutBook(BaseModel):
   donor_name: Optional[str] = Field(title="donor_name", description="기부자명", default=None)
   created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
   updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
+
