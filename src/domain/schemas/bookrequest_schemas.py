@@ -54,3 +54,8 @@ class DomainResBookRequest(BaseModel):
 class DomainResAdminBookRequest(BaseModel):
     data: list[DomainResBookRequest]
     count: int
+
+class DomainReqAdminPutBookRequest(BaseModel):
+    request_id: int = Field(title="book_request_id", description="도서 구매 요청 정보 id", example=1, gt=0)
+    processing_status: int = Field(0, title="processing_status", description="처리 상태", example=0, ge=0, le=3)
+    reject_reason: str | None = Field(None, title="reject_reason", description="거절 사유", example="Not available")
