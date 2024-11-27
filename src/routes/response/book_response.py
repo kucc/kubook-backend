@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from pydantic import BaseModel, Field
 
 from domain.schemas.book_schemas import DomainResGetBookList
@@ -25,5 +23,4 @@ class RouteResGetBook(BaseModel):
     language: str = Field(title="language", description="언어", example="영문")
     donor_name: str | None = Field(title="donor_name", description="책 기증자 성함", example="김철수")
     book_status: bool = Field(title="book_stauts", description="책 상태", example=True)
-    created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
-    updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
+
