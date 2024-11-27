@@ -65,7 +65,7 @@ async def service_admin_update_bookrequest(db:Session, request: DomainReqAdminPu
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Invalid processing status"
       )
-    if request.processing_status == BookRequestStatus.REJECTED and request.reject_reason is None:
+    if request.processing_status == BookRequestStatus.REJECTED.value and not request.reject_reason:
       raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Reject reason is missed"
