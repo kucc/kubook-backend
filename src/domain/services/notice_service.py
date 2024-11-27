@@ -20,7 +20,8 @@ async def service_read_notices(page: int, limit: int, db: Session):
     try:
         notices = db.execute(stmt).scalars().all()
         total=len(db.execute(stmt).scalars().all())
-
+        if total < offset:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Requested page is out of range")
         if not notices:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notices not found")
         elif not total:
@@ -37,6 +38,8 @@ async def service_read_notices(page: int, limit: int, db: Session):
         )
         for notice in notices
     ]
+    except HTTPException as e:
+        raise e
 
     except Exception as e:
         raise HTTPException(

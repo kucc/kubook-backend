@@ -28,12 +28,13 @@ async def service_admin_read_notices(page: int, limit: int, db: Session):
     try:
         notices = db.execute(stmt).scalars().all()
         total=len(db.execute(count_stmt).scalars().all())
-        if not notices:
+        if total < offset:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Requested page is out of range")
+        elif not notices:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notices not found")
         elif not total:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Fetch incorrect total value")
-        elif total < offset:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Requested page is out of range")
+
         response = [
             DomainResAdminGetNotice(
                 notice_id=notice.id,
@@ -45,7 +46,8 @@ async def service_admin_read_notices(page: int, limit: int, db: Session):
             )
             for notice in notices
         ]
-
+    except HTTPException as e:
+        raise e
 
     except Exception as e:
         raise HTTPException(
