@@ -14,7 +14,6 @@ from routes.loan_route import router as loan_router
 from routes.notice_route import router as notice_router
 from routes.user_route import router as user_router
 
-
 settings = Settings()
 
 app = FastAPI(
