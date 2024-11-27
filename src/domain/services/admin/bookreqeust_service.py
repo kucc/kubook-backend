@@ -4,7 +4,12 @@ from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from domain.schemas.bookrequest_schemas import DomainResAdminBookRequest, DomainResBookRequest
+from domain.enums.status import BookRequestStatus
+from domain.schemas.bookrequest_schemas import (
+    DomainReqAdminPutBookRequest,
+    DomainResAdminGetBookRequest,
+    DomainResBookRequest,
+)
 from repositories.models import RequestedBook
 
 
@@ -37,7 +42,7 @@ async def service_admin_read_bookreqeust(db: Session, page: int, limit: int):
       reject_reason=book.reject_reason
     ) for book in bookrequest]
 
-    response = DomainResAdminBookRequest(
+    response = DomainResAdminGetBookRequest(
       data=result,
       count=total_count
     )
