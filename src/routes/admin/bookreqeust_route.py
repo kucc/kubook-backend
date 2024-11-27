@@ -33,6 +33,7 @@ async def admin_read_bookRequest(
 @router.put(
   "/{request_id}",
   response_model=RouteResAdminPutBookRequest,
+  status_code=status.HTTP_200_OK,
   summary="관리자 도서 구매 요청 상태 수정"
 )
 async def admin_update_bookrequest(
