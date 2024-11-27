@@ -13,7 +13,8 @@ async def service_admin_read_bookreqeust(db: Session, page: int, limit: int):
     stmt = (select(RequestedBook).where(RequestedBook.is_deleted==False).order_by(RequestedBook.updated_at.desc())
                   .limit(limit).offset(offset))
     bookrequest = db.execute(stmt).scalars().all()
-    total_count = db.execute(select(func.count()).select_from(RequestedBook).where(RequestedBook.is_deleted==False))
+    total_count = db.execute(select(func.count()).select_from(RequestedBook)
+                             .where(RequestedBook.is_deleted==False)).scalar()
     if offset>=total_count:
       raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
