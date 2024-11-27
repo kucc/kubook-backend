@@ -60,7 +60,7 @@ async def service_admin_update_bookrequest(db:Session, request: DomainReqAdminPu
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Not found"
       )
-    if request.processing_status not in {processing_status.name for processing_status in BookRequestStatus}:
+    if request.processing_status not in {processing_status.value for processing_status in BookRequestStatus}:
       raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Invalid processing status"
