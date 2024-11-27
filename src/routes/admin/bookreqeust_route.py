@@ -12,6 +12,7 @@ router = APIRouter(
 )
 
 @router.get(
+  "",
   response_model= RouteResAdminGetBookReqeustList,
   status_code = status.HTTP_200_OK,
   summary="관리자 도서 구매 요청 목록 조회"
