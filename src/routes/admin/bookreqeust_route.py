@@ -36,10 +36,10 @@ async def admin_read_bookRequest(
   summary="관리자 도서 구매 요청 상태 수정"
 )
 async def admin_update_bookrequest(
-  db: Session,
   request_id: int,
-  processing_status: int,
-  reason: str | None
+  processing_status: int = Query(0, ge=0, le=3),
+  reason: str | None = Query(None),
+  db: Session = Depends(get_db)
 ):
     domain_req = DomainReqAdminPutBookRequest(
       request_id = request_id,
