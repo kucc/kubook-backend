@@ -16,7 +16,7 @@ from domain.schemas.bookrequest_schemas import (
 from repositories.models import RequestedBook
 
 
-async def service_admin_read_bookreqeust(db: Session, page: int, limit: int):
+async def service_admin_read_bookrequest(db: Session, page: int, limit: int):
     offset = (page-1)*limit
     stmt = (select(RequestedBook).where(RequestedBook.is_deleted==False).order_by(RequestedBook.updated_at.desc())
                   .limit(limit).offset(offset))
