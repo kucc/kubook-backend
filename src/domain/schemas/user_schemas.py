@@ -25,3 +25,5 @@ class DomainResPutUser(BaseModel):
     github: str | None = Field(None, title="github", description="깃허브 주소", example="https://github.com/kucc")
     instagram: str | None = Field(None, title="instagram", description="인스타그램 주소", example="https://www.instagram.com/")
 
+class DomainReqAdminDelUser(BaseModel):
+    user_id: int = Field(title="user_id", description="유저 고유 ID", example=1111, gt=0)
