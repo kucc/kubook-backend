@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_current_admin, get_db
@@ -18,11 +18,13 @@ router = APIRouter(
   summary="관리자 도서 구매 요청 목록 조회"
 )
 async def admin_read_bookreqeust(
-  db: Session = Depends(get_db)
+  db: Session = Depends(get_db),
+  page: int = Query(1, gt=0),
+  limit: int = Query(10, gt=0),
 ):
-    domain_result = await service_admin_read_bookreqeust(db)
+    domain_result = await service_admin_read_bookreqeust(db=db, page=page, limit=limit)
     result = RouteResAdminGetBookReqeustList(
-      data=domain_result,
-      count=len(domain_result)
+      data=domain_result.data,
+      count=domain_result.count
     )
     return result
