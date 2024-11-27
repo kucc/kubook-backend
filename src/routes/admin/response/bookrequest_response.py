@@ -3,6 +3,8 @@ from datetime import date
 
 from pydantic import BaseModel, Field
 
+from domain.schemas.bookrequest_schemas import DomainResBookRequest
+
 
 class RouteResAdminGetBookReqeust(BaseModel):
     user_id: int = Field(title="user_id", description="도서 구매를 요청한 사용자 ID", example=1, gt=0)
@@ -16,5 +18,5 @@ class RouteResAdminGetBookReqeust(BaseModel):
     reject_reason: str | None = Field(None, title="reject_reason", description="거절 사유", example="Not available")
 
 class RouteResAdminGetBookReqeustList(BaseModel):
-    data: list[RouteResAdminGetBookReqeust]
+    data: list[DomainResBookRequest]
     count: int
