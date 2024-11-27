@@ -1,3 +1,5 @@
+from math import ceil
+
 from fastapi import HTTPException, status
 from sqlalchemy import and_, func, select
 from sqlalchemy.orm.session import Session
@@ -10,6 +12,7 @@ from domain.schemas.notice_schemas import (
     DomainResAdminPutNotice,
 )
 from repositories.models import Notice
+from utils.crud_utils import delete_item
 
 
 async def service_admin_read_notices(page: int, limit: int, db: Session):
@@ -23,7 +26,7 @@ async def service_admin_read_notices(page: int, limit: int, db: Session):
     try:
 
         total=db.execute(total_stmt).scalar()
-        if total < page*limit:
+        if ceil(total/limit) <page:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Requested page is out of range")
 
         notices = db.execute(stmt).scalars().all()
@@ -144,3 +147,6 @@ async def service_admin_update_notice(notice_id: int, request: DomainReqAdminPut
         )
     return domain_res
 
+async def service_admin_delete_notice(notice_id: int, db: Session):
+    delete_item(Notice, notice_id, db)
+    return
