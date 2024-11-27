@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_current_admin, get_db
-from domain.services.admin.book_service import service_admin_search_books
+from domain.services.admin.book_service import service_admin_read_books, service_admin_search_books
 from routes.admin.response.book_response import RouteResAdminGetBookList
 
 router = APIRouter(
@@ -67,7 +67,7 @@ async def get_all_books(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_admin)
 ):
-    response = await service_admin_search_books(
+    response = await service_admin_read_books(
         db=db
     )
 

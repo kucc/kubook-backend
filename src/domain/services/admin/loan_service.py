@@ -1,8 +1,8 @@
 from fastapi import HTTPException, status
 from sqlalchemy import select, text
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
-from domain.schemas.admin.loan_schema import DomainAdminGetLoanItem
+from domain.schemas.loan_schemas import DomainAdminGetLoanItem
 from repositories.models import Loan
 
 
@@ -68,6 +68,54 @@ async def service_admin_search_loans(
 
     except HTTPException as e:
             raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error occurred during retrieve: {str(e)}",
+        ) from e
+
+    return search_loans
+
+
+async def service_admin_read_loans(db: Session) -> list[DomainAdminGetLoanItem]:
+    stmt = (
+        select(Loan)
+        .options(
+            selectinload(Loan.user),
+            selectinload(Loan.book)
+        )
+        .where(
+            Loan.is_deleted == False
+        )
+    )
+
+    try:
+        loans = db.execute(stmt.order_by(Loan.updated_at.desc())).scalars().all()
+
+        if not loans:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Books not found")
+
+        search_loans = [
+            DomainAdminGetLoanItem(
+                loan_id=loan.id,
+                book_id=loan.book_id,
+                user_id=loan.user_id,
+                user_name=loan.user.user_name,
+                code=loan.book.code,
+                book_title=loan.book.book_title,
+                loan_date=loan.loan_date,
+                due_date=loan.due_date,
+                extend_status=loan.extend_status,
+                return_status=loan.return_status,
+                return_date=loan.return_date,
+                created_at=loan.created_at,
+                updated_at=loan.updated_at,
+            )
+            for loan in loans
+        ]
+
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

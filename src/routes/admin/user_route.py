@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_current_admin, get_db
-from domain.services.admin.user_service import service_admin_search_users
+from domain.services.admin.user_service import service_admin_read_users, service_admin_search_users
 from routes.admin.response.user_response import RouteResAdminGetUserList
 
 router = APIRouter(
@@ -58,7 +58,7 @@ async def get_all_users(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_admin)
 ):
-    response = await service_admin_search_users(
+    response = await service_admin_read_users(
         db=db
     )
 

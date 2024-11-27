@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_current_admin, get_db
-from domain.services.admin.loan_service import service_admin_search_loans
+from domain.services.admin.loan_service import service_admin_read_loans, service_admin_search_loans
 from routes.admin.response.loan_response import RouteResAdminGetLoanList
 
 router = APIRouter(
@@ -62,7 +62,7 @@ async def get_all_loans(
     db: Session = Depends(get_db),
     current_user=Depends(get_current_admin)
 ):
-    response = await service_admin_search_loans(
+    response = await service_admin_read_loans(
         db = db
     )
 
