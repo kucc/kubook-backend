@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy import and_, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.orm.session import Session
 
 from domain.schemas.notice_schemas import DomainResGetNotice
@@ -10,22 +10,18 @@ async def service_read_notices(page: int, limit: int, db: Session):
 
     offset=(page-1)*limit
 
-    stmt =(select(Notice)
-           .where(Notice.is_deleted == False)
-           .order_by(Notice.created_at.desc())
-           .limit(limit)
-           .offset(offset)
-           )
+    count_stmt=select(Notice).where(Notice.is_deleted == False)
+    total_stmt=count_stmt.with_only_columns(func.count(Notice.id))
+    stmt = count_stmt.order_by(Notice.created_at.desc()).limit(limit).offset(offset)
 
     try:
-        notices = db.execute(stmt).scalars().all()
-        total=len(db.execute(stmt).scalars().all())
-        if total < offset:
+        total=db.execute(total_stmt).scalar()
+        if total < page*limit:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Requested page is out of range")
+
+        notices = db.execute(stmt).scalars().all()
         if not notices:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Notices not found")
-        elif not total:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Fetch incorrect total value")
 
         response = [
         DomainResGetNotice(
