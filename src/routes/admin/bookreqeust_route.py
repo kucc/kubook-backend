@@ -49,7 +49,7 @@ async def admin_update_bookrequest(
     domain_res = await service_admin_update_bookrequest(db=db, request=domain_req)
     result = RouteResAdminPutBookReqeust(
       user_id=domain_res.user_id,
-      reqeust_id=domain_res.reqeust_id,
+      request_id=domain_res.request_id,
       book_title=domain_res.book_title,
       publication_year=domain_res.publication_year,
       request_link=domain_res.request_link,
