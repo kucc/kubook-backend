@@ -9,7 +9,7 @@ from routes.admin.response.book_response import RouteResAdminGetBookList
 
 router = APIRouter(
     prefix="/admin/books",
-    tags=["admin"],
+    tags=["admin/books"],
     dependencies=[Depends(get_current_admin)]
 )
 

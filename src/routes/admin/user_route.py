@@ -9,7 +9,7 @@ from routes.admin.response.user_response import RouteResAdminGetUserList
 
 router = APIRouter(
     prefix="/admin/users",
-    tags=["admin"],
+    tags=["admin/users"],
     dependencies=[Depends(get_current_admin)]
 )
 

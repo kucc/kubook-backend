@@ -9,7 +9,7 @@ from routes.admin.response.loan_response import RouteResAdminGetLoanList
 
 router = APIRouter(
     prefix="/admin/loans",
-    tags=["admin"],
+    tags=["admin/loans"],
     dependencies=[Depends(get_current_admin)]
 )
 
