@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from domain.schemas.admin.user_schema import DomainAdminGetUserItem
+from domain.schemas.user_schemas import DomainAdminGetUserItem
 
 
 class RouteResAdminGetUserList(BaseModel):

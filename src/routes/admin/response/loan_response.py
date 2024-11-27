@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from domain.schemas.admin.loan_schema import DomainAdminGetLoanItem
+from domain.schemas.loan_schemas import DomainAdminGetLoanItem
 
 
 class RouteResAdminGetLoanList(BaseModel):

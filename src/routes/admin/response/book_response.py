@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from domain.schemas.admin.book_schema import DomainAdminGetBookItem
+from domain.schemas.book_schemas import DomainAdminGetBookItem
 
 
 class RouteResAdminGetBookList(BaseModel):
