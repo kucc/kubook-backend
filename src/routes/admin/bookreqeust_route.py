@@ -38,13 +38,13 @@ async def admin_read_bookRequest(
 async def admin_update_bookrequest(
   request_id: int,
   processing_status: int = Query(0, ge=0, le=3),
-  reason: str | None = Query(None),
+  reject_reason: str | None = Query(None),
   db: Session = Depends(get_db)
 ):
     domain_req = DomainReqAdminPutBookRequest(
       request_id = request_id,
       processing_status = processing_status,
-      reason = reason
+      reject_reason = reject_reason
     )
     domain_res = await service_admin_update_bookrequest(db=db, request=domain_req)
     result = RouteResAdminPutBookRequest(
