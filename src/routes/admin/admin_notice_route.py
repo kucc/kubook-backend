@@ -5,6 +5,7 @@ from dependencies import get_current_admin, get_db
 from domain.schemas.notice_schemas import DomainReqAdminPostNotice, DomainReqAdminPutNotice
 from domain.services.admin.notice_service import (
     service_admin_create_notice,
+    service_admin_delete_notice,
     service_admin_read_notice,
     service_admin_read_notices,
     service_admin_update_notice,
@@ -128,3 +129,16 @@ async def update_notice(
     )
 
     return response
+
+@router.delete(
+    "/{notice_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="공지사항 삭제",
+)
+async def delete_notice(
+    notice_id: int,
+    db: Session=Depends(get_db),
+    current_user=Depends(get_current_admin)
+):
+    await service_admin_delete_notice(notice_id, db)
+    return

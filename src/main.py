@@ -4,13 +4,11 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from config import Settings
-
 from routes.admin.admin_books_route import router as admin_books_router
 from routes.admin.admin_notice_route import router as admin_notice_router
 from routes.admin.book_route import router as admin_book_router
 from routes.admin.loan_route import router as admin_loan_router
 from routes.admin.user_route import router as admin_user_router
-
 from routes.authentication_route import router as auth_router
 from routes.book_review_route import router as review_router
 from routes.bookrequest_route import router as bookrequest_router
