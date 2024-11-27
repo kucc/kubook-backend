@@ -67,7 +67,7 @@ async def get_all_user_reviews(
 @router.post(
     "",
     response_model=DomainResPostReview,
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_201_CREATED,
     summary="리뷰 작성"
 )
 async def create_review(

@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_current_active_user, get_db
-from domain.services.notice_service import service_read_notices, service_read_notice
+from domain.services.notice_service import service_read_notice, service_read_notices
 from routes.response.notice_response import RouteResGetNotice, RouteResGetNoticeList
 
 router=APIRouter(
@@ -19,14 +19,15 @@ router=APIRouter(
     )
 
 async def get_all_notices(
-    page: int = Query(7, ge=1),
-    limit: int = Query(10, le=50),
+    page: int = Query(1, ge=1),
+    limit: int = Query(7, le=50),
     db: Session=Depends(get_db),
     current_user=Depends(get_current_active_user)
 ):
-    domain_res = await service_read_notices(page, limit, db)
+    domain_res, total = await service_read_notices(page, limit, db)
     response = RouteResGetNoticeList(
         data=domain_res,
+        total=total,
         count=len(domain_res)
     )
 
