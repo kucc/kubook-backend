@@ -3,9 +3,13 @@ from sqlalchemy.orm import Session
 
 from dependencies import get_current_admin, get_db
 from domain.schemas.bookrequest_schemas import DomainReqAdminPutBookRequest
-from domain.services.admin.bookrequest_service import service_admin_read_bookrequest, service_admin_update_bookrequest
+from domain.services.admin.bookrequest_service import (
+    service_admin_delete_bookrequest,
+    service_admin_read_bookrequest,
+    service_admin_update_bookrequest,
+)
+from routes.admin.request.bookrequest_request import RouteReqAdminPutBookRequest
 from routes.admin.response.bookrequest_response import RouteResAdminGetBookRequestList, RouteResAdminPutBookRequest
-from src.routes.admin.request.bookrequest_request import RouteReqAdminPutBookRequest
 
 router = APIRouter(
     prefix="/admin/book-requests",
@@ -60,3 +64,15 @@ async def admin_update_bookrequest(
       reject_reason=domain_res.reject_reason
     )
     return result
+
+@router.delete(
+  "/{request_id}",
+  status_code=status.HTTP_204_NO_CONTENT,
+  summary="관리자 도서 구매 요청 삭제"
+)
+async def admin_delete_bookrequest(
+  request_id: int,
+  db: Session = Depends(get_db)
+):
+    await service_admin_delete_bookrequest(request_id=request_id, db=db)
+    return
