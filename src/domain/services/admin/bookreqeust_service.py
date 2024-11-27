@@ -1,17 +1,24 @@
 
 
 from fastapi import HTTPException, status
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from domain.schemas.bookrequest_schemas import DomainResBookRequest
+from domain.schemas.bookrequest_schemas import DomainResAdminBookRequest, DomainResBookRequest
 from repositories.models import RequestedBook
 
 
-async def service_admin_read_bookreqeust(db: Session):
-    stmt = select(RequestedBook).where(RequestedBook.is_deleted==False).order_by(RequestedBook.updated_at.desc())
+async def service_admin_read_bookreqeust(db: Session, page: int, limit: int):
+    offset = (page-1)*limit
+    stmt = (select(RequestedBook).where(RequestedBook.is_deleted==False).order_by(RequestedBook.updated_at.desc())
+                  .limit(limit).offset(offset))
     bookrequest = db.execute(stmt).scalars().all()
-
+    total_count = db.execute(select(func.count()).select_from(RequestedBook).where(RequestedBook.is_deleted==False))
+    if offset>=total_count:
+      raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Page is out of range"
+      )
     if not bookrequest:
       raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
@@ -29,4 +36,8 @@ async def service_admin_read_bookreqeust(db: Session):
       reject_reason=book.reject_reason
     ) for book in bookrequest]
 
-    return result
+    response = DomainResAdminBookRequest(
+      data=result,
+      count=total_count
+    )
+    return response
