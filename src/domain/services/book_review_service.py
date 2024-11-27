@@ -1,6 +1,7 @@
 from datetime import datetime as _datetime
 
 from fastapi import HTTPException, status
+from msgspec import json
 from sqlalchemy import and_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
@@ -29,25 +30,26 @@ async def service_read_reviews_by_book_id(book_id, db: Session):
         if not reviews:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reviews not found")
 
-        response = [
+        result = [
             DomainResGetReviewByInfoId(
                 review_id=review.id,
                 user_id=review.user_id,
                 user_name=review.user.user_name,
                 review_content=review.review_content,
                 created_at=review.created_at,
-                updated_at=review.updated_at,
+                updated_at=review.updated_at
             )
             for review in reviews
         ]
 
+        #response = json.encode(result)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    return response
+    return result
 
 
 async def service_read_reviews_by_user_id(user_id, db: Session):

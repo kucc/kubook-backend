@@ -1,3 +1,4 @@
+from msgspec import Struct
 from pydantic import BaseModel, Field
 
 from domain.schemas.book_review_schemas import DomainResGetReviewByInfoId, DomainResGetReviewItem
@@ -15,6 +16,7 @@ class RouteResGetReviewList(BaseModel):
     count: int = Field(description="data 배열의 요소 개수")
 
 
-class RouteResGetReviewListByInfoId(BaseModel):
+class RouteResGetReviewListByInfoId(Struct):
     data: list[DomainResGetReviewByInfoId]
-    count: int = Field(description="data 배열의 요소 개수")
+    count: int
+    #= Field(description="data 배열의 요소 개수")

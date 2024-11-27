@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, status, Response
 from sqlalchemy.orm import Session
 
 from dependencies import get_current_active_user, get_db
@@ -17,6 +17,8 @@ from domain.services.book_review_service import (
 )
 from routes.request.book_review_request import RouteReqPostReview, RouteReqPutReview
 from routes.response.book_review_response import RouteResGetReviewList, RouteResGetReviewListByInfoId
+from msgspec import json
+from domain.schemas.book_review_schemas import DomainResGetReviewByInfoId
 
 router = APIRouter(
     prefix="/reviews",
@@ -27,7 +29,7 @@ router = APIRouter(
 
 @router.get(
     "/",
-    response_model=RouteResGetReviewListByInfoId,
+    response_model=None,
     status_code=status.HTTP_200_OK,
     summary="책에 대한 리뷰 조회"
 )
@@ -35,15 +37,16 @@ async def get_all_reviews_by_book_id(
     book_id: int = Query(alias="books"),
     db: Session = Depends(get_db),
     current_user=Depends(get_current_active_user)
-):
+) -> RouteResGetReviewListByInfoId:
     domain_res = await service_read_reviews_by_book_id(book_id, db)
-
+    #decoded_res = json.decode(domain_res, type=DomainResGetReviewByInfoId)
     result = RouteResGetReviewListByInfoId(
         data=domain_res,
         count=len(domain_res)
     )
+    encoded_result = json.encode(result)
+    return Response(content=encoded_result, media_type="application/json")
 
-    return result
 
 @router.get(
     "/list",
