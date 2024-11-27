@@ -4,8 +4,8 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from domain.schemas.bookrequest_schemas import DomainResBookRequest
 from repositories.models import RequestedBook
-from src.domain.schemas.bookrequest_schemas import DomainResBookRequest
 
 
 async def service_admin_read_bookreqeust(db: Session):
