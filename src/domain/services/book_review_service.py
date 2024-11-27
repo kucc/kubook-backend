@@ -12,7 +12,7 @@ from domain.schemas.book_review_schemas import (
     DomainResGetReviewItem,
     DomainResPostReview,
 )
-from repositories.models import BookReview, User
+from repositories.models import Book, BookReview, User
 from utils.crud_utils import delete_item, get_item
 
 
@@ -99,7 +99,7 @@ async def service_delete_review(review_id, user_id, db: Session):
 
 
 async def service_create_review(request: DomainReqPostReview, db: Session):
-    valid_book = get_item(BookReview, request.book_id, db)
+    valid_book = get_item(Book, request.book_id, db)
 
     if not valid_book:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid book info ID")

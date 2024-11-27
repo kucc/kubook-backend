@@ -118,7 +118,7 @@ async def service_read_bookrequest_list(request_data: DomainReqGetBookRequest, d
     stmt = (
         select(RequestedBook)
         .where(and_(RequestedBook.user_id == request_data.user_id, RequestedBook.is_deleted == False))
-        .order_by(RequestedBook.updated_at.desc)
+        .order_by(RequestedBook.updated_at.desc())
     )
     try:
         requested_book_list = db.scalars(stmt).all()
