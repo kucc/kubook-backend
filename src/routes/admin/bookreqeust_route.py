@@ -5,6 +5,7 @@ from dependencies import get_current_admin, get_db
 from domain.schemas.bookrequest_schemas import DomainReqAdminPutBookRequest
 from domain.services.admin.bookrequest_service import service_admin_read_bookrequest, service_admin_update_bookrequest
 from routes.admin.response.bookrequest_response import RouteResAdminGetBookRequestList, RouteResAdminPutBookRequest
+from src.routes.admin.request.bookrequest_request import RouteReqAdminPutBookRequest
 
 router = APIRouter(
     prefix="/admin/book-requests",
@@ -38,14 +39,13 @@ async def admin_read_bookRequest(
 )
 async def admin_update_bookrequest(
   request_id: int,
-  processing_status: int = Query(0, ge=0, le=3),
-  reject_reason: str | None = Query(None),
+  request: RouteReqAdminPutBookRequest,
   db: Session = Depends(get_db)
 ):
     domain_req = DomainReqAdminPutBookRequest(
       request_id = request_id,
-      processing_status = processing_status,
-      reject_reason = reject_reason
+      processing_status = request.processing_status,
+      reject_reason = request.reject_reason
     )
     domain_res = await service_admin_update_bookrequest(db=db, request=domain_req)
     result = RouteResAdminPutBookRequest(
