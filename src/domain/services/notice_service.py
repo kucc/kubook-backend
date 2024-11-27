@@ -1,3 +1,5 @@
+from math import ceil
+
 from fastapi import HTTPException, status
 from sqlalchemy import and_, func, select
 from sqlalchemy.orm.session import Session
@@ -16,7 +18,7 @@ async def service_read_notices(page: int, limit: int, db: Session):
 
     try:
         total=db.execute(total_stmt).scalar()
-        if total < page*limit:
+        if ceil(total/limit) <page:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Requested page is out of range")
 
         notices = db.execute(stmt).scalars().all()
