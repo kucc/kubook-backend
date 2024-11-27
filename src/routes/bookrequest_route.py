@@ -26,7 +26,7 @@ router = APIRouter(
 @router.post(
     "",
     response_model=RouteResPostBookRequest,
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_201_CREATED,
     summary="구매 요청"
 )
 async def create_book_request(
