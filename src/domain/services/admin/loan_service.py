@@ -3,7 +3,7 @@ from datetime import datetime
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from domain.schemas.loan_schemas import DomainResGetLoanItem
+from domain.schemas.loan_schemas import DomainResGetLoan
 from repositories.models import Loan
 from utils.crud_utils import get_item
 
@@ -11,7 +11,7 @@ from utils.crud_utils import get_item
 async def service_admin_toggle_loan_return(
     loan_id: int,
     db: Session
-) -> DomainResGetLoanItem:
+) -> DomainResGetLoan:
     loan = get_item(Loan, loan_id, db)
 
     try:
@@ -36,7 +36,7 @@ async def service_admin_toggle_loan_return(
         db.commit()
         db.refresh(loan)
 
-        result = DomainResGetLoanItem(
+        result = DomainResGetLoan(
             loan_id=loan.id,
             book_id=loan.book_id,
             user_id=loan.user_id,
