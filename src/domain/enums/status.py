@@ -37,18 +37,13 @@ class BookRequestStatus(Enum):
     REJECTED = 3
 
     def __str__(self):
-        if self.value == 0:
-            return "해당 도서 구매 요청은 대기 중입니다."
-        elif self.value == 1:
-            desc = "구매 완료"
-        elif self.value == 2:
-            desc = "신청자 취소"
-        elif self.value == 3:
-            desc = "관리자 반려"
-        else:
-            return "잘못된 도서 구매 요청 상태입니다."
-
-        return f"해당 도서 구매 요청은 {desc}되었습니다."
+        status_descriptions = {
+            0: "해당 도서 구매 요청은 대기 중입니다.",
+            1: "해당 도서 구매 요청은 구매 완료되었습니다.",
+            2: "해당 도서 구매 요청은 신청자 취소되었습니다.",
+            3: "해당 도서 구매 요청은 관리자 반려되었습니다."
+        }
+        return status_descriptions.get(self.value, "잘못된 도서 구매 요청 상태입니다.")
 
     def __call__(self):
         return self.value
@@ -76,3 +71,6 @@ class ExtendStatus(Enum):
     def __call__(self):
         return self.value
 
+
+def is_valid_enum_value(enum: Enum, status) -> bool:
+    return status in enum._member_map.values()
