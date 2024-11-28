@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from dependencies import get_current_active_user, get_db
+from dependencies import get_current_active_user, get_current_user, get_db
 from domain.schemas.bookrequest_schemas import (
     DomainReqDelBookRequest,
     DomainReqGetBookRequest,
@@ -20,13 +20,14 @@ from routes.response.bookrequest_response import RouteResBookRequest, RouteResBo
 router = APIRouter(
     prefix="/book-requests",
     tags=["book-requests"],
-    dependencies=[Depends(get_current_active_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 @router.post(
     "",
     response_model=RouteResPostBookRequest,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(get_current_active_user)],
     summary="구매 요청"
 )
 async def create_book_request(
@@ -60,12 +61,12 @@ async def create_book_request(
 
 @router.get(
     "/my-requests",
-    summary="user의 도서 구매 요청 목록 조회",
+    summary="회원의 도서 구매 요청 목록 조회",
     response_model=RouteResBookRequestList,
     status_code=status.HTTP_200_OK,
 )
 async def get_user_bookrequests(
-    db: Session = Depends(get_db), current_user=Depends(get_current_active_user)
+    db: Session = Depends(get_db), current_user=Depends(get_current_user)
 ):
     domain_req = DomainReqGetBookRequest(user_id=current_user.id)
     domain_res = await service_read_bookrequest_list(domain_req, db)
@@ -90,7 +91,7 @@ async def get_user_bookrequests(
 
 @router.put(
     "/users/{request_id}",
-    summary="user의 도서 구매 요청 수정",
+    summary="회원의 도서 구매 요청 수정",
     response_model=RouteResBookRequest,
     status_code=status.HTTP_200_OK,
 )
@@ -98,7 +99,7 @@ async def update_user_bookrequest(
     request_id: int,
     request_data: RouteReqPutBookRequest,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_active_user),
+    current_user=Depends(get_current_user),
 ):
     domain_req = DomainReqPutBookRequest(
         user_id=current_user.id,
@@ -130,7 +131,7 @@ async def update_user_bookrequest(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_user_bookrequest(
-    request_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_active_user)
+    request_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)
 ) -> None:
     domain_req = DomainReqDelBookRequest(user_id=current_user.id, request_id=request_id)
     await service_delete_bookrequest(domain_req, db)
