@@ -11,7 +11,7 @@ from domain.services.admin.user_service import (
     service_admin_update_user,
 )
 from routes.admin.request.user_request import RouteReqAdminPutUser
-from routes.admin.response.user_response import RouteResAdminGetUser, RouteResAdminGetUserList
+from routes.admin.response.user_response import RouteResAdminGetUserList, RouteResAdminPutUser
 
 router = APIRouter(
     prefix="/admin/users",
@@ -79,7 +79,7 @@ async def get_all_users(
   "/{user_id}",
   summary="관리자의 회원 상태 및 권한 수정",
   status_code=status.HTTP_200_OK,
-  response_model=RouteResAdminGetUser
+  response_model=RouteResAdminPutUser
 )
 async def update_admin_user(
   user_id : int,
@@ -95,7 +95,7 @@ async def update_admin_user(
 
   domain_response = await service_admin_update_user(request=domain_request, db=db)
 
-  response = RouteResAdminGetUser(
+  response = RouteResAdminPutUser(
     user_id=domain_response.user_id,
     auth_id=domain_response.auth_id,
     email=domain_response.email,

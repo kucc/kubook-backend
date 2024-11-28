@@ -9,7 +9,7 @@ class RouteResAdminGetUserList(BaseModel):
     data: list[DomainAdminGetUserItem]
     count: int
 
-class RouteResAdminGetUser(BaseModel):
+class RouteResAdminPutUser(BaseModel):
     user_id: int = Field(title="user_id", description="유저 고유 ID", example=1111, gt=0)
     auth_id: str = Field(title="auth_id", description="로그인 ID", example="gildong1")
     email: str = Field(title="email", description="이메일 주소", example="KUCC@korea.ac.kr")
