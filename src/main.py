@@ -39,7 +39,8 @@ origins = [
     "http://localhost:10242",
     "http://localhost:5173",
     "http://localhost:3000",
-    "https://localhost:8000"
+    "https://localhost:8000",
+    "https://kubook-frontend.vercel.app/"
 ]
 
 app.add_middleware(
