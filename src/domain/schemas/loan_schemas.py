@@ -19,7 +19,7 @@ class Loan(BaseModel):
     return_date: date | None = Field(title="return_date", description="반납 날짜", example=None)
 
 
-class DomianResGetLoanItem(BaseModel):
+class DomainResGetLoanItem(BaseModel):
     loan_id: int = Field(title="loan_id", description="대출 정보 id", example=1, gt=0)
     book_id: int = Field(title="book_id", description="대출한 책 ID", example=1, gt=0)
     user_id: int = Field(title="user_id", description="대출한 사용자 ID", example=1, gt=0)

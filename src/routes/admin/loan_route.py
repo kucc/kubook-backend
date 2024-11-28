@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Path, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_current_admin, get_db
-from domain.schemas.loan_schemas import DomianResGetLoanItem
+from domain.schemas.loan_schemas import DomainResGetLoanItem
 from domain.services.admin.loan_service import service_admin_toggle_loan_return
 
 router = APIRouter(
@@ -16,7 +16,7 @@ router = APIRouter(
 
 @router.put(
     "/return/{loan_id}",
-    response_model=DomianResGetLoanItem,
+    response_model=DomainResGetLoanItem,
     status_code=status.HTTP_200_OK,
     summary="관리자의 대출 반납 상태 수정"
 )
