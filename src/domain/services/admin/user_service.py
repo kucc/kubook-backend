@@ -13,9 +13,10 @@ async def service_admin_update_user(request: DomainReqAdminPutUser, db: Session)
     user_stmt = select(User).where(User.id == request.user_id, User.is_deleted == False)
     try :
         user = db.execute(user_stmt).scalar_one_or_none()
-        if not user :
+
+        if user is None :
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, \
-                                detail="Not found user. Check user_id in request")
+                                detail="Not found user by user_id")
 
         if request.user_status is not None :
             user.is_active = request.user_status
@@ -45,24 +46,26 @@ async def service_admin_update_user(request: DomainReqAdminPutUser, db: Session)
         db.flush()
         db.commit()
 
+    except HTTPException as e:
+        raise e
+
     except Exception as e:
-        if not isinstance(e, HTTPException):
-            db.rollback()
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        db.rollback()
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                 detail=f"Unexpected error occurred during update: {str(e)}") from e
     else :
         db.refresh(user)
 
-    response = DomainResAdminPutUser(
-            user_id=user.id,
-            auth_id=user.auth_id,
-            email=user.email,
-            user_name=user.user_name,
-            is_active=user.is_active,
-            is_admin=True if user.admin[-1].admin_status else False,
-            expiration_date=user.admin[-1].expiration_date if user.admin[-1].admin_status else None
-    )
-    return response
+        response = DomainResAdminPutUser(
+                user_id=user.id,
+                auth_id=user.auth_id,
+                email=user.email,
+                user_name=user.user_name,
+                is_active=user.is_active,
+                is_admin=True if user.admin[-1].admin_status else False,
+                expiration_date=user.admin[-1].expiration_date if user.admin[-1].admin_status else None
+        )
+        return response
 
 
 
