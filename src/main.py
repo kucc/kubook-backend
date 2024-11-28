@@ -5,6 +5,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from config import Settings
 from routes.admin.admin_books_route import router as admin_books_router
+from routes.admin.admin_user_route import router as admin_user_router
 from routes.admin.notice_route import router as admin_notice_router
 from routes.authentication_route import router as auth_router
 from routes.book_review_route import router as review_router
@@ -36,7 +37,8 @@ origins = [
     "http://localhost:10242",
     "http://localhost:5173",
     "http://localhost:3000",
-    "https://localhost:8000"
+    "https://localhost:8000",
+    "https://kubook-frontend.vercel.app/"
 ]
 
 app.add_middleware(
@@ -57,6 +59,7 @@ app.include_router(review_router)
 app.include_router(bookrequest_router)
 app.include_router(admin_notice_router)
 app.include_router(notice_router)
+app.include_router(admin_user_router)
 
 
 @app.exception_handler(StarletteHTTPException)
