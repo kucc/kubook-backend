@@ -57,7 +57,7 @@ async def create_book_request(
 
 
 @router.put(
-    "/users/{request_id}",
+    "/{request_id}",
     summary="user의 도서 구매 요청 수정",
     response_model=RouteResBookRequest,
     status_code=status.HTTP_200_OK,
