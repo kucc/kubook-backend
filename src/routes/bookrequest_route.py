@@ -4,18 +4,16 @@ from sqlalchemy.orm import Session
 from dependencies import get_current_active_user, get_db
 from domain.schemas.bookrequest_schemas import (
     DomainReqDelBookRequest,
-    DomainReqGetBookRequest,
     DomainReqPostBookRequest,
     DomainReqPutBookRequest,
 )
 from domain.services.bookrequest_service import (
     service_create_bookrequest,
     service_delete_bookrequest,
-    service_read_bookrequest_list,
     service_update_bookrequest,
 )
 from routes.request.bookrequest_request import RouteReqPostBookRequest, RouteReqPutBookRequest
-from routes.response.bookrequest_response import RouteResBookRequest, RouteResBookRequestList, RouteResPostBookRequest
+from routes.response.bookrequest_response import RouteResBookRequest, RouteResPostBookRequest
 
 router = APIRouter(
     prefix="/book-requests",
@@ -55,36 +53,6 @@ async def create_book_request(
         processing_status=result.processing_status
     )
 
-    return result
-
-
-@router.get(
-    "/my-requests",
-    summary="user의 도서 구매 요청 목록 조회",
-    response_model=RouteResBookRequestList,
-    status_code=status.HTTP_200_OK,
-)
-async def get_user_bookrequests(
-    db: Session = Depends(get_db), current_user=Depends(get_current_active_user)
-):
-    domain_req = DomainReqGetBookRequest(user_id=current_user.id)
-    domain_res = await service_read_bookrequest_list(domain_req, db)
-    converted_res = [
-        RouteResBookRequest(
-            user_id=item.user_id,
-            request_id=item.request_id,
-            book_title=item.book_title,
-            publication_year=item.publication_year,
-            request_link=item.request_link,
-            reason=item.reason,
-            processing_status=item.processing_status,
-            request_date=item.request_date,
-            reject_reason=item.reject_reason,
-        )
-        for item in domain_res
-    ]
-
-    result = RouteResBookRequestList(data=converted_res, count=len(converted_res))
     return result
 
 
