@@ -1,11 +1,11 @@
-from datetime import datetime as _datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from fastapi import HTTPException, status
 from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
 from domain.schemas.loan_schemas import DomainReqPostLoan, DomainReqPutLoan, DomainResGetLoan
+
 from repositories.models import Book, Loan
 from utils.crud_utils import get_item
 
@@ -58,7 +58,7 @@ async def service_extend_loan(request: DomainReqPutLoan, db: Session):
     try:
         loan.due_date += timedelta(days=7)
         loan.extend_status = True
-        loan.updated_at = _datetime.now()
+        loan.updated_at = datetime.now()
 
         db.flush()
 
@@ -99,12 +99,18 @@ async def service_create_loan(request: DomainReqPostLoan, db: Session):
 
     loan = Loan(
         book_id=request.book_id,
-        user_id=request.user_id,
-        loan_date=_datetime.today().date(),
-        due_date=(_datetime.today() + timedelta(days=14)).date(),
-        created_at=_datetime.now(),
-        updated_at=_datetime.now(),
+        user_id=request.user_id, # user_id is inserted at the route level by extracting the user_id from the token
+        loan_date=datetime.today().date(),
+        due_date=(datetime.today() + timedelta(days=14)).date(),
+        created_at=datetime.now(),
+        updated_at=datetime.now(),
+        extend_status=False, # default
+        return_status=False, # default
+        return_date=None, # default
+        overdue_days=0, # default
+        is_deleted=False, # default
     )
+
 
     try:
         db.add(loan)
