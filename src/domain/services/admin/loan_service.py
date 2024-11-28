@@ -9,7 +9,7 @@ from utils.crud_utils import get_item
 
 
 async def service_admin_toggle_loan_return(
-    loan_id,
+    loan_id: int,
     db: Session
 ) -> DomainResGetLoanItem:
     loan = get_item(Loan, loan_id, db)
