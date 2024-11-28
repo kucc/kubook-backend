@@ -45,8 +45,10 @@ class BookRequestStatus(Enum):
             desc = "신청자 취소"
         elif self.value == 3:
             desc = "관리자 반려"
+        else:
+            return "잘못된 도서 구매 요청 상태입니다."
 
-        return f"해당 도서 구매 요청은 {desc} 되었습니다."
+        return f"해당 도서 구매 요청은 {desc}되었습니다."
 
     def __call__(self):
         return self.value
