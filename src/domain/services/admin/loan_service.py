@@ -8,7 +8,10 @@ from repositories.models import Loan
 from utils.crud_utils import get_item
 
 
-async def service_admin_toggle_loan(loan_id, db: Session):
+async def service_admin_toggle_loan_return(
+        loan_id,
+        db: Session
+) -> DomianResGetLoanItem:
     loan = get_item(Loan, loan_id, db)
 
     try:

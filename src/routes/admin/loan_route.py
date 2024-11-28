@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from dependencies import get_current_admin, get_db
 from domain.schemas.loan_schemas import DomianResGetLoanItem
-from domain.services.admin.loan_service import service_admin_toggle_loan
+from domain.services.admin.loan_service import service_admin_toggle_loan_return
 
 router = APIRouter(
     prefix="/admin/loans",
@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 @router.put(
-    "/{loan_id}/toggle",
+    "/return/{loan_id}",
     response_model=DomianResGetLoanItem,
     status_code=status.HTTP_200_OK,
     summary="관리자의 대출 반납 상태 수정"
@@ -25,6 +25,6 @@ async def toggle_loan(
     db: Session = Depends(get_db),
     current_admin=Depends(get_current_admin),
 ):
-    response = await service_admin_toggle_loan(loan_id, db)
+    response = await service_admin_toggle_loan_return(loan_id, db)
 
     return response
