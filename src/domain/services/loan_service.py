@@ -35,6 +35,8 @@ async def service_read_loans_by_user_id(user_id, db: Session):
             )
             for loan in loans
         ]
+    except HTTPException as e:
+        raise e from e
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
