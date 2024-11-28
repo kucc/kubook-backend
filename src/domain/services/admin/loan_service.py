@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -9,14 +11,17 @@ from utils.crud_utils import get_item
 async def service_admin_toggle_loan(loan_id, db: Session):
     loan = get_item(Loan, loan_id, db)
 
-    # 이미 반납된 도서인지 확인
-    if loan.return_status:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This loan has already been returned.")
-
     try:
-        loan.return_status = True
+        if loan.return_status: # 반납 상태가 True이면 False로 변경
+            loan.return_status = False
+            loan.return_date = None
+        else: # 반납 상태가 False이면 True로 변경
+            loan.return_status = True
+            loan.return_date = datetime.now().date()
 
         db.flush()
+    except HTTPException as e:
+        raise e from e
     except Exception as e:
         db.rollback()
         raise HTTPException(
