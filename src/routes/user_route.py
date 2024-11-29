@@ -23,7 +23,7 @@ router = APIRouter(
     "/my-loans",
     response_model=RouteResGetLoanList,
     status_code=status.HTTP_200_OK,
-    summary="회원의 전체 대출 목록 조회",
+    summary="user의 전체 대출 목록 조회",
 )
 async def get_all_user_loans(
     db: Session = Depends(get_db),
@@ -117,7 +117,7 @@ async def put_user(
     "/my-reviews",
     response_model=RouteResGetReviewList,
     status_code=status.HTTP_200_OK,
-    summary="회원의 전체 리뷰 목록 조회",
+    summary="user의 전체 리뷰 목록 조회",
 )
 async def get_all_user_reviews(
     db: Session = Depends(get_db),
