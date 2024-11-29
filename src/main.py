@@ -5,6 +5,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from config import Settings
 from routes.admin.book_route import router as admin_book_router
+from routes.admin.bookreqeust_route import router as admin_bookreqeust_router
 from routes.admin.loan_route import router as admin_loan_router
 from routes.admin.notice_route import router as admin_notice_router
 from routes.admin.user_route import router as admin_user_router
@@ -61,6 +62,7 @@ app.include_router(bookrequest_router)
 app.include_router(admin_book_router)
 app.include_router(admin_loan_router)
 app.include_router(admin_user_router)
+app.include_router(admin_bookreqeust_router)
 app.include_router(admin_notice_router)
 
 

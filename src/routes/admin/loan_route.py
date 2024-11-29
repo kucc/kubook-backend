@@ -5,9 +5,12 @@ from sqlalchemy.orm import Session
 
 from dependencies import get_current_admin, get_db
 from domain.schemas.loan_schemas import DomainResGetLoan
-from domain.services.admin.loan_service import service_admin_read_loans, service_admin_search_loans, service_admin_toggle_loan_return
+from domain.services.admin.loan_service import (
+    service_admin_read_loans,
+    service_admin_search_loans,
+    service_admin_toggle_loan_return,
+)
 from routes.admin.response.loan_response import RouteResAdminGetLoanList
-
 
 router = APIRouter(
     prefix="/admin/loans",
@@ -31,7 +34,7 @@ async def toggle_loan(
 
     return response
 
-  
+
 @router.get(
     "/search",
     response_model=RouteResAdminGetLoanList,
