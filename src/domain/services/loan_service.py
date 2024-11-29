@@ -4,12 +4,8 @@ from fastapi import HTTPException, status
 from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
-from domain.schemas.loan_schemas import (
-    DomainReqPostLoan,
-    DomainReqPutLoan,
-    DomainResGetLoan,
-    DomainResGetLoanItem,
-)
+from domain.schemas.loan_schemas import DomainReqPostLoan, DomainReqPutLoan, DomainResGetLoan
+
 from repositories.models import Book, Loan
 from utils.crud_utils import get_item
 
@@ -24,8 +20,10 @@ async def service_read_loans_by_user_id(user_id, db: Session):
         result = [
             DomainResGetLoan(
                 loan_id=loan.id,
-                user_id=loan.user_id,
                 book_id=loan.book_id,
+                user_id=loan.user_id,
+                created_at=loan.created_at,
+                updated_at=loan.updated_at,
                 loan_date=loan.loan_date,
                 due_date=loan.due_date,
                 extend_status=loan.extend_status,
@@ -75,7 +73,7 @@ async def service_extend_loan(request: DomainReqPutLoan, db: Session):
         db.commit()
         db.refresh(loan)
 
-        result = DomainResGetLoanItem(
+        result = DomainResGetLoan(
             loan_id=loan.id,
             book_id=loan.book_id,
             user_id=loan.user_id,
@@ -127,7 +125,7 @@ async def service_create_loan(request: DomainReqPostLoan, db: Session):
         db.commit()
         db.refresh(loan)
 
-        result = DomainResGetLoanItem(
+        result = DomainResGetLoan(
             loan_id=loan.id,
             book_id=loan.book_id,
             user_id=loan.user_id,
