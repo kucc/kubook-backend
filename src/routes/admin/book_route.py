@@ -181,7 +181,7 @@ async def update_admin_book(
 
 @router.delete(
     "/{book_id}",
-    summary="관리자 도서 정보 등록",
+    summary="관리자 도서 정보 삭제",
     status_code=status.HTTP_204_NO_CONTENT
 )
 async def delete_admin_book(
