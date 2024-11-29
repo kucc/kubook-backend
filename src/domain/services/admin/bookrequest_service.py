@@ -1,5 +1,6 @@
 
 from datetime import datetime
+from math import ceil
 
 from fastapi import HTTPException, status
 from sqlalchemy import and_, func, select
@@ -16,17 +17,17 @@ from repositories.models import RequestedBook
 
 
 async def service_admin_read_bookrequest(db: Session, page: int, limit: int):
-    offset = (page-1)*limit
-    stmt = (select(RequestedBook).where(RequestedBook.is_deleted==False).order_by(RequestedBook.updated_at.desc())
-                  .limit(limit).offset(offset))
-    bookrequest = db.execute(stmt).scalars().all()
     total = db.execute(select(func.count()).select_from(RequestedBook)
                              .where(RequestedBook.is_deleted==False)).scalar()
-    if offset>=total:
+    if ceil(total/limit) <page:
       raise HTTPException(
         status_code=status.HTTP_400_BAD_REQUEST,
         detail="Page is out of range"
       )
+    offset = (page-1)*limit
+    stmt = (select(RequestedBook).where(RequestedBook.is_deleted==False).order_by(RequestedBook.updated_at.desc())
+                  .limit(limit).offset(offset))
+    bookrequest = db.execute(stmt).scalars().all()
     if not bookrequest:
       raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
