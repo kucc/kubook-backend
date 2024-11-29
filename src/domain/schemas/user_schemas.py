@@ -38,3 +38,6 @@ class DomainAdminGetUserItem(BaseModel):
     is_active: bool = Field(title="is_active", description="활동 상태")
     created_at: datetime = Field(title="create_at", description="생성일시")
     updated_at: datetime = Field(title="update_at", description="수정일시")
+
+class DomainReqAdminDelUser(BaseModel):
+    user_id: int = Field(title="user_id", description="유저 고유 ID", example=1111, gt=0)
