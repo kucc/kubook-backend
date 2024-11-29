@@ -53,7 +53,7 @@ class DomainResBookRequest(BaseModel):
 
 class DomainResAdminGetBookRequest(BaseModel):
     data: list[DomainResBookRequest]
-    count: int
+    total: int = Field(0, title="total", description="총 도서 구매 요청", example=0, ge=0)
 
 class DomainReqAdminPutBookRequest(BaseModel):
     request_id: int = Field(title="book_request_id", description="도서 구매 요청 정보 id", example=1, gt=0)
