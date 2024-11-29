@@ -5,7 +5,6 @@ from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
 from domain.schemas.loan_schemas import DomainReqPostLoan, DomainReqPutLoan, DomainResGetLoan
-
 from repositories.models import Book, Loan
 from utils.crud_utils import get_item
 
