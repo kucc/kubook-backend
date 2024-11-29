@@ -35,7 +35,6 @@ async def get_all_notices(
     page: int = Query(1, ge=1),
     limit: int = Query(7, le=50),
     db: Session=Depends(get_db),
-    current_user=Depends(get_current_admin)
 ):
     domain_res, total = await service_admin_read_notices(page, limit, db)
     response = RouteResAdminGetNoticeList(
@@ -57,7 +56,6 @@ async def get_all_notices(
 async def get_notice(
     notice_id: int,
     db: Session=Depends(get_db),
-    current_user=Depends(get_current_admin)
 ):
     domain_res = await service_admin_read_notice(notice_id, db)
     response = RouteResAdminGetNotice(
