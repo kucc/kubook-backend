@@ -1,11 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Path, Query, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_current_admin, get_db
-from domain.schemas.user_schemas import DomainReqAdminPutUser
+from domain.schemas.user_schemas import DomainReqAdminDelUser, DomainReqAdminPutUser
 from domain.services.admin.user_service import (
+    service_admin_delete_user,
     service_admin_read_users,
     service_admin_search_users,
     service_admin_update_user,
@@ -18,7 +19,6 @@ router = APIRouter(
     tags=["admin/users"],
     dependencies=[Depends(get_current_admin)]
 )
-
 
 @router.get(
     "/search",
@@ -106,4 +106,22 @@ async def update_admin_user(
   )
 
   return response
+
+
+
+@router.delete(
+    "/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="회원 탈퇴",
+)
+async def delete_user(
+    user_id: Annotated[int, Path(description="삭제할 사용자 ID")],
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_admin)
+):
+    domain_req = DomainReqAdminDelUser(
+        user_id=user_id
+    )
+    await service_admin_delete_user(domain_req, db)
+    return
 

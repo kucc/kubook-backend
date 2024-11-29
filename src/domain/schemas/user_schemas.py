@@ -55,3 +55,6 @@ class DomainResAdminPutUser(BaseModel):
     expiration_date : date | None  = Field(title="expiration_date", description="관리자 권한 만료일, \
                                           기본적으로 권한 부여일로부터 1년", examples=["2025-07-02"])
 
+class DomainReqAdminDelUser(BaseModel):
+    user_id: int = Field(title="user_id", description="유저 고유 ID", example=1111, gt=0)
+
