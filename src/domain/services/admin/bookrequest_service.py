@@ -58,7 +58,7 @@ async def service_admin_update_bookrequest(db:Session, request: DomainReqAdminPu
     if not request_book:
       raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
-        detail="Not found"
+        detail="BookRequest Not found"
       )
     if request.processing_status not in {processing_status.value for processing_status in BookRequestStatus}:
       raise HTTPException(
@@ -104,12 +104,12 @@ async def service_admin_update_bookrequest(db:Session, request: DomainReqAdminPu
       return result
 
 async def service_admin_delete_bookrequest(request_id: int, db: Session):
-    stmt = select(RequestedBook).where(and_(RequestedBook.id==request_id, RequestedBook.is_deleted==False))
+    stmt = select(RequestedBook).where(RequestedBook.id==request_id, RequestedBook.is_deleted==False)
     request_book = db.execute(stmt).scalar_one_or_none()
     if not request_book:
       raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
-        detail="Not found"
+        detail="BookRequest Not found"
       )
     try:
       request_book.is_deleted = True
