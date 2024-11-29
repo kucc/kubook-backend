@@ -59,11 +59,9 @@ app.include_router(user_router)
 app.include_router(loan_router)
 app.include_router(review_router)
 app.include_router(notice_router)
-
 app.include_router(bookrequest_router)
 app.include_router(admin_loan_router)
 app.include_router(admin_user_router)
-app.include_router(admin_book_router)
 app.include_router(admin_bookreqeust_router)
 app.include_router(admin_notice_router)
 
