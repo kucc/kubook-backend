@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, Field, model_validator
 from typing import Optional
 from fastapi import HTTPException, status
 class RouteReqPutUser(BaseModel):
@@ -6,7 +6,7 @@ class RouteReqPutUser(BaseModel):
     github: str | None = Field(None, title="github", description="깃허브 주소", example="https://github.com/kucc")
     instagram: str | None = Field(None, title="instagram", description="인스타그램 주소", example="https://www.instagram.com/")
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     def check_at_least_one_field(cls, values):
         # If all three fields are None, raise an error
         if not any(values.get(field) for field in ['user_name', 'github', 'instagram']):
