@@ -4,7 +4,6 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from config import Settings
-
 from routes.admin.admin_books_route import router as admin_books_router
 from routes.admin.admin_notice_route import router as admin_notice_router
 from routes.admin.book_route import router as admin_book_router
@@ -59,7 +58,6 @@ app.include_router(user_router)
 app.include_router(loan_router)
 app.include_router(review_router)
 app.include_router(notice_router)
-
 app.include_router(bookrequest_router)
 app.include_router(admin_loan_router)
 app.include_router(admin_user_router)
