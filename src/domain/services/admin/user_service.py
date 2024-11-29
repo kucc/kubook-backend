@@ -1,9 +1,11 @@
 from fastapi import HTTPException, status
 from sqlalchemy import select, text
+from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session, selectinload
 
-from domain.schemas.user_schemas import DomainAdminGetUserItem
+from domain.schemas.user_schemas import DomainAdminGetUserItem, DomainReqAdminDelUser
 from repositories.models import User
+from utils.crud_utils import delete_item
 
 
 async def service_admin_search_users(
@@ -26,7 +28,7 @@ async def service_admin_search_users(
                 .params(user_name=f"{user_name}*")
         )
     if authority is not None:
-        stmt = stmt.where(User.admin[0].admin_status == authority)
+        stmt = stmt.where(User.admin[-1].admin_status == authority)
     if active is not None:
         stmt = stmt.where(User.is_active == active)
 
@@ -105,3 +107,40 @@ async def service_admin_read_users(db: Session) -> list[DomainAdminGetUserItem]:
         ) from e
 
     return search_users
+
+
+async def service_admin_delete_user(request: DomainReqAdminDelUser, db: Session):
+    # 유저를 검색해서 관리자가 아니라면 바로 삭제. 관리자라면 관리자 테이블에서 이미 삭제되었는지 확인 후 삭제
+    stmt = (
+        select(User)
+        .where(
+            User.id == request.user_id,
+            User.is_deleted == False
+        )
+    )
+
+    try:
+        user = db.execute(stmt).scalar_one()
+
+        if user.admin:
+            if not user.admin[-1].is_deleted:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Cannot delete an active admin user"
+                )
+    except NoResultFound as e:
+        raise HTTPException(
+             status_code=status.HTTP_404_NOT_FOUND,
+             detail="User not found"
+        ) from e
+    except HTTPException as e:
+            raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error occurred during user retrieval: {str(e)}",
+        ) from e
+
+    delete_item(User, request.user_id, db)
+
+    return

@@ -99,13 +99,6 @@ async def service_admin_search_books(
 
 
 async def service_admin_create_book(request: DomainReqAdminPostBook, db: Session):
-    # check if the book already exists in database
-    stmt = select(Book).where(Book.book_title == request.book_title)
-    exist_request = db.execute(stmt).scalar_one_or_none()
-
-    if exist_request:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Already exists")
     if request.code[0] not in {category.name for category in BookCategoryStatus}:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Invalid Category")
