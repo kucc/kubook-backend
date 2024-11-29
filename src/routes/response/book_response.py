@@ -27,3 +27,9 @@ class RouteResGetBook(BaseModel):
     book_status: bool = Field(title="book_stauts", description="책 상태", example=True)
     created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
     updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
+
+
+#여기도 최신 책 리스트
+class RouteResGetNewBookList(BaseModel):
+    data: list[DomainResGetBookList]
+    count: int = Field(description="data 배열의 요소 개수")

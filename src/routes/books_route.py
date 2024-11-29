@@ -3,13 +3,33 @@ from sqlalchemy.orm import Session
 
 from dependencies import get_db
 from domain.schemas.book_schemas import DomainReqGetBook
-from domain.services.book_service import service_read_book, service_read_books, service_search_books
-from routes.response.book_response import RouteResGetBook, RouteResGetBookList
+from domain.services.book_service import service_read_book, service_read_books, service_search_books, service_read_new_books
+from routes.response.book_response import RouteResGetBook, RouteResGetBookList, RouteResGetNewBookList
 
 router = APIRouter(
     prefix="/books",
     tags=["books"]
 )
+
+# 최신 책 새로 추가
+@router.get(
+    "/new",
+    summary="최신 도서 목록 조회",
+    response_model=RouteResGetNewBookList,
+    status_code=status.HTTP_200_OK
+)
+async def get_new_books(
+    db: Session = Depends(get_db)
+):
+    page = 1
+    limit = 10
+    domain_res = await service_read_new_books(page, limit, db)
+    result = RouteResGetNewBookList(
+        data=domain_res,
+        count=len(domain_res)
+    )
+
+    return result
 
 
 @router.get(
@@ -84,3 +104,5 @@ async def get_books(
     )
 
     return result
+
+
