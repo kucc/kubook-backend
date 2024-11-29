@@ -44,7 +44,8 @@ class DomainReqPostLoan(BaseModel):
     user_id: int = Field(title="user_id", description="대출한 사용자 ID", example=1, gt=0)
     book_id: int = Field(title="book_id", description="대출한 책 ID", example=1, gt=0)
 
-class DomainAdminGetLoanItem(BaseModel):
+
+class DomainAdminGetLoan(BaseModel):
     loan_id: int = Field(title="loan_id", description="대출 id", example=1, gt=0)
     book_id: int = Field(title="book_id", description="대출한 책 ID", example=1, gt=0)
     user_id: int = Field(title="user_id", description="대출한 사용자 ID", example=1, gt=0)
