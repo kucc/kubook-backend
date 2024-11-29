@@ -47,7 +47,7 @@ class DomainResBookRequest(BaseModel):
     publication_year: int = Field(title="publication_year", description="출판년도", example=2022, gt=0)
     request_link: str = Field(title="request_link", description="요청 링크", example="https://example.com/request")
     reason: str = Field(title="reason", description="이유", example="Need for study")
-    processing_status: int = Field(0, title="processing_status", description="처리 상태", example=0, ge=0, le=3)
+    processing_status: int = Field(0, title="processing_status", description="처리 상태", example=0)
     request_date: date = Field(title="request_date", description="요청 일자", example=date.today())
     reject_reason: str | None = Field(None, title="reject_reason", description="거절 사유", example="Not available")
 
@@ -57,5 +57,5 @@ class DomainResAdminGetBookRequest(BaseModel):
 
 class DomainReqAdminPutBookRequest(BaseModel):
     request_id: int = Field(title="book_request_id", description="도서 구매 요청 정보 id", example=1, gt=0)
-    processing_status: int = Field(0, title="processing_status", description="처리 상태", example=0, ge=0, le=3)
+    processing_status: int = Field(0, title="processing_status", description="처리 상태", example=0)
     reject_reason: str | None = Field(None, title="reject_reason", description="거절 사유", example="Not available")
