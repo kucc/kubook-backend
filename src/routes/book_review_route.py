@@ -12,11 +12,10 @@ from domain.services.book_review_service import (
     service_create_review,
     service_delete_review,
     service_read_reviews_by_book_id,
-    service_read_reviews_by_user_id,
     service_update_review,
 )
 from routes.request.book_review_request import RouteReqPostReview, RouteReqPutReview
-from routes.response.book_review_response import RouteResGetReviewList, RouteResGetReviewListByInfoId
+from routes.response.book_review_response import RouteResGetReviewListByInfoId
 
 router = APIRouter(
     prefix="/reviews",
@@ -43,24 +42,6 @@ async def get_all_reviews_by_book_id(
         count=len(domain_res)
     )
 
-    return result
-
-@router.get(
-    "/list",
-    response_model=RouteResGetReviewList,
-    status_code=status.HTTP_200_OK,
-    summary="회원의 전체 리뷰 목록 조회",
-)
-async def get_all_user_reviews(
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_active_user)
-):
-    domain_res = await service_read_reviews_by_user_id(current_user.id, db)
-
-    result = RouteResGetReviewList(
-        data=domain_res,
-        count=len(domain_res)
-    )
     return result
 
 
