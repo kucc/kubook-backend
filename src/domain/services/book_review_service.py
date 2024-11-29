@@ -50,7 +50,10 @@ async def service_read_reviews_by_book_id(book_id, db: Session):
     return response
 
 
-async def service_read_reviews_by_user_id(user_id, db: Session):
+async def service_read_reviews_by_user_id(
+    user_id,
+    db: Session
+) -> list[DomainResGetReviewItem]:
     stmt = (
         select(BookReview)
         .where(and_(BookReview.user_id == user_id, BookReview.is_deleted == False))
@@ -79,6 +82,7 @@ async def service_read_reviews_by_user_id(user_id, db: Session):
             review_content=review.review_content,
             created_at=review.created_at,
             updated_at=review.updated_at,
+            book_title=review.book.book_title,
         )
         for review in reviews
     ]

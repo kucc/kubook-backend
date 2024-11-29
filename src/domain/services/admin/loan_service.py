@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session, joinedload, selectinload
 
-from domain.schemas.loan_schemas import DomainAdminGetLoanItem, DomainResGetLoan, 
+from domain.schemas.loan_schemas import DomainAdminGetLoanItem, DomainResGetLoan
 from repositories.models import Loan
 from utils.crud_utils import get_item
 

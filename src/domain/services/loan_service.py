@@ -5,12 +5,14 @@ from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
 from domain.schemas.loan_schemas import DomainReqPostLoan, DomainReqPutLoan, DomainResGetLoan
-
 from repositories.models import Book, Loan
 from utils.crud_utils import get_item
 
 
-async def service_read_loans_by_user_id(user_id, db: Session):
+async def service_read_loans_by_user_id(
+    user_id,
+    db: Session
+) -> list[DomainResGetLoan]:
     stmt = select(Loan).where(and_(Loan.user_id == user_id, Loan.is_deleted == False)).order_by(Loan.updated_at)
 
     try:
@@ -30,6 +32,9 @@ async def service_read_loans_by_user_id(user_id, db: Session):
                 overdue_days=loan.overdue_days,
                 return_status=loan.return_status,
                 return_date=loan.return_date,
+                book_title=loan.book.book_title,
+                code=loan.book.code,
+                version=loan.book.version,
             )
             for loan in loans
         ]

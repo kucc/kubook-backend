@@ -4,7 +4,6 @@ from datetime import date, datetime, timedelta
 from pydantic import BaseModel, Field
 
 
-
 class DomainResGetLoan(BaseModel):
     loan_id: int = Field(title="loan_id", description="대출 정보 id", example=1, gt=0)
     book_id: int = Field(title="book_id", description="대출한 책 ID", example=1, gt=0)
@@ -17,6 +16,9 @@ class DomainResGetLoan(BaseModel):
     overdue_days: int = Field(title="overdue_days", description="연체 일자", example=1)
     return_status: bool = Field(title="return_status", description="반납 상태", example=False)
     return_date: date | None = Field(title="return_date", description="반납 날짜", example=None)
+    book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")
+    code: str = Field(title="code", description="책 코드", example="A3")
+    version: str | None = Field(title="version", description="판본", example="10e")
 
 
 class DomainReqPutLoan(BaseModel):

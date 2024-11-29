@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 from dependencies import get_current_active_user, get_db
 from domain.services.loan_service import service_read_loans_by_user_id
 from domain.services.user_service import service_read_user, service_update_user
+from routes.request.user_request import RouteReqPutUser
 from routes.response.loan_response import RouteResGetLoanList
 from routes.response.user_response import RouteResGetUser, RouteResPutUser
-from routes.request.user_request import RouteReqPutUser
 
 router = APIRouter(
     prefix="/users",
