@@ -74,18 +74,25 @@ async def service_read_reviews_by_user_id(
             detail="Reviews not found"
         )
 
-    result = [
-        DomainResGetReviewItem(
-            review_id=review.id,
-            user_id=review.user_id,
-            book_id=review.book_id,
-            review_content=review.review_content,
-            created_at=review.created_at,
-            updated_at=review.updated_at,
-            book_title=review.book.book_title,
-        )
-        for review in reviews
-    ]
+    result = []
+    for review in reviews:
+        if review.book is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Book with ID {review.book_id} not found for review ID {review.id}"
+            )
+        else:
+            result.append(
+                DomainResGetReviewItem(
+                    review_id=review.id,
+                    user_id=review.user_id,
+                    book_id=review.book_id,
+                    review_content=review.review_content,
+                    created_at=review.created_at,
+                    updated_at=review.updated_at,
+                    book_title=review.book.book_title,
+                )
+            )
 
     return result
 
