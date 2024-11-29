@@ -4,7 +4,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session, joinedload, selectinload
 
-from domain.schemas.loan_schemas import DomainAdminGetLoanItem, DomainResGetLoan, 
+from domain.schemas.loan_schemas import DomainAdminGetLoan, DomainResGetLoan
 from repositories.models import Loan
 from utils.crud_utils import get_item
 
@@ -59,7 +59,7 @@ async def service_admin_search_loans(
     category_name: str | None,
     return_status: str | None,
     db: Session
-) -> list[DomainAdminGetLoanItem]:
+) -> list[DomainAdminGetLoan]:
     stmt = (
         select(Loan)
         .options(joinedload(Loan.user), joinedload(Loan.book))
@@ -95,7 +95,7 @@ async def service_admin_search_loans(
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loans not found")
 
         search_loans = [
-            DomainAdminGetLoanItem(
+            DomainAdminGetLoan(
                 loan_id=loan.id,
                 book_id=loan.book_id,
                 user_id=loan.user_id,
@@ -124,7 +124,7 @@ async def service_admin_search_loans(
     return search_loans
 
 
-async def service_admin_read_loans(db: Session) -> list[DomainAdminGetLoanItem]:
+async def service_admin_read_loans(db: Session) -> list[DomainAdminGetLoan]:
     stmt = (
         select(Loan)
         .options(
@@ -143,7 +143,7 @@ async def service_admin_read_loans(db: Session) -> list[DomainAdminGetLoanItem]:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Books not found")
 
         search_loans = [
-            DomainAdminGetLoanItem(
+            DomainAdminGetLoan(
                 loan_id=loan.id,
                 book_id=loan.book_id,
                 user_id=loan.user_id,
