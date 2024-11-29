@@ -1,8 +1,6 @@
-
-from typing import Self
-
 from fastapi import HTTPException, status
 from pydantic import BaseModel, Field, field_validator, model_validator
+from typing_extensions import Self
 
 from domain.enums.status import BookRequestStatus
 
