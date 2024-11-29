@@ -20,6 +20,7 @@ class RouteResAdminGetBookRequest(BaseModel):
 class RouteResAdminGetBookRequestList(BaseModel):
     data: list[DomainResBookRequest]
     count: int
+    total: int = Field(0, title="total", description="총 도서 구매 요청", example=0, ge=0)
 
 class RouteResAdminPutBookRequest(BaseModel):
     user_id: int = Field(title="user_id", description="도서 구매를 요청한 사용자 ID", example=1, gt=0)

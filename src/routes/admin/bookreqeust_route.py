@@ -31,7 +31,8 @@ async def admin_read_bookRequest(
     domain_result = await service_admin_read_bookrequest(db=db, page=page, limit=limit)
     result = RouteResAdminGetBookRequestList(
       data=domain_result.data,
-      count=domain_result.count
+      count=len(domain_result.data),
+      total=domain_result.total
     )
     return result
 
