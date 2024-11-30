@@ -1,32 +1,31 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from dependencies import get_current_active_user, get_db
+from dependencies import get_current_active_user, get_current_user, get_db
 from domain.schemas.bookrequest_schemas import (
     DomainReqDelBookRequest,
-    DomainReqGetBookRequest,
     DomainReqPostBookRequest,
     DomainReqPutBookRequest,
 )
 from domain.services.bookrequest_service import (
     service_create_bookrequest,
     service_delete_bookrequest,
-    service_read_bookrequest_list,
     service_update_bookrequest,
 )
 from routes.request.bookrequest_request import RouteReqPostBookRequest, RouteReqPutBookRequest
-from routes.response.bookrequest_response import RouteResBookRequest, RouteResBookRequestList, RouteResPostBookRequest
+from routes.response.bookrequest_response import RouteResBookRequest, RouteResPostBookRequest
 
 router = APIRouter(
     prefix="/book-requests",
     tags=["book-requests"],
-    dependencies=[Depends(get_current_active_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 @router.post(
     "",
     response_model=RouteResPostBookRequest,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(get_current_active_user)],
     summary="구매 요청"
 )
 async def create_book_request(
@@ -58,38 +57,8 @@ async def create_book_request(
     return result
 
 
-@router.get(
-    "/my-requests",
-    summary="user의 도서 구매 요청 목록 조회",
-    response_model=RouteResBookRequestList,
-    status_code=status.HTTP_200_OK,
-)
-async def get_user_bookrequests(
-    db: Session = Depends(get_db), current_user=Depends(get_current_active_user)
-):
-    domain_req = DomainReqGetBookRequest(user_id=current_user.id)
-    domain_res = await service_read_bookrequest_list(domain_req, db)
-    converted_res = [
-        RouteResBookRequest(
-            user_id=item.user_id,
-            request_id=item.request_id,
-            book_title=item.book_title,
-            publication_year=item.publication_year,
-            request_link=item.request_link,
-            reason=item.reason,
-            processing_status=item.processing_status,
-            request_date=item.request_date,
-            reject_reason=item.reject_reason,
-        )
-        for item in domain_res
-    ]
-
-    result = RouteResBookRequestList(data=converted_res, count=len(converted_res))
-    return result
-
-
 @router.put(
-    "/users/{request_id}",
+    "/{request_id}",
     summary="user의 도서 구매 요청 수정",
     response_model=RouteResBookRequest,
     status_code=status.HTTP_200_OK,
@@ -98,7 +67,7 @@ async def update_user_bookrequest(
     request_id: int,
     request_data: RouteReqPutBookRequest,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_active_user),
+    current_user=Depends(get_current_user),
 ):
     domain_req = DomainReqPutBookRequest(
         user_id=current_user.id,
@@ -130,7 +99,7 @@ async def update_user_bookrequest(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_user_bookrequest(
-    request_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_active_user)
+    request_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)
 ) -> None:
     domain_req = DomainReqDelBookRequest(user_id=current_user.id, request_id=request_id)
     await service_delete_bookrequest(domain_req, db)

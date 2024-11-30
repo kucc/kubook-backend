@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
-from dependencies import get_current_active_user, get_db
+from dependencies import get_current_user, get_db
 from domain.schemas.book_review_schemas import (
     DomainReqPostReview,
     DomainReqPutReview,
@@ -21,7 +21,6 @@ from routes.response.book_review_response import RouteResGetReviewList, RouteRes
 router = APIRouter(
     prefix="/reviews",
     tags=["reviews"],
-    dependencies=[Depends(get_current_active_user)]
 )
 
 
@@ -34,7 +33,6 @@ router = APIRouter(
 async def get_all_reviews_by_book_id(
     book_id: int = Query(alias="books"),
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_active_user)
 ):
     domain_res = await service_read_reviews_by_book_id(book_id, db)
 
@@ -50,10 +48,11 @@ async def get_all_reviews_by_book_id(
     response_model=RouteResGetReviewList,
     status_code=status.HTTP_200_OK,
     summary="회원의 전체 리뷰 목록 조회",
+    dependencies=[Depends(get_current_user)]
 )
 async def get_all_user_reviews(
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(get_current_user)
 ):
     domain_res = await service_read_reviews_by_user_id(current_user.id, db)
 
@@ -68,12 +67,13 @@ async def get_all_user_reviews(
     "",
     response_model=DomainResPostReview,
     status_code=status.HTTP_201_CREATED,
-    summary="리뷰 작성"
+    summary="리뷰 작성",
+    dependencies=[Depends(get_current_user)]
 )
 async def create_review(
     route_req: RouteReqPostReview,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(get_current_user)
 ):
     domain_req = DomainReqPostReview(
         user_id=current_user.id,
@@ -87,12 +87,13 @@ async def create_review(
 @router.delete(
     "/{review_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="리뷰 삭제"
+    summary="리뷰 삭제",
+    dependencies=[Depends(get_current_user)]
 )
 async def delete_reivew(
     review_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(get_current_user)
 ):
     await service_delete_review(review_id, current_user.id, db)
     return
@@ -101,13 +102,14 @@ async def delete_reivew(
     "/{review_id}",
     response_model=DomainResGetReviewItem,
     status_code=status.HTTP_200_OK,
-    summary="리뷰 수정"
+    summary="리뷰 수정",
+    dependencies=[Depends(get_current_user)]
 )
 async def update_review(
     review_id: int,
     review_update_data: RouteReqPutReview,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(get_current_user)
 ):
     domain_req = DomainReqPutReview(
         review_id=review_id,
