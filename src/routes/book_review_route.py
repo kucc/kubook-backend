@@ -42,25 +42,6 @@ async def get_all_reviews_by_book_id(
 
     return result
 
-@router.get(
-    "/list",
-    response_model=RouteResGetReviewList,
-    status_code=status.HTTP_200_OK,
-    summary="회원의 전체 리뷰 목록 조회",
-    dependencies=[Depends(get_current_user)]
-)
-async def get_all_user_reviews(
-    db: Session = Depends(get_db),
-    current_user=Depends(get_current_user)
-):
-    domain_res = await service_read_reviews_by_user_id(current_user.id, db)
-
-    result = RouteResGetReviewList(
-        data=domain_res,
-        count=len(domain_res)
-    )
-    return result
-
 
 @router.post(
     "",
