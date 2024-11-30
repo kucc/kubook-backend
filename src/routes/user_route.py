@@ -65,7 +65,7 @@ async def get_user(
     status_code=status.HTTP_200_OK,
 )
 async def get_user_bookrequests(
-    db: Session = Depends(get_db), current_user=Depends(get_current_active_user)
+    db: Session = Depends(get_db), current_user=Depends(get_current_user)
 ):
     domain_req = DomainReqGetBookRequest(user_id=current_user.id)
     domain_res = await service_read_bookrequest_list(domain_req, db)
