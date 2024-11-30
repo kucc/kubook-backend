@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from dependencies import get_current_active_user, get_db
+from dependencies import get_current_user, get_db
 from domain.schemas.bookrequest_schemas import DomainReqGetBookRequest
 from domain.services.bookrequest_service import service_read_bookrequest_list
 from domain.services.loan_service import service_read_loans_by_user_id
@@ -14,7 +14,7 @@ from routes.response.user_response import RouteResGetUser, RouteResPutUser
 router = APIRouter(
     prefix="/users",
     tags=["users"],
-    dependencies=[Depends(get_current_active_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 @router.get(
@@ -25,7 +25,7 @@ router = APIRouter(
 )
 async def get_all_user_loans(
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(get_current_user)
 ):
     result = await service_read_loans_by_user_id(current_user.id, db)
 
@@ -43,7 +43,7 @@ async def get_all_user_loans(
 )
 async def get_user(
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(get_current_user)
 ):
     result = await service_read_user(current_user.id, db)
 
@@ -96,7 +96,7 @@ async def get_user_bookrequests(
 async def put_user(
     request: RouteReqPutUser,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_active_user)
+    current_user=Depends(get_current_user)
 ):
     result = await service_update_user(current_user.id, db, request)
 

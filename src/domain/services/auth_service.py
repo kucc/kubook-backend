@@ -99,10 +99,6 @@ async def login_with_username(
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    # Check if the user is active
-    if not user.is_active:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User disabled")
-
     # Create JWT tokens
     token_response = create_user_tokens(user.id)
     response = JSONResponse(content={
