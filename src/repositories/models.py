@@ -1,4 +1,5 @@
 from sqlalchemy import TIMESTAMP, Boolean, Column, Date, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.dialects.mysql import TINYINT
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.sql import func
 
@@ -141,6 +142,24 @@ class Notice(Base):
     # Relationships
     admin = relationship("Admin", foreign_keys=[admin_id])
     user = relationship("User", foreign_keys=[user_id])
+
+
+class Settings(Base):
+    __tablename__ = "settings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    start_date = Column(DateTime, nullable=False)
+    end_date = Column(DateTime, nullable=False)
+    extend_days = Column(TINYINT(unsigned=True), nullable=False)
+    extend_max_count = Column(TINYINT(unsigned=True), nullable=False)
+    loan_days = Column(TINYINT(unsigned=True), nullable=False)
+    loan_max_book = Column(TINYINT(unsigned=True), nullable=False)
+    request_max_count = Column(TINYINT(unsigned=True), nullable=False)
+    request_max_price = Column(TINYINT(unsigned=True), nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
+    updated_at = Column(TIMESTAMP, nullable=False, server_default=func.now(), onupdate=func.now())
+    is_deleted = Column(Boolean, nullable=False, default=False)
+
 
 
 # 여기서부터는 예시로 작성한 코드입니다.
