@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
-from dependencies import get_current_active_user, get_db
+from dependencies import get_current_active_user, get_current_user, get_db
 from domain.schemas.bookrequest_schemas import (
     DomainReqDelBookRequest,
     DomainReqPostBookRequest,
@@ -18,13 +18,14 @@ from routes.response.bookrequest_response import RouteResBookRequest, RouteResPo
 router = APIRouter(
     prefix="/book-requests",
     tags=["book-requests"],
-    dependencies=[Depends(get_current_active_user)]
+    dependencies=[Depends(get_current_user)]
 )
 
 @router.post(
     "",
     response_model=RouteResPostBookRequest,
     status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(get_current_active_user)],
     summary="구매 요청"
 )
 async def create_book_request(
@@ -66,7 +67,7 @@ async def update_user_bookrequest(
     request_id: int,
     request_data: RouteReqPutBookRequest,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_active_user),
+    current_user=Depends(get_current_user),
 ):
     domain_req = DomainReqPutBookRequest(
         user_id=current_user.id,
@@ -98,7 +99,7 @@ async def update_user_bookrequest(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_user_bookrequest(
-    request_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_active_user)
+    request_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)
 ) -> None:
     domain_req = DomainReqDelBookRequest(user_id=current_user.id, request_id=request_id)
     await service_delete_bookrequest(domain_req, db)
