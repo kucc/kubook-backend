@@ -63,6 +63,8 @@ async def service_admin_search_loans(
 ) -> list[DomainAdminGetLoan]:
     stmt = (
         select(Loan)
+        .join(Loan.book)
+        .join(Loan.user)
         .options(
             selectinload(Loan.user),
             selectinload(Loan.book)
