@@ -10,7 +10,7 @@ from utils.crud_utils import get_item
 
 
 async def service_read_loans_by_user_id(
-    user_id,
+    user_id: int,
     db: Session
 ) -> list[DomainResGetLoan]:
     stmt = (
