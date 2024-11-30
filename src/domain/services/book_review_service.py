@@ -50,7 +50,10 @@ async def service_read_reviews_by_book_id(book_id, db: Session):
     return response
 
 
-async def service_read_reviews_by_user_id(user_id, db: Session):
+async def service_read_reviews_by_user_id(
+    user_id,
+    db: Session
+) -> list[DomainResGetReviewItem]:
     stmt = (
         select(BookReview)
         .where(and_(BookReview.user_id == user_id, BookReview.is_deleted == False))
@@ -71,17 +74,25 @@ async def service_read_reviews_by_user_id(user_id, db: Session):
             detail="Reviews not found"
         )
 
-    result = [
-        DomainResGetReviewItem(
-            review_id=review.id,
-            user_id=review.user_id,
-            book_id=review.book_id,
-            review_content=review.review_content,
-            created_at=review.created_at,
-            updated_at=review.updated_at,
-        )
-        for review in reviews
-    ]
+    result = []
+    for review in reviews:
+        if review.book is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Book with ID {review.book_id} not found for review ID {review.id}"
+            )
+        else:
+            result.append(
+                DomainResGetReviewItem(
+                    review_id=review.id,
+                    user_id=review.user_id,
+                    book_id=review.book_id,
+                    review_content=review.review_content,
+                    created_at=review.created_at,
+                    updated_at=review.updated_at,
+                    book_title=review.book.book_title,
+                )
+            )
 
     return result
 

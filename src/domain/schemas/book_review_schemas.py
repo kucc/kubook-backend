@@ -28,6 +28,7 @@ class DomainResGetReviewItem(BaseModel):
     review_content: str = Field(title="review_content", description="리뷰 내용")
     created_at: _datetime = Field(title="create_at", description="생성일시", example=_datetime.now())
     updated_at: _datetime = Field(title="update_at", description="수정일시", example=_datetime.now())
+    book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")
 
 
 class DomainReqPostReview(BaseModel):
