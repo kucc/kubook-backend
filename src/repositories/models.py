@@ -150,7 +150,7 @@ class Settings(Base):
     id = Column(Integer, primary_key=True, index=True)
     start_date = Column(DateTime, nullable=False)
     end_date = Column(DateTime, nullable=False)
-    extend_days = Column(TINYINT(unsigned=True)(unsigned=True), nullable=False)
+    extend_days = Column(TINYINT(unsigned=True), nullable=False)
     extend_max_count = Column(TINYINT(unsigned=True), nullable=False)
     loan_days = Column(TINYINT(unsigned=True), nullable=False)
     loan_max_book = Column(TINYINT(unsigned=True), nullable=False)
