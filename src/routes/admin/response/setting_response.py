@@ -44,11 +44,20 @@ class ExtendSetting(BaseModel):
 class LoanSetting(BaseModel):
     loan_days : int = Field(..., title="대출 기간", description="1회 당 대출 기간", \
                               examples=[3, 7, 10], ge=1)
-    loan_max_count : int = Field(..., title="대출 가능 권수", description="1회당 대출 가능 권수", \
+    loan_max_book : int = Field(..., title="대출 가능 권수", description="1회당 대출 가능 권수", \
                                    examples=[3, 7, 10], ge=1)
 
 class BookRequestSetting(BaseModel):
     request_max_count : int = Field(..., title="도서 구매 최대 권수", description="1인당 구매 가능한 최대 도서 권수", \
                                    examples=[3, 7, 10], ge=1)
     request_max_price : int = Field(..., title="도서 구매 최대 가격", description="1인당 구매 가능한 최고 도서 가격", \
-                                   examples=[15000, 30000, 50000], ge=1)
+                                   examples=[15000, 30000, 50000])
+
+class RouteResAdminSetting(BaseModel):
+    setting_id : int = Field(title="setting_id", description="설정 ID", gt=0)
+    service_date : ServiceDate
+    loan : LoanSetting
+    extend : ExtendSetting
+    bookreqeust : BookRequestSetting
+    created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
+    updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
