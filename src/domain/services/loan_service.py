@@ -4,37 +4,57 @@ from fastapi import HTTPException, status
 from sqlalchemy import and_, select
 from sqlalchemy.orm import Session
 
-from domain.schemas.loan_schemas import (
-    DomainReqPostLoan,
-    DomainReqPutLoan,
-    DomainResGetLoan,
-    DomainResGetLoanItem,
-)
+from domain.schemas.loan_schemas import DomainReqPostLoan, DomainReqPutLoan, DomainResGetLoan
 from repositories.models import Book, Loan
 from utils.crud_utils import get_item
 
 
-async def service_read_loans_by_user_id(user_id, db: Session):
-    stmt = select(Loan).where(and_(Loan.user_id == user_id, Loan.is_deleted == False)).order_by(Loan.updated_at)
+async def service_read_loans_by_user_id(
+    user_id: int,
+    db: Session
+) -> list[DomainResGetLoan]:
+    stmt = (
+        select(Loan)
+        .where(
+            and_(
+                Loan.user_id == user_id,
+                Loan.is_deleted == False
+            )
+        ).order_by(Loan.updated_at.desc()))
 
     try:
         loans = db.scalars(stmt).all()  # loans를 리스트로 반환
         if not loans:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loans not found") from None
-        result = [
-            DomainResGetLoan(
-                loan_id=loan.id,
-                user_id=loan.user_id,
-                book_id=loan.book_id,
-                loan_date=loan.loan_date,
-                due_date=loan.due_date,
-                extend_status=loan.extend_status,
-                overdue_days=loan.overdue_days,
-                return_status=loan.return_status,
-                return_date=loan.return_date,
-            )
-            for loan in loans
-        ]
+        result = []
+        for loan in loans:
+            if loan.book is None:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Book with ID {loan.book_id} not found for loan ID {loan.id}"
+                )
+            else:
+                result.append(
+                    DomainResGetLoan(
+                        loan_id=loan.id,
+                        book_id=loan.book_id,
+                        user_id=loan.user_id,
+                        created_at=loan.created_at,
+                        updated_at=loan.updated_at,
+                        loan_date=loan.loan_date,
+                        due_date=loan.due_date,
+                        extend_status=loan.extend_status,
+                        overdue_days=loan.overdue_days,
+                        return_status=loan.return_status,
+                        return_date=loan.return_date,
+                        book_title=loan.book.book_title,
+                        code=loan.book.code,
+                        version=loan.book.version,
+                    )
+                )
+
+    except HTTPException as e:
+        raise e from e
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -75,7 +95,7 @@ async def service_extend_loan(request: DomainReqPutLoan, db: Session):
         db.commit()
         db.refresh(loan)
 
-        result = DomainResGetLoanItem(
+        result = DomainResGetLoan(
             loan_id=loan.id,
             book_id=loan.book_id,
             user_id=loan.user_id,
@@ -127,7 +147,7 @@ async def service_create_loan(request: DomainReqPostLoan, db: Session):
         db.commit()
         db.refresh(loan)
 
-        result = DomainResGetLoanItem(
+        result = DomainResGetLoan(
             loan_id=loan.id,
             book_id=loan.book_id,
             user_id=loan.user_id,

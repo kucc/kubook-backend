@@ -33,3 +33,4 @@ class RouteResGetBook(BaseModel):
 class RouteResGetNewBookList(BaseModel):
     data: list[DomainResGetNewBookList]
     count: int = Field(description="data 배열의 요소 개수")
+
