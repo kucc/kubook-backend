@@ -16,24 +16,11 @@ class ServiceDate(BaseModel):
       print(service.end_datetime)    # 2024-12-31 23:59:59
     '''
 
-    start_date: str = Field(..., title="도서 서비스 시작일", description="도서 대출 및 도서 구매 신청 시작일", \
+    start_date: datetime = Field(..., title="도서 서비스 시작일", description="도서 대출 및 도서 구매 신청 시작일", \
                              examples=["2024-01-01", "2024-01-01 00:00:00"])
-    end_date: str = Field(..., title="도서 서비스 종료일",  description="도서 대출 및 도서 구매 신청 종료일", \
+    end_date: datetime = Field(..., title="도서 서비스 종료일",  description="도서 대출 및 도서 구매 신청 종료일", \
                           examples=["2024-12-31", "2024-12-31 23:59:59"])
 
-    # @property를 사용하여 날짜 객체로 변환
-    @property
-    def start_datetime(self) -> datetime:
-        return datetime.strptime(self.start_date, "%Y-%m-%d").replace(hour=0, minute=0, second=0)
-
-    @property
-    def end_datetime(self) -> datetime:
-        return datetime.strptime(self.end_date, "%Y-%m-%d").replace(hour=23, minute=59, second=59)
-
-    def is_service_duration(self) -> bool:
-        """현재 시간 기준으로 서비스 기간 내에 있는지 확인"""
-        current_datetime = datetime.now()
-        return self.start_datetime <= current_datetime <= self.end_datetime
 
 class ExtendSetting(BaseModel):
     extend_days : int = Field(..., title="연장일수", description="1회 연장 시 추가되는 대출 기간", \
