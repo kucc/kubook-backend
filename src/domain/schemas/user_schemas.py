@@ -41,9 +41,9 @@ class DomainAdminGetUserItem(BaseModel):
 
 class DomainReqAdminPutUser(BaseModel):
     user_id: int = Field(title="user_id", description="관리자의 회원 ID", gt=0)
-    user_status: bool | None = Field(None, title="is_active", description="회원 상태(대출 가능 여부)", examples=[True])
+    user_status: bool | None = Field(None, title="is_active", description="회원 상태(대출 가능 여부",examples=[True])
     admin_status: bool | None = Field(None, title="admin_status", description="관리자 권한 상태")
-    expiration_date : date | None = Field(None, title="expiration_date", description="관리자 권한 만료일, \
+    expiration_date : date | None = Field(None, title="expiration_date", description="관리자 권한 만료일,\
                                           기본적으로 권한 부여일로부터 1년", examples=["2025-07-02"])
 class DomainResAdminPutUser(BaseModel):
     user_id: int = Field(title="user_id", description="유저 고유 ID", example=1111, gt=0)
