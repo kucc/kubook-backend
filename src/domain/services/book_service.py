@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy import and_, or_, select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
 from domain.schemas.book_schemas import DomainReqGetBook, DomainResGetBook, DomainResGetBookList
@@ -7,36 +7,52 @@ from repositories.models import Book
 from utils.crud_utils import get_item
 
 
-async def service_search_books(searching_keyword: str, page: int, limit: int, db: Session):
-    keyword = f"%{searching_keyword}%"
-
+async def service_search_books(
+    searching_keyword: str,
+    page: int,
+    limit: int,
+    db: Session
+) -> DomainResGetBookList:
     offset = (page - 1) * limit # Calculate offset based on the page numbe
 
     stmt = (
         select(Book)
-        .where(
-            and_(
-                Book.is_deleted == False,
-                or_(
-                    Book.book_title.ilike(keyword),
-                    Book.author.ilike(keyword),
-                    Book.publisher.ilike(keyword),
-                    Book.category_name.ilike(keyword),
-                ),
-            )
-        )
-        .order_by(Book.updated_at.desc())
-        .limit(limit)
-        .offset(offset)
+        .where(Book.is_deleted == False)
     )
+
+    search_columns = ['book_title', 'author', 'publisher', 'category_name']
+    search_conditions = []
+    params = {}
+
+    for column in search_columns:
+        search_conditions.append(f"MATCH({column}) AGAINST(:{column} IN BOOLEAN MODE)")
+        params[column] = f"{searching_keyword}*"
+
+    # Combine all search conditions with OR
+    combined_search = text(" OR ".join(search_conditions))
+    stmt = stmt.where(combined_search).params(**params)
+    """.order_by(Book.updated_at.desc())
+        .limit(limit)
+        .offset(offset)"""
+
     try:
-        books = db.execute(stmt).scalars().all()
+        books = (db.execute(
+            stmt
+            .order_by(Book.updated_at.desc())
+            .limit(limit)
+            .offset(offset)
+        )
+        .scalars()
+        .all())
 
         if not books:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Books not found"
             )
+    except HTTPException as e:
+        raise e
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
