@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 
-from domain.schemas.loan_schemas import DomainAdminGetLoan
+from domain.schemas.loan_schemas import DomainResAdminGetLoan
 
 
 class RouteResAdminGetLoanList(BaseModel):
-    data: list[DomainAdminGetLoan]
+    data: list[DomainResAdminGetLoan]
     count: int
 
