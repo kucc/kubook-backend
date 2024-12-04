@@ -16,6 +16,9 @@ class DomainResGetLoan(BaseModel):
     overdue_days: int = Field(title="overdue_days", description="연체 일자", example=1)
     return_status: bool = Field(title="return_status", description="반납 상태", example=False)
     return_date: date | None = Field(title="return_date", description="반납 날짜", example=None)
+    book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")
+    code: str = Field(title="code", description="책 코드", example="A3")
+    version: str | None = Field(title="version", description="판본", example="10e")
 
 
 class DomainReqPutLoan(BaseModel):
