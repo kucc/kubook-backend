@@ -134,7 +134,8 @@ async def service_read_new_books(page: int, limit: int, db: Session):
     stmt = (
         select(Book)
         .where(
-            Book.is_deleted == False
+            Book.is_deleted == False,
+            Book.book_status == True
         )
         .order_by(Book.created_at.desc())
         .limit(limit)

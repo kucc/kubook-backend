@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-from domain.schemas.book_schemas import DomainResGetBookList
+from domain.schemas.book_schemas import DomainResGetBookList, DomainResGetNewBookList
 
 
 class RouteResGetBookList(BaseModel):
@@ -31,5 +31,5 @@ class RouteResGetBook(BaseModel):
 
 #여기도 최신 책 리스트
 class RouteResGetNewBookList(BaseModel):
-    data: list[DomainResGetBookList]
+    data: list[DomainResGetNewBookList]
     count: int = Field(description="data 배열의 요소 개수")
