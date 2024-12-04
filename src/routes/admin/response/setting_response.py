@@ -58,6 +58,6 @@ class RouteResAdminSetting(BaseModel):
     service_date : ServiceDate
     loan : LoanSetting
     extend : ExtendSetting
-    bookreqeust : BookRequestSetting
+    bookrequest : BookRequestSetting
     created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
     updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
