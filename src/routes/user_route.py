@@ -51,7 +51,7 @@ async def get_user(
         user_id=result.user_id,
         auth_id=result.auth_id,
         email=result.email,
-        user_name=result.email,
+        user_name=result.user_name,
         is_active=result.is_active,
         github=result.github,
         instagram=result.instagram
@@ -104,7 +104,7 @@ async def put_user(
         user_id=result.user_id,
         auth_id=result.auth_id,
         email=result.email,
-        user_name=result.email,
+        user_name=result.user_name,
         is_active=result.is_active,
         github=result.github,
         instagram=result.instagram
