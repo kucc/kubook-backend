@@ -155,7 +155,7 @@ class Settings(Base):
     loan_days = Column(TINYINT(unsigned=True), nullable=False)
     loan_max_book = Column(TINYINT(unsigned=True), nullable=False)
     request_max_count = Column(TINYINT(unsigned=True), nullable=False)
-    request_max_price = Column(TINYINT(unsigned=True), nullable=False)
+    request_max_price = Column(Integer, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.now())
     updated_at = Column(TIMESTAMP, nullable=False, server_default=func.now(), onupdate=func.now())
     is_deleted = Column(Boolean, nullable=False, default=False)
