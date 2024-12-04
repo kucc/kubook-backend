@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field, root_validator
-from typing import Optional
 from fastapi import HTTPException, status
+from pydantic import BaseModel, Field, root_validator
+
+
 class RouteReqPutUser(BaseModel):
     user_name: str | None = Field(title="user_name", description="사용자 이름", example="홍길동")
     github: str | None = Field(None, title="github", description="깃허브 주소", example="https://github.com/kucc")
