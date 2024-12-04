@@ -29,7 +29,6 @@ async def get_setting(
 ):
     domain_res = await service_admin_read_setting(db)
 
-
     service_date = ServiceDate(start_date=domain_res.start_date, end_date=domain_res.end_date)
     loan = LoanSetting(loan_days=domain_res.loan_days, loan_max_book=domain_res.loan_max_book)
     extend = ExtendSetting(extend_days=domain_res.extend_days, extend_max_count=domain_res.extend_max_count)

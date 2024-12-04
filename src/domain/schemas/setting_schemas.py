@@ -1,8 +1,6 @@
 from datetime import datetime
 
-from fastapi import HTTPException, status
-from pydantic import BaseModel, Field, model_validator
-from typing_extensions import Self
+from pydantic import BaseModel, Field
 
 
 class DomainReqAdminSetting(BaseModel):
@@ -20,13 +18,11 @@ class DomainReqAdminSetting(BaseModel):
         self.end_date = self.end_date.replace(hour=23, minute=59, second=59)
         return
 
-    @model_validator(mode='after')
-    def is_service_duration(self) -> Self:
-        """현재 시간 기준으로 서비스 기간 내에 있는지 확인"""
-        current_datetime = datetime.now()
+    def is_service_duration(self, current_datetime: datetime) -> bool:
         if not (self.start_date <= current_datetime <= self.end_date):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Out of range for service date")
-        return Self
+            return False
+        return True
+
 
 class DomainResAdminSetting(BaseModel):
     setting_id: int = Field(title="setting_id", description="설정 ID", ge=1)
