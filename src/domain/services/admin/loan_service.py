@@ -5,7 +5,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session, selectinload
 
-from domain.schemas.loan_schemas import DomainAdminGetLoan, DomainResGetLoan
+from domain.schemas.loan_schemas import DomainResAdminGetLoan, DomainResGetLoan
 from repositories.models import Loan
 from utils.crud_utils import get_item
 
@@ -60,7 +60,7 @@ async def service_admin_search_loans(
     category_name: str | None,
     return_status: str | None,
     db: Session
-) -> list[DomainAdminGetLoan]:
+) -> list[DomainResAdminGetLoan]:
     stmt = (
         select(Loan)
         .join(Loan.book)
@@ -86,7 +86,7 @@ async def service_admin_search_loans(
         )
     if category_name:
         stmt = (
-            stmt.where(text("MATCH(category_name) AGAINST(:category_name IN BOOLEAN MODE)"))
+            stmt.where(text("MATCH(book.category_name) AGAINST(:category_name IN BOOLEAN MODE)"))
                 .params(category_name=f"{category_name}*")
         )
     if return_status is not None:
@@ -111,13 +111,14 @@ async def service_admin_search_loans(
                     detail=f"Book with ID {loan.book_id} not found for loan ID {loan.id}"
                 )
             search_loans.append(
-                DomainAdminGetLoan(
+                DomainResAdminGetLoan(
                     loan_id=loan.id,
                     book_id=loan.book_id,
                     user_id=loan.user_id,
                     user_name=loan.user.user_name,
                     code=loan.book.code,
                     book_title=loan.book.book_title,
+                    category_name=loan.book.category_name,
                     loan_date=loan.loan_date,
                     due_date=loan.due_date,
                     extend_status=loan.extend_status,
@@ -139,7 +140,7 @@ async def service_admin_search_loans(
     return search_loans
 
 
-async def service_admin_read_loans(db: Session) -> list[DomainAdminGetLoan]:
+async def service_admin_read_loans(db: Session) -> list[DomainResAdminGetLoan]:
     stmt = (
         select(Loan)
         .options(
@@ -170,13 +171,14 @@ async def service_admin_read_loans(db: Session) -> list[DomainAdminGetLoan]:
                     detail=f"Book with ID {loan.book_id} not found for loan ID {loan.id}"
                 )
             search_loans.append(
-                DomainAdminGetLoan(
+                DomainResAdminGetLoan(
                     loan_id=loan.id,
                     book_id=loan.book_id,
                     user_id=loan.user_id,
                     user_name=loan.user.user_name,
                     code=loan.book.code,
                     book_title=loan.book.book_title,
+                    category_name=loan.book.category_name,
                     loan_date=loan.loan_date,
                     due_date=loan.due_date,
                     extend_status=loan.extend_status,
