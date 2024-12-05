@@ -159,7 +159,6 @@ async def service_delete_bookrequest(request_data: DomainReqDelBookRequest, db: 
     try:
         requested_book.processing_status = 2
         requested_book.processed_date = date.today()
-        requested_book.is_deleted = True
         db.add(requested_book)
         db.flush()
     except Exception as e:
