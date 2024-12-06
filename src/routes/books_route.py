@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
@@ -53,9 +55,15 @@ async def get_book_by_book_id(
     status_code=status.HTTP_200_OK
 )
 async def search_books(
-    searching_keyword: str = Query(alias="search"),
-    page: int = Query(1, gt=0),
-    limit: int = Query(10, gt=0), # 차후 기본 값은 적당히 변경할 예정
+    searching_keyword: Annotated[
+        str, Query(description="Search Query", min_length=2, max_length=50)
+    ],
+    page: Annotated[
+        int, Query(description="페이지", example=1, gt=0)
+    ] = 1,
+    limit: Annotated[
+        int, Query(description="페이지 당 조회 개수", example=10, gt=0)
+    ] = 10, # 차후 기본 값은 적당히 변경할 예정
     db: Session = Depends(get_db)
 ):
     domain_res = await service_search_books(searching_keyword, page, limit, db)
@@ -65,6 +73,7 @@ async def search_books(
     )
 
     return result
+
 
 @router.get(
     "",

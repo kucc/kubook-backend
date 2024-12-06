@@ -1,9 +1,10 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from domain.schemas.user_schemas import DomainResGetUser, DomainReqPutUser, DomainResPutUser
+from domain.schemas.user_schemas import DomainReqPutUser, DomainResGetUser, DomainResPutUser
 from repositories.models import User
 from utils.crud_utils import get_item
+
 
 async def service_read_user(user_id:int, db: Session):
     user = get_item(User, user_id, db)
