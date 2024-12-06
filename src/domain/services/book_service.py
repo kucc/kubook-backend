@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy import select, text
+from sqlalchemy import or_, select, text
 from sqlalchemy.orm import Session
 
 from domain.schemas.book_schemas import DomainReqGetBook, DomainResGetBook, DomainResGetBookList
@@ -21,29 +21,32 @@ async def service_search_books(
     )
 
     search_columns = ['book_title', 'author', 'publisher', 'category_name']
-    search_conditions = []
-    params = {}
 
-    for column in search_columns:
-        search_conditions.append(f"MATCH({column}) AGAINST(:{column} IN BOOLEAN MODE)")
-        params[column] = f"{searching_keyword}*"
+    # OR 조건을 위한 조건 리스트 생성
+    conditions = [
+        text(f"MATCH({column}) AGAINST(:{column} IN BOOLEAN MODE)")
+        for column in search_columns
+    ]
 
-    # Combine all search conditions with OR
-    combined_search = text(" OR ".join(search_conditions))
-    stmt = stmt.where(combined_search).params(**params)
-    """.order_by(Book.updated_at.desc())
-        .limit(limit)
-        .offset(offset)"""
+    # 모든 조건을 OR로 결합
+    stmt = stmt.where(or_(*conditions))
 
+    # 각 열에 대해 검색 키워드 파라미터 설정
+    search_params = {column: f"{searching_keyword}*" for column in search_columns}
+    stmt = stmt.params(**search_params)
+
+    print(stmt)
     try:
-        books = (db.execute(
-            stmt
-            .order_by(Book.updated_at.desc())
-            .limit(limit)
-            .offset(offset)
+        books = (
+            db.execute(
+                stmt
+                .order_by(Book.updated_at.desc())
+                .limit(limit)
+                .offset(offset)
+            )
+            .scalars()
+            .all()
         )
-        .scalars()
-        .all())
 
         if not books:
             raise HTTPException(
