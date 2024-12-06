@@ -3,7 +3,7 @@ from sqlalchemy import or_, select, text
 from sqlalchemy.orm import Session
 
 from domain.schemas.book_schemas import DomainReqGetBook, DomainResGetBook, DomainResGetBookList
-from repositories.models import Book
+from repositories.models import Book, Loan
 from utils.crud_utils import get_item
 
 
@@ -15,8 +15,23 @@ async def service_search_books(
 ) -> DomainResGetBookList:
     offset = (page - 1) * limit # Calculate offset based on the page numbe
 
+    latest_loan_subq = (
+        select(Loan.return_status)
+        .where(Loan.book_id == Book.id)
+        .order_by(Loan.updated_at.desc())
+        .limit(1)
+    )
     stmt = (
-        select(Book)
+        select(
+            Book.id,
+            Book.book_title,
+            Book.category_name,
+            Book.image_url,
+            Book.book_status,
+            Book.created_at,
+            Book.updated_at,
+            latest_loan_subq.scalar_subquery().label("loan_status")
+        )
         .where(Book.is_deleted == False)
     )
 
@@ -44,7 +59,6 @@ async def service_search_books(
                 .limit(limit)
                 .offset(offset)
             )
-            .scalars()
             .all()
         )
 
@@ -62,20 +76,24 @@ async def service_search_books(
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    response = [
-        DomainResGetBookList(
-            book_id=book.id,
-            book_title=book.book_title,
-            category_name=book.category_name,
-            image_url=book.image_url,
-            book_status=book.book_status,
-            created_at=book.created_at,
-            updated_at=book.updated_at
-        )
-        for book in books
-    ]
+    search_books = []
+    for book in books:
+        (book_id, book_title, category_name, image_url, book_status, created_at, updated_at, loan_status) = book
 
-    return response
+        search_books.append(
+            DomainResGetBookList(
+                book_id=book_id,
+                book_title=book_title,
+                category_name=category_name,
+                image_url=image_url,
+                book_status=book_status,
+                created_at=created_at,
+                updated_at=updated_at,
+                loan_status=loan_status
+            )
+        )
+
+    return search_books
 
 
 async def service_read_book(request_data: DomainReqGetBook, db: Session):
