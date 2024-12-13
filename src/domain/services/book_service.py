@@ -32,7 +32,7 @@ async def service_search_books(
             Book.updated_at,
             latest_loan_subq.scalar_subquery().label("loan_status")
         )
-        .where(Book.is_deleted == False)
+        .where(Book.is_deleted == False and Book.book_status == True)
     )
 
     search_columns = ['book_title', 'author', 'publisher', 'category_name']
@@ -50,7 +50,7 @@ async def service_search_books(
     search_params = {column: f"{searching_keyword}*" for column in search_columns}
     stmt = stmt.params(**search_params)
 
-    print(stmt)
+    # print(stmt) # 디버깅용
     try:
         books = (
             db.execute(
