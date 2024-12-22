@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
+from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from config import Settings
@@ -16,6 +17,8 @@ async def register(request: RegisterRequest, db: Session):
 
     # If user information does not exist in the DB, create a new user
     if user is None:
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        hashed_pwd = pwd_context.hash(request.password)
         user = User(
             auth_id=request.user_name,
             auth_type='EXP',
@@ -23,6 +26,7 @@ async def register(request: RegisterRequest, db: Session):
             github_id=request.github,
             instagram_id=request.instagram,
             user_name=request.user_name,
+            password=hashed_pwd,
             is_active=True
         )
         db.add(user)
