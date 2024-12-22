@@ -9,7 +9,7 @@ from domain.services.token_service import create_user_tokens, refresh_user_token
 from externals.firebase import sign_in_with_email_and_password
 from repositories.models import User
 
-
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 async def register(request: RegisterRequest, db: Session):
 
     # Check if user information exists in the DB
@@ -17,7 +17,6 @@ async def register(request: RegisterRequest, db: Session):
 
     # If user information does not exist in the DB, create a new user
     if user is None:
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
         hashed_pwd = pwd_context.hash(request.password)
         user = User(
             auth_id=request.user_name,
@@ -104,6 +103,9 @@ async def login_with_username(
     # If user information does not exist in the DB, return error
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if not pwd_context.verify(request.password, user.password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unvalid Password")
 
     # Create JWT tokens
     token_response = create_user_tokens(user.id)
