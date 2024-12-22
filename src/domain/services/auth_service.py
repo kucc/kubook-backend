@@ -95,7 +95,7 @@ async def login_with_username(
         db: Session):
     # Authenticate user
     # Check if user information exists in the DB
-    user = db.query(User).filter(User.auth_id == request.auth_id).first()
+    user = db.query(User).filter(User.email == request.email).first()
 
     # If user information does not exist in the DB, return error
     if user is None:
