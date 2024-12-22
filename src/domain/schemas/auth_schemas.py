@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 
 
 class UserInfo(BaseModel):
@@ -22,7 +22,7 @@ class FirebaseLoginRequest(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    email: str = Field(..., example="test@test.com")
+    email: EmailStr = Field(..., example="test@test.com")
     password: str = Field(..., example="asdf1234")
 
 
@@ -33,7 +33,7 @@ class LoginResponse(BaseModel):
 
 
 class RegisterRequest(BaseModel):
-    email: str = Field(..., example="test@test.com")
+    email: EmailStr = Field(..., example="test@test.com")
     password: str = Field(..., example="asdf1234")
     user_name: str = Field(..., example="테스트 이름")
     github: Optional[str] = Field(default=None)
