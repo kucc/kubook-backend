@@ -3,7 +3,7 @@ from datetime import datetime as _datetime
 from fastapi import HTTPException, status
 from sqlalchemy import and_, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session, joinedload
 
 from domain.schemas.book_review_schemas import (
     DomainReqPostReview,
@@ -16,16 +16,22 @@ from repositories.models import Book, BookReview, User
 from utils.crud_utils import delete_item, get_item
 
 
-async def service_read_reviews_by_book_id(book_id, db: Session):
+async def service_read_reviews_by_book_id(
+    book_id: int,
+    db: Session
+) -> list[DomainResGetReviewByInfoId]:
+    # Using joinedload may reduce queries if the relationships are not large
     stmt = (
         select(BookReview)
-        .options(selectinload(BookReview.user))
+        .options(
+            joinedload(BookReview.user),
+            joinedload(BookReview.book),
+        )
         .where(and_(BookReview.book_id == book_id, BookReview.is_deleted == False))
         .order_by(BookReview.updated_at.desc())
     )
     try:
         reviews = db.execute(stmt).scalars().all()
-
         if not reviews:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reviews not found")
 
@@ -34,13 +40,15 @@ async def service_read_reviews_by_book_id(book_id, db: Session):
                 review_id=review.id,
                 user_id=review.user_id,
                 user_name=review.user.user_name,
+                book_title=review.book.book_title,
                 review_content=review.review_content,
                 created_at=review.created_at,
                 updated_at=review.updated_at,
             )
             for review in reviews
         ]
-
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -51,7 +59,7 @@ async def service_read_reviews_by_book_id(book_id, db: Session):
 
 
 async def service_read_reviews_by_user_id(
-    user_id,
+    user_id: int,
     db: Session
 ) -> list[DomainResGetReviewItem]:
     stmt = (
@@ -62,37 +70,39 @@ async def service_read_reviews_by_user_id(
 
     try:
         reviews = db.scalars(stmt).all()  # loans를 리스트로 반환
+
+        if not reviews:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Reviews not found"
+            )
+
+        result = []
+        for review in reviews:
+            if review.book is None:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail=f"Book with ID {review.book_id} not found for review ID {review.id}"
+                )
+            else:
+                result.append(
+                    DomainResGetReviewItem(
+                        review_id=review.id,
+                        user_id=review.user_id,
+                        book_id=review.book_id,
+                        review_content=review.review_content,
+                        created_at=review.created_at,
+                        updated_at=review.updated_at,
+                        book_title=review.book.book_title,
+                    )
+                )
+    except HTTPException as e:
+        raise e
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Unexpected error occurred during retrieve: {str(e)}",
-        ) from e
-
-    if not reviews:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Reviews not found"
-        )
-
-    result = []
-    for review in reviews:
-        if review.book is None:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Book with ID {review.book_id} not found for review ID {review.id}"
-            )
-        else:
-            result.append(
-                DomainResGetReviewItem(
-                    review_id=review.id,
-                    user_id=review.user_id,
-                    book_id=review.book_id,
-                    review_content=review.review_content,
-                    created_at=review.created_at,
-                    updated_at=review.updated_at,
-                    book_title=review.book.book_title,
-                )
-            )
+                detail=f"Unexpected error occurred during retrieve: {str(e)}",
+            ) from e
 
     return result
 
