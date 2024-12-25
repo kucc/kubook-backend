@@ -21,7 +21,7 @@ async def service_read_reviews_by_book_id(book_id, db: Session):
         select(BookReview)
         .options(selectinload(BookReview.user))
         .where(and_(BookReview.book_id == book_id, BookReview.is_deleted == False))
-        .order_by(BookReview.updated_at)
+        .order_by(BookReview.updated_at.desc())
     )
     try:
         reviews = db.execute(stmt).scalars().all()
