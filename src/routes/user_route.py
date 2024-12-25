@@ -127,6 +127,7 @@ async def get_all_user_reviews(
 
     result = RouteResGetReviewList(
         data=domain_res,
-        count=len(domain_res)
+        count=len(domain_res),
+        total=len(domain_res)
     )
     return result

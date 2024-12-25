@@ -37,7 +37,8 @@ async def get_all_reviews_by_book_id(
 
     result = RouteResGetReviewListByInfoId(
         data=domain_res,
-        count=len(domain_res)
+        count=len(domain_res),
+        total=len(domain_res)
     )
 
     return result

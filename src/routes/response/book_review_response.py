@@ -13,8 +13,10 @@ class RouteResGetReviewList(BaseModel):
     """
     data: list[DomainResGetReviewItem]
     count: int = Field(description="data 배열의 요소 개수")
+    total: int = Field(description="data 배열의 총 요소 개수")
 
 
 class RouteResGetReviewListByInfoId(BaseModel):
     data: list[DomainResGetReviewByInfoId]
     count: int = Field(description="data 배열의 요소 개수")
+    total: int = Field(description="data 배열의 총 요소 개수")
