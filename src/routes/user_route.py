@@ -125,7 +125,7 @@ async def get_all_user_reviews(
     limit: int = Query(10, gt=0),
     current_user=Depends(get_current_user)
 ):
-    domain_res = await service_read_reviews_by_user_id(user_id=current_user.id, page=page, limit=limit, db=db)
+    domain_res = await service_read_reviews_by_user_id(user_id=current_user.id, db=db)
 
     result = RouteResGetReviewList(
         data=domain_res.data,

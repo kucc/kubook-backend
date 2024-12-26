@@ -81,24 +81,15 @@ async def service_read_reviews_by_book_id(
 
 async def service_read_reviews_by_user_id(
     user_id: int,
-    page: int,
-    limit: int,
     db: Session
 ) -> DomainResGetReviewList:
     total = db.execute(select(func.count()).select_from(BookReview)
                        .where(and_(BookReview.user_id == user_id, BookReview.is_deleted == False))).scalar()
 
-    if ceil(total/limit) < page:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Page is out of range"
-        )
-    offset = (page - 1) * limit
     stmt = (
         select(BookReview)
         .where(and_(BookReview.user_id == user_id, BookReview.is_deleted == False))
         .order_by(BookReview.updated_at.desc())
-        .limit(limit).offset(offset)
     )
 
     try:
