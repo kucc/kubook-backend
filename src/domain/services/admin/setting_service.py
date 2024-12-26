@@ -2,7 +2,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm.session import Session
 
-from domain.schemas.setting_schemas import DomainResAdminSetting
+from domain.schemas.setting_schemas import DomainReqAdminSetting, DomainResAdminSetting
 from repositories.models import Settings
 
 
@@ -38,7 +38,8 @@ async def service_admin_read_setting(db: Session):
 
     return response
 
-async def service_admin_create_setting(request: DomainResAdminSetting, db: Session):
+async def service_admin_create_setting(request: DomainReqAdminSetting, db: Session):
+    request.set_datetime()
     setting = Settings(
         start_date=request.start_date,
         end_date=request.end_date,

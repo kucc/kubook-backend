@@ -69,7 +69,6 @@ async def create_setting(
         request_max_count=setting.request_max_count,
         request_max_price=setting.request_max_price
     )
-    domain_req.set_datetime()
     domain_res = await service_admin_create_setting(domain_req, db)
     result = RouteResAdminSetting(
         setting_id=domain_res.setting_id,
