@@ -1,7 +1,8 @@
 from datetime import datetime as _datetime
+from math import ceil
 
 from fastapi import HTTPException, status
-from sqlalchemy import and_, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
@@ -10,6 +11,8 @@ from domain.schemas.book_review_schemas import (
     DomainReqPutReview,
     DomainResGetReviewByInfoId,
     DomainResGetReviewItem,
+    DomainResGetReviewList,
+    DomainResGetReviewListByInfoId,
     DomainResPostReview,
 )
 from repositories.models import Book, BookReview, User
@@ -18,8 +21,19 @@ from utils.crud_utils import delete_item, get_item
 
 async def service_read_reviews_by_book_id(
     book_id: int,
+    page: int,
+    limit: int,
     db: Session
-) -> list[DomainResGetReviewByInfoId]:
+) -> DomainResGetReviewListByInfoId:
+    total = db.execute(select(func.count()).select_from(BookReview)
+                       .where(and_(BookReview.book_id == book_id, BookReview.is_deleted == False))).scalar()
+
+    if ceil(total/limit) < page:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Page is out of range"
+        )
+    offset = (page - 1) * limit
     # Using joinedload may reduce queries if the relationships are not large
     stmt = (
         select(BookReview)
@@ -29,13 +43,14 @@ async def service_read_reviews_by_book_id(
         )
         .where(and_(BookReview.book_id == book_id, BookReview.is_deleted == False))
         .order_by(BookReview.updated_at.desc())
+        .limit(limit).offset(offset)
     )
     try:
         reviews = db.execute(stmt).scalars().all()
         if not reviews:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Reviews not found")
 
-        response = [
+        result = [
             DomainResGetReviewByInfoId(
                 review_id=review.id,
                 user_id=review.user_id,
@@ -47,6 +62,12 @@ async def service_read_reviews_by_book_id(
             )
             for review in reviews
         ]
+
+        response = DomainResGetReviewListByInfoId(
+            data = result,
+            total = total
+        )
+
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -60,12 +81,24 @@ async def service_read_reviews_by_book_id(
 
 async def service_read_reviews_by_user_id(
     user_id: int,
+    page: int,
+    limit: int,
     db: Session
-) -> list[DomainResGetReviewItem]:
+) -> DomainResGetReviewList:
+    total = db.execute(select(func.count()).select_from(BookReview)
+                       .where(and_(BookReview.user_id == user_id, BookReview.is_deleted == False))).scalar()
+
+    if ceil(total/limit) < page:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Page is out of range"
+        )
+    offset = (page - 1) * limit
     stmt = (
         select(BookReview)
         .where(and_(BookReview.user_id == user_id, BookReview.is_deleted == False))
         .order_by(BookReview.updated_at.desc())
+        .limit(limit).offset(offset)
     )
 
     try:
@@ -96,6 +129,12 @@ async def service_read_reviews_by_user_id(
                         book_title=review.book.book_title,
                     )
                 )
+
+        response = DomainResGetReviewList(
+            data = result,
+            total = total
+        )
+
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -104,7 +143,7 @@ async def service_read_reviews_by_user_id(
                 detail=f"Unexpected error occurred during retrieve: {str(e)}",
             ) from e
 
-    return result
+    return response
 
 
 async def service_delete_review(review_id, user_id, db: Session):

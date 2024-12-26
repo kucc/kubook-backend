@@ -12,6 +12,12 @@ class DomainResGetReviewByInfoId(BaseModel):
     updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
     book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")
 
+
+class DomainResGetReviewListByInfoId(BaseModel):
+    data: list[DomainResGetReviewByInfoId]
+    total: int = Field(description="BookReview 객체의 총 요소 개수")
+
+
 class Review(BaseModel):
     id: int = Field(title="book_review_id", description="리뷰 정보 id", example=1, gt=0)
     user_id: int = Field(title="user_id", description="리뷰한 사용자 ID", example=1, gt=0)
@@ -31,6 +37,11 @@ class DomainResGetReviewItem(BaseModel):
     book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")
 
 
+class DomainResGetReviewList(BaseModel):
+    data: list[DomainResGetReviewItem]
+    total: int = Field(description="BookReview 객체의 총 요소 개수")
+
+
 class DomainReqPostReview(BaseModel):
     user_id: int = Field(title="user_id", description="리뷰한 사용자 ID", example=1, gt=0)
     book_id: int = Field(title="book_id", description="리뷰한 책 정보 ID", example=1, gt=0)
@@ -44,6 +55,7 @@ class DomainResPostReview(BaseModel):
     book_id: int = Field(title="book_id", description="리뷰한 책 정보 ID", example=1, gt=0)
     review_content: str = Field(title="review_content", description="리뷰 내용")
     created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
+
 
 class DomainReqPutReview(BaseModel):
     review_id: int = Field(title="book_review_id", description="리뷰 id", example=1, gt=0)
