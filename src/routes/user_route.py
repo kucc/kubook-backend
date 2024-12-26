@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from dependencies import get_current_user, get_db
@@ -53,7 +53,7 @@ async def get_user(
         user_id=result.user_id,
         auth_id=result.auth_id,
         email=result.email,
-        user_name=result.email,
+        user_name=result.user_name,
         is_active=result.is_active,
         github=result.github,
         instagram=result.instagram
@@ -106,7 +106,7 @@ async def put_user(
         user_id=result.user_id,
         auth_id=result.auth_id,
         email=result.email,
-        user_name=result.email,
+        user_name=result.user_name,
         is_active=result.is_active,
         github=result.github,
         instagram=result.instagram
@@ -121,12 +121,15 @@ async def put_user(
 )
 async def get_all_user_reviews(
     db: Session = Depends(get_db),
+    page: int = Query(1, gt=0),
+    limit: int = Query(10, gt=0),
     current_user=Depends(get_current_user)
 ):
-    domain_res = await service_read_reviews_by_user_id(current_user.id, db)
+    domain_res = await service_read_reviews_by_user_id(user_id=current_user.id, db=db)
 
     result = RouteResGetReviewList(
-        data=domain_res,
-        count=len(domain_res)
+        data=domain_res.data,
+        count=len(domain_res.data),
+        total=domain_res.total
     )
     return result

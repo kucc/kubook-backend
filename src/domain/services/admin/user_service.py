@@ -49,7 +49,6 @@ async def service_admin_search_users(
             DomainAdminGetUserItem(
                 user_id=user.id,
                 auth_id=user.auth_id,
-                auth_type=user.auth_type,
                 email=user.email,
                 user_name=user.user_name,
                 github_id=user.github_id,
@@ -57,6 +56,7 @@ async def service_admin_search_users(
                 is_active=user.is_active,
                 created_at=user.created_at,
                 updated_at=user.updated_at,
+                is_admin=True if user.admin and user.admin[-1].admin_status else False
             )
             for user in users
         ]
@@ -93,7 +93,6 @@ async def service_admin_read_users(db: Session) -> list[DomainAdminGetUserItem]:
             DomainAdminGetUserItem(
                 user_id=user.id,
                 auth_id=user.auth_id,
-                auth_type=user.auth_type,
                 email=user.email,
                 user_name=user.user_name,
                 github_id=user.github_id,
@@ -101,6 +100,7 @@ async def service_admin_read_users(db: Session) -> list[DomainAdminGetUserItem]:
                 is_active=user.is_active,
                 created_at=user.created_at,
                 updated_at=user.updated_at,
+                is_admin=True if user.admin and user.admin[-1].admin_status else False
             )
             for user in users
         ]

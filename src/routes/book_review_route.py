@@ -31,13 +31,16 @@ router = APIRouter(
 )
 async def get_all_reviews_by_book_id(
     book_id: int = Query(alias="books"),
+    page: int =  Query(1, gt=0),
+    limit: int = Query(10, gt=0),
     db: Session = Depends(get_db),
 ):
-    domain_res = await service_read_reviews_by_book_id(book_id, db)
+    domain_res = await service_read_reviews_by_book_id(book_id=book_id, page=page, limit=limit, db=db)
 
     result = RouteResGetReviewListByInfoId(
-        data=domain_res,
-        count=len(domain_res)
+        data=domain_res.data,
+        count=len(domain_res.data), # count는 현재 page에 있는 리뷰의 개수
+        total=domain_res.total # total은 총 리뷰의 개수
     )
 
     return result

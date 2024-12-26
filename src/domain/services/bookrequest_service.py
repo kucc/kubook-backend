@@ -17,14 +17,6 @@ from utils.crud_utils import get_item
 
 
 async def service_create_bookrequest(request: DomainReqPostBookRequest, db: Session):
-    # check if the book already exists in database
-    stmt = select(RequestedBook).where(RequestedBook.book_title == request.book_title)
-    valid_request = db.execute(stmt).scalar_one_or_none()
-
-    if valid_request:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                            detail="Already requested book")
-
     # check if the user exists in database
     stmt = select(User).where(User.id == request.user_id)
     valid_user_id = db.execute(stmt).scalar_one_or_none()
@@ -159,7 +151,6 @@ async def service_delete_bookrequest(request_data: DomainReqDelBookRequest, db: 
     try:
         requested_book.processing_status = 2
         requested_book.processed_date = date.today()
-        requested_book.is_deleted = True
         db.add(requested_book)
         db.flush()
     except Exception as e:
