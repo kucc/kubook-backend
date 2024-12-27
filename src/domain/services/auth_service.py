@@ -13,7 +13,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 async def register(request: RegisterRequest, db: Session):
 
     # Check if user information exists in the DB
-    user = db.query(User).filter((User.user_name == request.user_name) | (User.email == request.email)).first()
+    user = db.query(User).filter(User.email == request.email).first()
 
     # If user information does not exist in the DB, create a new user
     if user is None:
