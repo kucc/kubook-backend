@@ -112,7 +112,10 @@ async def login_with_username(
     return response
 
 async def service_refresh_token(access_token: str, refresh_token: str):
-    token_response = refresh_user_tokens(access_token, refresh_token)
+    try :
+        token_response = refresh_user_tokens(access_token, refresh_token)
+    except HTTPException as e:
+        raise e
     response = JSONResponse(content=None, status_code=status.HTTP_202_ACCEPTED)
     response.headers["Authorization"]= token_response["access_token"]
     response.set_cookie(key="refresh_token", value=token_response["refresh_token"])

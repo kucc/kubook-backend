@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
@@ -27,6 +28,7 @@ def create_jwt(
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
+        print(0, expire)
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
@@ -65,7 +67,7 @@ def create_user_tokens(user_id: int) -> dict:
         algorithm=Settings().JWT_ALGORITHM,
         expires_delta=refresh_token_expires
     )
-
+    print(access_token_expires, refresh_token_expires)
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
@@ -76,22 +78,23 @@ def refresh_user_tokens(access_token: str, refresh_token: str) -> dict:
     try:
         # access token 유효성 검사
         payload_access = jwt.decode(access_token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
-        if datetime.fromtimestamp(payload_access.get("exp")) >= datetime.now():
+        if payload_access.get("exp") >= time.time():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Access token has not expired",
+                detail="Access Token has not expired",
             )
-        # refresh token 유효성, 만료 여부 검사
-        payload = jwt.decode(refresh_token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
+        try:
+            payload = jwt.decode(refresh_token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
+        except ExpiredSignatureError as err:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Refresh Token has expired",
+            ) from err
         user_id = payload.get("sub")
         refresh_token = create_user_tokens(user_id=user_id)
         return refresh_token
-
-    except ExpiredSignatureError as err:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Refresh Token has expired",
-        ) from err
+    except HTTPException as err:
+        raise err
     except JWTError as err:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
