@@ -5,12 +5,12 @@ from sqlalchemy.orm import Session
 
 from config import Settings
 from domain.schemas.auth_schemas import LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, UserInfo
-from domain.services.token_service import create_user_tokens, refresh_user_tokens, verify_token
+from domain.services.token_service import create_user_tokens, verify_jwt
 from externals.firebase import sign_in_with_email_and_password
 from repositories.models import User
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-async def register(request: RegisterRequest, db: Session):
+async def service_register(request: RegisterRequest, db: Session):
 
     # Check if user information exists in the DB
     user = db.query(User).filter(User.email == request.email).first()
@@ -54,7 +54,7 @@ async def register(request: RegisterRequest, db: Session):
 # firebase를 사용한 로그인
 
 
-async def login_with_firebase(request:LoginRequest, db: Session):
+async def service_login_sso(request:LoginRequest, db: Session):
     # Authenticate user
     # Check if user exists in Firebase
 
@@ -95,7 +95,7 @@ async def login_with_firebase(request:LoginRequest, db: Session):
     return response
 
 
-async def login_with_username(
+async def service_login(
         request: LoginRequest,
         db: Session):
     # Authenticate user
@@ -128,19 +128,26 @@ async def login_with_username(
 
 async def service_refresh_token(access_token: str, refresh_token: str):
     try:
-        verified_access = verify_token(access_token)
-        if verified_access > -1 :
+        verified_access = verify_jwt(access_token)
+        verified_refresh = verify_jwt(refresh_token)
+        if verified_refresh < 0 :
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Available Access Token",
+                status_code=status.HTTP_410_GONE,
+                detail="Invalid / Expired Refresh Token",
                 headers={"WWW-Authenticate": "Bearer"}
             )
-        elif verified_access == -1 :
-            token_response = refresh_user_tokens(refresh_token)
+        elif verified_access > 0 :
+            return JSONResponse(
+                status_code=status.HTTP_208_ALREADY_REPORTED,
+                content={"detail" : "Available Tokens"}
+            )
+        else:
+            token_response = create_user_tokens(verified_refresh)
+            response = JSONResponse(content=None, status_code=status.HTTP_201_CREATED, headers={
+                "Authorization" : token_response["access_token"]
+            })
+            response.set_cookie(key="refresh_token", value=token_response["refresh_token"])
+            return response
+
     except HTTPException as e:
         raise e
-    response = JSONResponse(content=None, status_code=status.HTTP_201_CREATED, headers={
-        "Authorization" : token_response["access_token"]
-    })
-    response.set_cookie(key="refresh_token", value=token_response["refresh_token"])
-    return response
