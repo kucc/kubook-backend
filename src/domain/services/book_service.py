@@ -1,8 +1,15 @@
+from math import ceil
+
 from fastapi import HTTPException, status
-from sqlalchemy import or_, select, text
+from sqlalchemy import func, or_, select, text
 from sqlalchemy.orm import Session
 
-from domain.schemas.book_schemas import DomainReqGetBook, DomainResGetBook, DomainResGetBookList
+from domain.schemas.book_schemas import (
+    DomainReqGetBook,
+    DomainResGetBook,
+    DomainResGetBookList,
+    DomainResGetBookListWithTotal,
+)
 from repositories.models import Book, Loan
 from utils.crud_utils import get_item
 
@@ -69,6 +76,15 @@ async def service_search_books(
             )
             .all()
         )
+        # Get total count using the same stmt conditions
+        count_stmt = stmt.with_only_columns(func.count())
+        total = db.execute(count_stmt).scalar()
+
+        if ceil(total/limit) < page:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Page is out of range"
+            )
 
         if not books:
             raise HTTPException(
@@ -101,7 +117,11 @@ async def service_search_books(
             )
         )
 
-    return search_books
+    response = DomainResGetBookListWithTotal(
+        data=search_books,
+        total=total
+    )
+    return response
 
 
 async def service_read_book(request_data: DomainReqGetBook, db: Session):
