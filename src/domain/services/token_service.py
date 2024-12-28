@@ -1,4 +1,3 @@
-import time
 from datetime import datetime, timedelta, timezone
 
 from fastapi import HTTPException, status
@@ -28,16 +27,11 @@ def create_jwt(
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
-        print(0, expire)
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, secret_key, algorithm=algorithm)
     return encoded_jwt
-
-# TODO: 여기서부터 이어서 할 거
-# 내일 할 일: dependencies 전부, database,
-
 
 def create_user_tokens(user_id: int) -> dict:
     """
@@ -67,36 +61,39 @@ def create_user_tokens(user_id: int) -> dict:
         algorithm=Settings().JWT_ALGORITHM,
         expires_delta=refresh_token_expires
     )
-    print(access_token_expires, refresh_token_expires)
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
         "token_type": "bearer"
     }
 
-def refresh_user_tokens(access_token: str, refresh_token: str) -> dict:
+def verify_token(token: str) -> int:
     try:
-        # access token 유효성 검사
-        payload_access = jwt.decode(access_token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
-        if payload_access.get("exp") >= time.time():
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Access Token has not expired",
-            )
-        try:
-            payload = jwt.decode(refresh_token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
-        except ExpiredSignatureError as err:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Refresh Token has expired",
-            ) from err
-        user_id = payload.get("sub")
-        refresh_token = create_user_tokens(user_id=user_id)
+        payload = jwt.decode(token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
+    except ExpiredSignatureError:
+        return -1
+    except JWTError:
+        return -2
+    else :
+        return int(payload.get("sub"))
+
+
+
+def refresh_user_tokens(refresh_token: str) -> dict:
+    verified_refresh = verify_token(refresh_token)
+    user_id = verified_refresh
+    if user_id > -1:
+        refresh_token = create_user_tokens(user_id)
         return refresh_token
-    except HTTPException as err:
-        raise err
-    except JWTError as err:
+    elif user_id == -1:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid token",
-        ) from err
+            status_code=status.HTTP_410_GONE,
+            detail="Refresh Token Expired",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Invalid Refresh Token",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
