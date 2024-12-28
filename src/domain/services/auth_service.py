@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 from fastapi.responses import JSONResponse
+from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from config import Settings
@@ -8,19 +9,23 @@ from domain.services.token_service import create_user_tokens, refresh_user_token
 from externals.firebase import sign_in_with_email_and_password
 from repositories.models import User
 
-
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 async def register(request: RegisterRequest, db: Session):
 
     # Check if user information exists in the DB
-    user = db.query(User).filter(User.user_name == request.user_name).first()
+    user = db.query(User).filter(User.email == request.email).first()
 
     # If user information does not exist in the DB, create a new user
     if user is None:
+        hashed_pwd = pwd_context.hash(request.password)
         user = User(
             auth_id=request.user_name,
             auth_type='EXP',
-            email="none",
+            email=request.email,
+            github_id=request.github,
+            instagram_id=request.instagram,
             user_name=request.user_name,
+            password=hashed_pwd,
             is_active=True
         )
         db.add(user)
@@ -93,11 +98,14 @@ async def login_with_username(
         db: Session):
     # Authenticate user
     # Check if user information exists in the DB
-    user = db.query(User).filter(User.auth_id == request.auth_id).first()
+    user = db.query(User).filter(User.email == request.email).first()
 
     # If user information does not exist in the DB, return error
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if not pwd_context.verify(request.password, user.password):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unvalid Password")
 
     # Create JWT tokens
     token_response = create_user_tokens(user.id)

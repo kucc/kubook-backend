@@ -95,7 +95,7 @@ async def update_user_bookrequest(
 
 @router.delete(
     "/{request_id}",
-    summary="도서 구매 요청 삭제 (요청자 취소)",
+    summary="도서 구매 요청 취소",
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_user_bookrequest(
