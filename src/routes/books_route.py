@@ -29,6 +29,7 @@ async def get_book_by_book_id(
     result = RouteResGetBook(
         book_id=domain_res.book_id,
         book_title=domain_res.book_title,
+        loanable=domain_res.loanable,
         code=domain_res.code,
         category_name=domain_res.category_name,
         subtitle=domain_res.subtitle,
