@@ -49,15 +49,18 @@ async def get_book_by_book_id(
 
 
 @router.get(
-    "/",
+    "/search",
     summary="도서 검색",
     response_model=RouteResGetBookList,
     status_code=status.HTTP_200_OK
 )
 async def search_books(
-    searching_keyword: Annotated[
+    search: Annotated[
         str, Query(description="Search Query", min_length=2, max_length=50)
-    ],
+    ] = None,
+    is_loanable: Annotated[
+        bool, Query(description="대출 가능 여부", example=True)
+    ] = None,
     page: Annotated[
         int, Query(description="페이지", example=1, gt=0)
     ] = 1,
@@ -65,8 +68,14 @@ async def search_books(
         int, Query(description="페이지 당 조회 개수", example=10, gt=0)
     ] = 10, # 차후 기본 값은 적당히 변경할 예정
     db: Session = Depends(get_db)
-):
-    domain_res = await service_search_books(searching_keyword, page, limit, db)
+) -> RouteResGetBookList:
+    domain_res = await service_search_books(
+        search=search,
+        is_loanable=is_loanable,
+        page=page,
+        limit=limit,
+        db=db
+    )
     result = RouteResGetBookList(
         data=domain_res,
         count=len(domain_res)
@@ -82,8 +91,12 @@ async def search_books(
     status_code=status.HTTP_200_OK
 )
 async def get_books(
-    page: int = Query(1, gt=0),
-    limit: int = Query(10, gt=0), # 차후 기본 값은 적당히 변경할 예정
+    page: Annotated[
+        int, Query(description="페이지", example=1, gt=0)
+    ] = 1,
+    limit: Annotated[
+        int, Query(description="페이지 당 조회 개수", example=10, gt=0)
+    ] = 10, # 차후 기본 값은 적당히 변경할 예정
     db: Session = Depends(get_db)
 ):
     domain_res = await service_read_books(page, limit, db)

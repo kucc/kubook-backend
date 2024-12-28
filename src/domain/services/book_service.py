@@ -8,11 +8,18 @@ from utils.crud_utils import get_item
 
 
 async def service_search_books(
-    searching_keyword: str,
+    search: str,
+    is_loanable: bool,
     page: int,
     limit: int,
     db: Session
-) -> DomainResGetBookList:
+) -> list[DomainResGetBookList]:
+    if search is None and is_loanable is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Searching keyword or is_loanable should be provided"
+        )
+
     offset = (page - 1) * limit # Calculate offset based on the page numbe
 
     latest_loan_subq = (
@@ -35,20 +42,21 @@ async def service_search_books(
         .where(Book.is_deleted == False and Book.book_status == True)
     )
 
-    search_columns = ['book_title', 'author', 'publisher', 'category_name']
+    if search: # if search keyword is provided
+        search_columns = ['book_title', 'author', 'publisher', 'category_name']
 
-    # OR 조건을 위한 조건 리스트 생성
-    conditions = [
-        text(f"MATCH({column}) AGAINST(:{column} IN BOOLEAN MODE)")
-        for column in search_columns
-    ]
+        # OR 조건을 위한 조건 리스트 생성
+        conditions = [
+            text(f"MATCH({column}) AGAINST(:{column} IN BOOLEAN MODE)")
+            for column in search_columns
+        ]
 
-    # 모든 조건을 OR로 결합
-    stmt = stmt.where(or_(*conditions))
+        # 모든 조건을 OR로 결합
+        stmt = stmt.where(or_(*conditions))
 
-    # 각 열에 대해 검색 키워드 파라미터 설정
-    search_params = {column: f"{searching_keyword}*" for column in search_columns}
-    stmt = stmt.params(**search_params)
+        # 각 열에 대해 검색 키워드 파라미터 설정
+        search_params = {column: f"{search}*" for column in search_columns}
+        stmt = stmt.params(**search_params)
 
     # print(stmt) # 디버깅용
     try:
@@ -89,7 +97,7 @@ async def service_search_books(
                 book_status=book_status,
                 created_at=created_at,
                 updated_at=updated_at,
-                loan_status=loan_status
+                is_loanable = False if loan_status == True else True
             )
         )
 
