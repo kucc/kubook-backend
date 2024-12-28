@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.sql import and_
 
 from database import get_db_session
-from domain.services.token_service import verify_token
+from domain.services.token_service import verify_jwt
 from repositories.models import User
 
 
@@ -26,7 +26,7 @@ async def get_current_user(token:str=Header(None), db: Session = Depends(get_db)
     if not token:
         raise credentials_exception
     try:
-        user_id = verify_token(token)
+        user_id = verify_jwt(token)
         if user_id < 0:
             raise credentials_exception
         stmt = select(User).where(and_(User.id == user_id, User.is_deleted==False))
@@ -44,7 +44,7 @@ async def get_current_user(token:str=Header(None), db: Session = Depends(get_db)
 def get_current_active_user(user: User = Depends(get_current_user)):
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Inactive user"
         )
     return user
