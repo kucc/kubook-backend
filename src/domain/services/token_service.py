@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta, timezone
 
-from fastapi import HTTPException, status
 from jose import ExpiredSignatureError, JWTError, jwt
 
 from config import Settings
@@ -53,7 +52,7 @@ def create_user_tokens(user_id: int) -> dict:
         expires_delta=access_token_expires
     )
 
-    # Create Refresh Token
+    # Create New Token
     refresh_token_expires = timedelta(minutes=Settings().JWT_REFRESH_EXPIRATION_TIME_MINUTES)
     refresh_token = create_jwt(
         data={"sub": str(user_id)},
@@ -67,7 +66,7 @@ def create_user_tokens(user_id: int) -> dict:
         "token_type": "bearer"
     }
 
-def verify_token(token: str) -> int:
+def verify_jwt(token: str) -> int:
     try:
         payload = jwt.decode(token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
     except ExpiredSignatureError:
@@ -77,23 +76,3 @@ def verify_token(token: str) -> int:
     else :
         return int(payload.get("sub"))
 
-
-
-def refresh_user_tokens(refresh_token: str) -> dict:
-    verified_refresh = verify_token(refresh_token)
-    user_id = verified_refresh
-    if user_id > -1:
-        refresh_token = create_user_tokens(user_id)
-        return refresh_token
-    elif user_id == -1:
-        raise HTTPException(
-            status_code=status.HTTP_410_GONE,
-            detail="Refresh Token Expired",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Invalid Refresh Token",
-            headers={"WWW-Authenticate": "Bearer"}
-        )
