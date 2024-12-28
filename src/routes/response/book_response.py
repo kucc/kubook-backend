@@ -6,6 +6,7 @@ from domain.schemas.book_schemas import DomainResGetBookList
 class RouteResGetBookList(BaseModel):
     data: list[DomainResGetBookList]
     count: int = Field(description="data 배열의 요소 개수")
+    total: int = Field(description="data 배열의 총 요소 개수")
 
 
 class RouteResGetBook(BaseModel):
