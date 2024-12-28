@@ -1,7 +1,7 @@
 from math import ceil
 
 from fastapi import HTTPException, status
-from sqlalchemy import func, or_, select, text
+from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.orm import Session
 
 from domain.schemas.book_schemas import (
@@ -20,8 +20,8 @@ async def service_search_books(
     page: int,
     limit: int,
     db: Session
-) -> list[DomainResGetBookList]:
-    if search is None and is_loanable is None:
+) -> DomainResGetBookListWithTotal:
+    if not search and is_loanable is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Searching keyword or is_loanable should be provided"
@@ -34,7 +34,8 @@ async def service_search_books(
         .where(Loan.book_id == Book.id)
         .order_by(Loan.updated_at.desc())
         .limit(1)
-    )
+    ).scalar_subquery()
+
     stmt = (
         select(
             Book.id,
@@ -44,15 +45,15 @@ async def service_search_books(
             Book.book_status,
             Book.created_at,
             Book.updated_at,
-            latest_loan_subq.scalar_subquery().label("loan_status")
+            latest_loan_subq.label("loan_status")
         )
-        .where(Book.is_deleted == False and Book.book_status == True)
+        .where(and_(Book.is_deleted == False, Book.book_status == True))
     )
 
     if search: # if search keyword is provided
         search_columns = ['book_title', 'author', 'publisher', 'category_name']
 
-        # OR 조건을 위한 조건 리스트 생성
+        # Create a list of conditions for OR operation
         conditions = [
             text(f"MATCH({column}) AGAINST(:{column} IN BOOLEAN MODE)")
             for column in search_columns
@@ -64,13 +65,18 @@ async def service_search_books(
         # 각 열에 대해 검색 키워드 파라미터 설정
         search_params = {column: f"{search}*" for column in search_columns}
         stmt = stmt.params(**search_params)
+    if is_loanable is not None:
+        if is_loanable:
+            stmt = stmt.where(or_(latest_loan_subq == False, latest_loan_subq.is_(None)))
+        else:
+            stmt = stmt.where(latest_loan_subq == True)
 
     # print(stmt) # 디버깅용
     try:
         books = (
             db.execute(
                 stmt
-                .order_by(Book.updated_at.desc())
+                .order_by(Book.updated_at.desc(), Book.id.asc())
                 .limit(limit)
                 .offset(offset)
             )

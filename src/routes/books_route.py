@@ -13,6 +13,42 @@ router = APIRouter(
     tags=["books"]
 )
 
+@router.get(
+    "/search",
+    summary="도서 검색",
+    response_model=RouteResGetBookList,
+    status_code=status.HTTP_200_OK
+)
+async def search_books(
+    search: Annotated[
+        str, Query(description="Search Query", min_length=2, max_length=50)
+    ] = None,
+    is_loanable: Annotated[
+        bool, Query(description="대출 가능 여부", example=True)
+    ] = None,
+    page: Annotated[
+        int, Query(description="페이지", example=1, gt=0)
+    ] = 1,
+    limit: Annotated[
+        int, Query(description="페이지 당 조회 개수", example=10, gt=0)
+    ] = 10, # 차후 기본 값은 적당히 변경할 예정
+    db: Session = Depends(get_db)
+) -> RouteResGetBookList:
+    domain_res = await service_search_books(
+        search=search,
+        is_loanable=is_loanable,
+        page=page,
+        limit=limit,
+        db=db
+    )
+    result = RouteResGetBookList(
+        data=domain_res.data,
+        count=len(domain_res.data),
+        total=domain_res.total
+    )
+
+    return result
+
 
 @router.get(
     "/{book_id}",
@@ -43,42 +79,6 @@ async def get_book_by_book_id(
         book_status=domain_res.book_status,
         created_at=domain_res.created_at,
         updated_at=domain_res.updated_at
-    )
-
-    return result
-
-
-@router.get(
-    "/search",
-    summary="도서 검색",
-    response_model=RouteResGetBookList,
-    status_code=status.HTTP_200_OK
-)
-async def search_books(
-    search: Annotated[
-        str, Query(description="Search Query", min_length=2, max_length=50)
-    ] = None,
-    is_loanable: Annotated[
-        bool, Query(description="대출 가능 여부", example=True)
-    ] = None,
-    page: Annotated[
-        int, Query(description="페이지", example=1, gt=0)
-    ] = 1,
-    limit: Annotated[
-        int, Query(description="페이지 당 조회 개수", example=10, gt=0)
-    ] = 10, # 차후 기본 값은 적당히 변경할 예정
-    db: Session = Depends(get_db)
-) -> RouteResGetBookList:
-    domain_res = await service_search_books(
-        search=search,
-        is_loanable=is_loanable,
-        page=page,
-        limit=limit,
-        db=db
-    )
-    result = RouteResGetBookList(
-        data=domain_res,
-        count=len(domain_res)
     )
 
     return result
