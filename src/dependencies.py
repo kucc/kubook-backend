@@ -17,15 +17,14 @@ def get_db():
     finally:
         session.close()
 
-
-async def get_current_user(token=Header(None), db: Session = Depends(get_db)):
+async def get_current_user(authorization=Header(None), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
+        payload = jwt.decode(authorization, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
         user_id: int = int(payload.get("sub"))
         if user_id is None:
             raise credentials_exception
@@ -34,10 +33,12 @@ async def get_current_user(token=Header(None), db: Session = Depends(get_db)):
         if user is None:
             raise credentials_exception
         return user
+    except HTTPException as err:
+        raise err
     except ExpiredSignatureError as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
+            detail="Access Token has expired",
         ) from err
     except JWTError as err:
         raise HTTPException(
