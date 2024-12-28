@@ -102,9 +102,12 @@ async def service_read_book(request_data: DomainReqGetBook, db: Session):
     if not book:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Requested book not found")
 
+    loanable = False if book.loans and book.loans[-1].return_status == False else True
+
     response = DomainResGetBook(
         book_id=book.id,
         book_title=book.book_title,
+        loanable=loanable,
         code=book.code,
         category_name=book.category_name,
         subtitle=book.subtitle,
