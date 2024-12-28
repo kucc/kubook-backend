@@ -20,7 +20,7 @@ class User(Base):
     created_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp())
     updated_at = Column(TIMESTAMP, nullable=False, default=func.current_timestamp(), onupdate=func.current_timestamp())
     is_deleted = Column(Boolean, nullable=False, default=False)
-
+    password = Column(Text, nullable=False)
     # Relationships
     admin = relationship("Admin", back_populates="user")
     requested_books = relationship("RequestedBook", back_populates="user")
