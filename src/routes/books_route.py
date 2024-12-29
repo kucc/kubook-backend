@@ -43,7 +43,7 @@ async def search_books(
     )
     result = RouteResGetBookList(
         data=domain_res.data,
-        count=len(domain_res.data),
+        count=domain_res.count,
         total=domain_res.total
     )
 
@@ -102,8 +102,9 @@ async def get_books(
 ):
     domain_res = await service_read_books(page, limit, db)
     result = RouteResGetBookList(
-        data=domain_res,
-        count=len(domain_res)
+        data=domain_res.data,
+        count=domain_res.count,
+        total=domain_res.total
     )
 
     return result
