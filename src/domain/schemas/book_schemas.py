@@ -36,12 +36,11 @@ class DomainResGetBookItem(BaseModel):
     book_status: bool = Field(title="book_stauts", description="책 상태", example=True)
     created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
     updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
-    loanable: bool | None = Field(title="loan_status", description="대출 상태", example=False)
+    loanable: bool = Field(title="loan_status", description="대출 상태", example=False)
 
 
 class DomainResGetBookList(BaseModel):
     data: list[DomainResGetBookItem]
-    count : int = Field(description="data 배열의 요소 개수")
     total: int = Field(description="Book 객체의 총 요소 개수")
 
 
