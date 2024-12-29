@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from domain.schemas.book_schemas import (
     DomainReqGetBook,
     DomainResGetBook,
+    DomainResGetBookItem,
     DomainResGetBookList,
-    DomainResGetBookListWithTotal,
 )
 from repositories.models import Book, Loan
 
@@ -19,7 +19,7 @@ async def service_search_books(
     page: int,
     limit: int,
     db: Session
-) -> DomainResGetBookListWithTotal:
+) -> DomainResGetBookList:
     if not search and is_loanable is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -74,7 +74,7 @@ async def service_search_books(
                 stmt = stmt.where(or_(latest_loan_subq == True, latest_loan_subq.is_(None)))
 
 
-    print(stmt) # 디버깅용
+    # print(stmt) # 디버깅용
     try:
         books = (
             db.execute(
@@ -113,8 +113,11 @@ async def service_search_books(
     for book in books:
         (book_id, book_title, category_name, image_url, book_status, created_at, updated_at, loan_status) = book
 
+        # loan_status == None이면 True
+        loanable = True if loan_status is None else loan_status
+
         search_books.append(
-            DomainResGetBookList(
+            DomainResGetBookItem(
                 book_id=book_id,
                 book_title=book_title,
                 category_name=category_name,
@@ -122,11 +125,11 @@ async def service_search_books(
                 book_status=book_status,
                 created_at=created_at,
                 updated_at=updated_at,
-                loanable=loan_status  # loan_status의 값을 inverse 없이 바로 적용
+                loanable=loanable
             )
         )
 
-    response = DomainResGetBookListWithTotal(
+    response = DomainResGetBookList(
         data=search_books,
         total=total
     )
@@ -238,8 +241,10 @@ async def service_read_books(page: int, limit: int, db: Session):
     for book in books:
         (book_id, book_title, category_name, image_url, book_status, created_at, updated_at, loan_status) = book
 
+        loanable = True if loan_status is None else loan_status
+
         result.append(
-            DomainResGetBookList(
+            DomainResGetBookItem(
                 book_id=book_id,
                 book_title=book_title,
                 category_name=category_name,
@@ -247,13 +252,12 @@ async def service_read_books(page: int, limit: int, db: Session):
                 book_status=book_status,
                 created_at=created_at,
                 updated_at=updated_at,
-                loanable=loan_status  # loan_status의 값을 inverse 없이 바로 적용
+                loanable=loanable
             )
         )
 
-    response = DomainResGetBookListWithTotal(
+    response = DomainResGetBookList(
         data=result,
         total=total
     )
-
     return response
