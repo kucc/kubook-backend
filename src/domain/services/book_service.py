@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from domain.schemas.book_schemas import (
     DomainReqGetBook,
     DomainResGetBook,
+    DomainResGetBookItem,
     DomainResGetBookList,
-    DomainResGetBookListWithTotal,
 )
 from repositories.models import Book, Loan
 
@@ -19,7 +19,7 @@ async def service_search_books(
     page: int,
     limit: int,
     db: Session
-) -> DomainResGetBookListWithTotal:
+) -> DomainResGetBookList:
     if not search and is_loanable is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -74,7 +74,7 @@ async def service_search_books(
                 stmt = stmt.where(or_(latest_loan_subq == True, latest_loan_subq.is_(None)))
 
 
-    print(stmt) # 디버깅용
+    # print(stmt) # 디버깅용
     try:
         books = (
             db.execute(
@@ -113,8 +113,11 @@ async def service_search_books(
     for book in books:
         (book_id, book_title, category_name, image_url, book_status, created_at, updated_at, loan_status) = book
 
+        # loan_status == None이면 True
+        loanable = True if loan_status is None else loan_status
+
         search_books.append(
-            DomainResGetBookList(
+            DomainResGetBookItem(
                 book_id=book_id,
                 book_title=book_title,
                 category_name=category_name,
@@ -122,11 +125,11 @@ async def service_search_books(
                 book_status=book_status,
                 created_at=created_at,
                 updated_at=updated_at,
-                loanable=loan_status  # loan_status의 값을 inverse 없이 바로 적용
+                loanable=loanable
             )
         )
 
-    response = DomainResGetBookListWithTotal(
+    response = DomainResGetBookList(
         data=search_books,
         total=total
     )
@@ -155,7 +158,6 @@ async def service_read_book(request_data: DomainReqGetBook, db: Session):
                     loanable = False
                 break
 
-
     response = DomainResGetBook(
         book_id=book.id,
         book_title=book.book_title,
@@ -177,20 +179,38 @@ async def service_read_book(request_data: DomainReqGetBook, db: Session):
     )
     return response
 
+
 async def service_read_books(page: int, limit: int, db: Session):
     offset = (page - 1) * limit # Calculate offset based on the page number
+    latest_loan_subq = (
+        select(Loan.return_status)
+        .where(and_(Loan.book_id == Book.id, Loan.is_deleted == False))
+        .order_by(Loan.updated_at.desc())
+        .limit(1)
+    ).scalar_subquery()
 
     stmt = (
-        select(Book)
-        .where(
-            Book.is_deleted == False
+        select(
+            Book.id,
+            Book.book_title,
+            Book.category_name,
+            Book.image_url,
+            Book.book_status,
+            Book.created_at,
+            Book.updated_at,
+            latest_loan_subq.label("loan_status"),
         )
-        .order_by(Book.updated_at.desc())
-        .limit(limit)
-        .offset(offset)
+        .where(and_(Book.is_deleted == False, Book.book_status == True))
     )
     try:
-        books = db.execute(stmt).scalars().all()
+        books = (
+            db.execute(
+                stmt
+                .order_by(Book.updated_at.desc(), Book.id.asc())
+                .limit(limit)
+                .offset(offset)
+            ).all()
+        )
 
         if not books:
             raise HTTPException(
@@ -198,23 +218,46 @@ async def service_read_books(page: int, limit: int, db: Session):
                 detail="Books not found"
             )
 
+        # Get total count using the same stmt conditions
+        count_stmt = stmt.with_only_columns(func.count())
+        total = db.execute(count_stmt).scalar_one()
+
+        if ceil(total/limit) < page:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Page is out of range"
+            )
+
+    except HTTPException as e:
+        raise e
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    response = [
-        DomainResGetBookList(
-            book_id=book.id,
-            book_title=book.book_title,
-            category_name=book.category_name,
-            image_url=book.image_url,
-            book_status=book.book_status,
-            created_at=book.created_at,
-            updated_at=book.updated_at
-        )
-        for book in books
-    ]
+    result = []
+    for book in books:
+        (book_id, book_title, category_name, image_url, book_status, created_at, updated_at, loan_status) = book
 
+        loanable = True if loan_status is None else loan_status
+
+        result.append(
+            DomainResGetBookItem(
+                book_id=book_id,
+                book_title=book_title,
+                category_name=category_name,
+                image_url=image_url,
+                book_status=book_status,
+                created_at=created_at,
+                updated_at=updated_at,
+                loanable=loanable
+            )
+        )
+
+    response = DomainResGetBookList(
+        data=result,
+        total=total
+    )
     return response
