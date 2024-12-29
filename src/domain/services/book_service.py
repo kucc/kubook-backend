@@ -1,26 +1,40 @@
+from math import ceil
+
 from fastapi import HTTPException, status
-from sqlalchemy import or_, select, text
+from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.orm import Session
 
-from domain.schemas.book_schemas import DomainReqGetBook, DomainResGetBook, DomainResGetBookList
+from domain.schemas.book_schemas import (
+    DomainReqGetBook,
+    DomainResGetBook,
+    DomainResGetBookList,
+    DomainResGetBookListWithTotal,
+)
 from repositories.models import Book, Loan
-from utils.crud_utils import get_item
 
 
 async def service_search_books(
-    searching_keyword: str,
+    search: str,
+    is_loanable: bool,
     page: int,
     limit: int,
     db: Session
-) -> DomainResGetBookList:
+) -> DomainResGetBookListWithTotal:
+    if not search and is_loanable is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Searching keyword or is_loanable should be provided"
+        )
+
     offset = (page - 1) * limit # Calculate offset based on the page numbe
 
     latest_loan_subq = (
         select(Loan.return_status)
-        .where(Loan.book_id == Book.id)
+        .where(and_(Loan.book_id == Book.id, Loan.is_deleted == False))
         .order_by(Loan.updated_at.desc())
         .limit(1)
-    )
+    ).scalar_subquery()
+
     stmt = (
         select(
             Book.id,
@@ -30,37 +44,56 @@ async def service_search_books(
             Book.book_status,
             Book.created_at,
             Book.updated_at,
-            latest_loan_subq.scalar_subquery().label("loan_status")
+            latest_loan_subq.label("loan_status")
         )
-        .where(Book.is_deleted == False and Book.book_status == True)
+        .where(and_(Book.is_deleted == False, Book.book_status == True))
     )
 
-    search_columns = ['book_title', 'author', 'publisher', 'category_name']
+    if search: # if search keyword is provided
+        search_columns = ['book_title', 'author', 'publisher', 'category_name']
 
-    # OR 조건을 위한 조건 리스트 생성
-    conditions = [
-        text(f"MATCH({column}) AGAINST(:{column} IN BOOLEAN MODE)")
-        for column in search_columns
-    ]
+        # Create a list of conditions for OR operation
+        conditions = [
+            text(f"MATCH({column}) AGAINST(:{column} IN BOOLEAN MODE)")
+            for column in search_columns
+        ]
 
-    # 모든 조건을 OR로 결합
-    stmt = stmt.where(or_(*conditions))
+        # 모든 조건을 OR로 결합
+        stmt = stmt.where(or_(*conditions))
 
-    # 각 열에 대해 검색 키워드 파라미터 설정
-    search_params = {column: f"{searching_keyword}*" for column in search_columns}
-    stmt = stmt.params(**search_params)
+        # 각 열에 대해 검색 키워드 파라미터 설정
+        search_params = {column: f"{search}*" for column in search_columns}
+        stmt = stmt.params(**search_params)
 
-    # print(stmt) # 디버깅용
+    if is_loanable is not None: # is_lonable = True or Flase
+            if not is_loanable:
+                # loan.return_status = False
+                stmt = stmt.where(latest_loan_subq == False)
+            else:
+                # loan.return_status = True or null
+                stmt = stmt.where(or_(latest_loan_subq == True, latest_loan_subq.is_(None)))
+
+
+    print(stmt) # 디버깅용
     try:
         books = (
             db.execute(
                 stmt
-                .order_by(Book.updated_at.desc())
+                .order_by(Book.updated_at.desc(), Book.id.asc())
                 .limit(limit)
                 .offset(offset)
             )
             .all()
         )
+        # Get total count using the same stmt conditions
+        count_stmt = stmt.with_only_columns(func.count())
+        total = db.execute(count_stmt).scalar()
+
+        if ceil(total/limit) < page:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Page is out of range"
+            )
 
         if not books:
             raise HTTPException(
@@ -89,22 +122,44 @@ async def service_search_books(
                 book_status=book_status,
                 created_at=created_at,
                 updated_at=updated_at,
-                loan_status=loan_status
+                loanable=loan_status  # loan_status의 값을 inverse 없이 바로 적용
             )
         )
 
-    return search_books
+    response = DomainResGetBookListWithTotal(
+        data=search_books,
+        total=total
+    )
+    return response
 
 
 async def service_read_book(request_data: DomainReqGetBook, db: Session):
-    book = get_item(Book, request_data.book_id, db)
+    stmt = (select(Book).
+            where(and_(
+                Book.id == request_data.book_id,
+                Book.is_deleted == False,
+                Book.book_status == True,     # 조건 추가
+            )))
+    book = db.execute(stmt).scalar_one_or_none()
 
     if not book:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Requested book not found")
 
+    # loanable
+    loanable = True
+
+    if book.loans:
+        for loan in book.loans:
+            if not loan.is_deleted:
+                if not loan.return_status:
+                    loanable = False
+                break
+
+
     response = DomainResGetBook(
         book_id=book.id,
         book_title=book.book_title,
+        loanable=loanable,
         code=book.code,
         category_name=book.category_name,
         subtitle=book.subtitle,

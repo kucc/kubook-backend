@@ -181,6 +181,7 @@ async def service_admin_read_loans(db: Session) -> list[DomainResAdminGetLoan]:
                     category_name=loan.book.category_name,
                     loan_date=loan.loan_date,
                     due_date=loan.due_date,
+                    overdue_days=loan.overdue_days,
                     extend_status=loan.extend_status,
                     return_status=loan.return_status,
                     return_date=loan.return_date,

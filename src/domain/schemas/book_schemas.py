@@ -11,6 +11,7 @@ class DomainReqGetBook(BaseModel):
 class DomainResGetBook(BaseModel):
     book_id: int = Field(title="book_id", description="책 ID", example=1, gt=0)
     book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")
+    loanable: bool = Field(title="loanable", description="대출 가능 여부", default=True)
     code: str = Field(title="code", description="책 코드", example="A3")
     category_name: str = Field(title="category_name", description="카테고리 이름", example="웹")
     subtitle: str | None = Field(title="subtitle", description="부제목", example="for beginner")
@@ -35,7 +36,13 @@ class DomainResGetBookList(BaseModel):
     book_status: bool = Field(title="book_stauts", description="책 상태", example=True)
     created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
     updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
-    loan_status: bool | None = Field(title="loan_status", description="대출 상태", example=False)
+    loanable: bool | None = Field(title="loan_status", description="대출 상태", example=False)
+
+
+class DomainResGetBookListWithTotal(BaseModel):
+    data: list[DomainResGetBookList]
+    total: int = Field(description="Book 객체의 총 요소 개수")
+
 
 class DomainReqAdminPostBook(BaseModel):
     book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")

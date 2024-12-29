@@ -125,8 +125,7 @@ class Book(Base):
 
     # Relationships
     book_reviews = relationship("BookReview", back_populates="book")
-    loans = relationship("Loan", back_populates="book")
-
+    loans = relationship("Loan", back_populates="book", order_by="Loan.updated_at.desc()")  # order_by 적용
 
 class Notice(Base):
     __tablename__ = "notice"

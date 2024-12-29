@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Depends, Header, status
+from typing import Annotated
+
+from fastapi import APIRouter, Cookie, Depends, Header, status
 from sqlalchemy.orm import Session
 
 import domain.schemas.auth_schemas as auth_schemas
-import domain.services.auth_service as auth_service
 from config import Settings
 from dependencies import get_db
+from domain.services.auth_service import service_login, service_refresh_token, service_register
 
 router = APIRouter(
     prefix="/auth",
@@ -24,14 +26,15 @@ settings = Settings()
     description="""신규 사용자 등록
     """,
     response_description={
-        status.HTTP_201_CREATED: {"description": "User created"}
+        status.HTTP_201_CREATED: {"description": "User created"},
+        status.HTTP_400_BAD_REQUEST: {"description": "User already exists"}
     }
 )
 async def register(
     request: auth_schemas.RegisterRequest,
     db: Session = Depends(get_db)
 ):
-    return await auth_service.register(request, db)
+    return await service_register(request, db)
 
 
 @router.post(
@@ -60,7 +63,7 @@ async def login(
     db: Session = Depends(get_db)
 ):
     if settings.ENVIRONMENT == "development":
-        return await auth_service.login_with_username(request, db)
+        return await service_login(request, db)
     # elif settings.ENVIRONMENT == "production":
     #     return await auth_service.login(request, db)
 
@@ -68,10 +71,15 @@ async def login(
     "/refresh-token",
     status_code=status.HTTP_201_CREATED,
     summary="토큰 재발급",
-    description="refresh_token 만료 이전에만 토큰 재발급 가능"
+    description="refresh_token(Cookie)이 유효한 경우에만 토큰 재발급 가능",
+    response_description={
+        status.HTTP_201_CREATED: {"description": "Created New Tokens"},
+        status.HTTP_208_ALREADY_REPORTED: {"description": "Available Tokens"},
+        status.HTTP_410_GONE: {"description": "Invalid / Expired Refresh Token"},
+    }
 )
 async def refresh_token(
     access_token: str = Header(),
-    refresh_token: str = Header(),
+    refresh_token: Annotated[str, Cookie()] = None
 ):
-    return await auth_service.service_refresh_token(access_token = access_token, refresh_token = refresh_token)
+    return await service_refresh_token(access_token = access_token, refresh_token = refresh_token)

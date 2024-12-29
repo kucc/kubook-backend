@@ -6,11 +6,13 @@ from domain.schemas.book_schemas import DomainResGetBookList
 class RouteResGetBookList(BaseModel):
     data: list[DomainResGetBookList]
     count: int = Field(description="data 배열의 요소 개수")
+    total: int = Field(description="data 배열의 총 요소 개수")
 
 
 class RouteResGetBook(BaseModel):
     book_id: int = Field(title="book_id", description="책 ID", example=1, gt=0)
     book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")
+    loanable: bool = Field(title="loanable", description="대출 가능 여부", default=True)
     code: str = Field(title="code", description="책 코드", example="A3")
     category_name: str = Field(title="category_name", description="카테고리 이름", example="웹")
     subtitle: str | None = Field(title="subtitle", description="부제목", example="for beginner")
