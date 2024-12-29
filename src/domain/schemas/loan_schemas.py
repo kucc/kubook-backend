@@ -55,6 +55,7 @@ class DomainResAdminGetLoan(BaseModel):
     category_name: str = Field(title="category_name", description="카테고리명", example="웹")
     loan_date: date = Field(title="loan_date", description="대출 날짜", example=datetime.today().date())
     due_date: date = Field(title="due_date", description="반납 기한", example=(datetime.today() + timedelta(days=14)).date())
+    overdue_days: int = Field(title="overdue_days", description="연체 일자", example=1)
     extend_status: bool = Field(title="extend_status", description="연장 상태", example=True)
     return_status: bool = Field(title="return_status", description="반납 상태", example=False)
     return_date: date | None = Field(title="return_date", description="반납 날짜", example=None)
