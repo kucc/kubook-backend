@@ -1,12 +1,12 @@
 from datetime import date
 
 from fastapi import Depends, Header, HTTPException, status
-from jose import ExpiredSignatureError, JWTError, jwt
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import and_
 
-from config import Settings
 from database import get_db_session
+from domain.services.token_service import verify_jwt
 from repositories.models import User
 
 
@@ -17,39 +17,34 @@ def get_db():
     finally:
         session.close()
 
-
-async def get_current_user(token=Header(None), db: Session = Depends(get_db)):
+async def get_current_user(token:str=Header(None), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid credentials",
+        detail="Invalid or Expired Access token",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    if not token:
+        raise credentials_exception
     try:
-        payload = jwt.decode(token, key=Settings().JWT_SECRET_KEY, algorithms=Settings().JWT_ALGORITHM)
-        user_id: int = int(payload.get("sub"))
-        if user_id is None:
+        user_id = verify_jwt(token)
+        if user_id < 0:
             raise credentials_exception
-        stmt = select(User).where(User.id == user_id)
+        stmt = select(User).where(and_(User.id == user_id, User.is_deleted==False))
         user = db.execute(stmt).scalar_one()
         if user is None:
-            raise credentials_exception
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
         return user
-    except ExpiredSignatureError as err:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token has expired",
-        ) from err
-    except JWTError as err:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid token",
-        ) from err
+    except HTTPException as err:
+        raise err
 
 
 def get_current_active_user(user: User = Depends(get_current_user)):
     if not user.is_active:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Inactive user"
         )
     return user
