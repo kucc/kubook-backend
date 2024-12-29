@@ -74,7 +74,7 @@ async def service_search_books(
                 stmt = stmt.where(or_(latest_loan_subq == True, latest_loan_subq.is_(None)))
 
 
-    print(stmt) # 디버깅용
+    # print(stmt) # 디버깅용
     try:
         books = (
             db.execute(
