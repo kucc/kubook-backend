@@ -7,8 +7,8 @@ from sqlalchemy.orm import Session
 from domain.schemas.book_schemas import (
     DomainReqGetBook,
     DomainResGetBook,
+    DomainResGetBookItem,
     DomainResGetBookList,
-    DomainResGetBookListWithTotal,
 )
 from repositories.models import Book, Loan
 
@@ -19,7 +19,7 @@ async def service_search_books(
     page: int,
     limit: int,
     db: Session
-) -> DomainResGetBookListWithTotal:
+) -> DomainResGetBookList:
     if not search and is_loanable is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -113,8 +113,11 @@ async def service_search_books(
     for book in books:
         (book_id, book_title, category_name, image_url, book_status, created_at, updated_at, loan_status) = book
 
+        # loan_status == None이면 True
+        loanable = True if loan_status is None else loan_status
+
         search_books.append(
-            DomainResGetBookList(
+            DomainResGetBookItem(
                 book_id=book_id,
                 book_title=book_title,
                 category_name=category_name,
@@ -122,12 +125,13 @@ async def service_search_books(
                 book_status=book_status,
                 created_at=created_at,
                 updated_at=updated_at,
-                loanable=loan_status  # loan_status의 값을 inverse 없이 바로 적용
+                loanable=loanable
             )
         )
 
-    response = DomainResGetBookListWithTotal(
+    response = DomainResGetBookList(
         data=search_books,
+        count=len(search_books),
         total=total
     )
     return response
@@ -204,17 +208,24 @@ async def service_read_books(page: int, limit: int, db: Session):
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    response = [
-        DomainResGetBookList(
+    data = [
+        DomainResGetBookItem(
             book_id=book.id,
             book_title=book.book_title,
             category_name=book.category_name,
             image_url=book.image_url,
             book_status=book.book_status,
             created_at=book.created_at,
-            updated_at=book.updated_at
+            updated_at=book.updated_at,
+            loanable=True     # 임시, 수정 필요
         )
         for book in books
     ]
+
+    response = DomainResGetBookList(
+        data=data,
+        count=len(data),
+        total=144   # 임시, 수정 필요
+    )
 
     return response
