@@ -244,7 +244,7 @@ async def service_read_books(page: int, limit: int, db: Session):
         loanable = True if loan_status is None else loan_status
 
         result.append(
-            DomainResGetBookList(
+            DomainResGetBookItem(
                 book_id=book_id,
                 book_title=book_title,
                 category_name=category_name,
