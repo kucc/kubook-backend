@@ -11,7 +11,6 @@ from domain.schemas.book_schemas import (
     DomainResGetBookListWithTotal,
 )
 from repositories.models import Book, Loan
-from utils.crud_utils import get_item
 
 
 async def service_search_books(
@@ -31,7 +30,7 @@ async def service_search_books(
 
     latest_loan_subq = (
         select(Loan.return_status)
-        .where(Loan.book_id == Book.id)
+        .where(and_(Loan.book_id == Book.id, Loan.is_deleted == False))
         .order_by(Loan.updated_at.desc())
         .limit(1)
     ).scalar_subquery()
@@ -65,13 +64,17 @@ async def service_search_books(
         # 각 열에 대해 검색 키워드 파라미터 설정
         search_params = {column: f"{search}*" for column in search_columns}
         stmt = stmt.params(**search_params)
-    if is_loanable is not None:
-        if is_loanable:
-            stmt = stmt.where(or_(latest_loan_subq == False, latest_loan_subq.is_(None)))
-        else:
-            stmt = stmt.where(latest_loan_subq == True)
 
-    # print(stmt) # 디버깅용
+    if is_loanable is not None: # is_lonable = True or Flase
+            if not is_loanable:
+                # loan.return_status = False
+                stmt = stmt.where(latest_loan_subq == False)
+            else:
+                # loan.return_status = True or null
+                stmt = stmt.where(or_(latest_loan_subq == True, latest_loan_subq.is_(None)))
+
+
+    print(stmt) # 디버깅용
     try:
         books = (
             db.execute(
@@ -119,7 +122,7 @@ async def service_search_books(
                 book_status=book_status,
                 created_at=created_at,
                 updated_at=updated_at,
-                is_loanable = False if loan_status == True else True
+                loanable=loan_status  # loan_status의 값을 inverse 없이 바로 적용
             )
         )
 
@@ -131,12 +134,27 @@ async def service_search_books(
 
 
 async def service_read_book(request_data: DomainReqGetBook, db: Session):
-    book = get_item(Book, request_data.book_id, db)
+    stmt = (select(Book).
+            where(and_(
+                Book.id == request_data.book_id,
+                Book.is_deleted == False,
+                Book.book_status == True,     # 조건 추가
+            )))
+    book = db.execute(stmt).scalar_one_or_none()
 
     if not book:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Requested book not found")
 
-    loanable = False if book.loans and book.loans[-1].return_status == False else True
+    # loanable
+    loanable = True
+
+    if book.loans:
+        for loan in book.loans:
+            if not loan.is_deleted:
+                if not loan.return_status:
+                    loanable = False
+                break
+
 
     response = DomainResGetBook(
         book_id=book.id,
