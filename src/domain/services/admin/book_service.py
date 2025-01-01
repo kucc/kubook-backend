@@ -59,17 +59,17 @@ async def service_admin_search_books(
         if not books:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Books not found")
 
-        search_books = []
+        result = []
         for book in books:
-            loan_status = None
+            loanable = True
             if book.loans:
                 latest_loan = max(book.loans, key=lambda loan: loan.updated_at, default=None)
-                loan_status = latest_loan.return_status if latest_loan else None
+                loanable = latest_loan.return_status if latest_loan else True
 
-                if return_status is not None and loan_status != return_status:
+                if return_status is not None and loanable != return_status:
                     continue
 
-            search_books.append(
+            result.append(
                 DomainAdminGetBookItem(
                     book_id=book.id,
                     book_title=book.book_title,
@@ -87,7 +87,7 @@ async def service_admin_search_books(
                     book_status=book.book_status,
                     created_at=book.created_at,
                     updated_at=book.updated_at,
-                    loan_status=loan_status
+                    loanable=loanable,
                 )
             )
 
@@ -99,7 +99,7 @@ async def service_admin_search_books(
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    return search_books
+    return result
 
 
 async def service_admin_create_book(request: DomainReqAdminPostBook, db: Session):
@@ -234,9 +234,10 @@ async def service_admin_read_books(db: Session) -> list[DomainAdminGetBookItem]:
 
         result = []
         for book in books:
+            loanable = True
             if book.loans:
                 latest_loan = max(book.loans, key=lambda loan: loan.updated_at, default=None)
-                loanable = True if latest_loan is None else latest_loan.return_status
+                loanable = latest_loan.return_status if latest_loan else True
 
             result.append(
                 DomainAdminGetBookItem(
