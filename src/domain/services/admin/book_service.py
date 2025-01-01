@@ -90,16 +90,16 @@ async def service_admin_search_books(
         count_stmt = stmt.with_only_columns(func.count())
         total = db.execute(count_stmt).scalar_one()
 
-        if ceil(total/limit) < page:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Page is out of range"
-            )
-
         if not books:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Books not found"
+            )
+
+        if ceil(total/limit) < page:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Page is out of range"
             )
 
         result = []
