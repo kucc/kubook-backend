@@ -41,7 +41,7 @@ async def search_books(
     publisher: Annotated[
         str, Query(description="출판사", example="publisher", min_length=2, max_length=50)
     ] = None,
-    return_status: Annotated[
+    is_loanable: Annotated[
         bool, Query(description="반납 여부", example=False)
     ] = None,
     page: Annotated[
@@ -57,7 +57,7 @@ async def search_books(
         category_name=category_name,
         author=author,
         publisher=publisher,
-        return_status=return_status,
+        is_loanable=is_loanable,
         page=page,
         limit=limit,
         db=db
