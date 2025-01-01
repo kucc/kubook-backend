@@ -132,4 +132,4 @@ class DomainAdminGetBookItem(BaseModel):
     book_status: bool = Field(title="book_stauts", description="책 상태", example=True)
     created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
     updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
-    loan_status: bool | None = Field(title="loan_status", description="대출 상태", example=False)
+    loanable: bool | None = Field(title="loanable", description="대출 상태", example=False)
