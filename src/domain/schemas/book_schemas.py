@@ -133,3 +133,8 @@ class DomainAdminGetBookItem(BaseModel):
     created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
     updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
     loanable: bool | None = Field(title="loanable", description="대출 상태", example=False)
+
+
+class DomainAdminGetBookList(BaseModel):
+    data: list[DomainAdminGetBookItem]
+    total: int = Field(description="Book 객체의 총 요소 개수")

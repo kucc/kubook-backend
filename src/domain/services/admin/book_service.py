@@ -1,13 +1,15 @@
 # ruff: noqa: C901
 from datetime import datetime
+from math import ceil
 
 from fastapi import HTTPException, status
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session, selectinload
 
 from domain.enums.book_category import BookCategoryStatus
 from domain.schemas.book_schemas import (
     DomainAdminGetBookItem,
+    DomainAdminGetBookList,
     DomainReqAdminDelBook,
     DomainReqAdminPostBook,
     DomainReqAdminPutBook,
@@ -24,8 +26,11 @@ async def service_admin_search_books(
     author: str | None,
     publisher: str | None,
     return_status: bool | None,
+    page: int,
+    limit: int,
     db: Session
-) -> list[DomainAdminGetBookItem]:
+) -> DomainAdminGetBookList:
+    offset = (page - 1) * limit # Calculate offset based on the page number
     stmt = (
         select(Book)
         .options(selectinload(Book.loans))
@@ -54,10 +59,27 @@ async def service_admin_search_books(
         )
 
     try:
-        books = db.execute(stmt.order_by(Book.updated_at.desc())).scalars().all() # 최신 업데이트 순으로 정렬
+        books = (
+            db.execute(
+                stmt
+                .order_by(Book.updated_at.desc(), Book.id.asc())
+                .limit(limit)
+                .offset(offset)
+            ).scalars().all()
+        )
 
         if not books:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Books not found")
+
+        # Get total count using the same stmt conditions
+        count_stmt = stmt.with_only_columns(func.count())
+        total = db.execute(count_stmt).scalar_one()
+
+        if ceil(total/limit) < page:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Page is out of range"
+            )
 
         result = []
         for book in books:
@@ -99,7 +121,12 @@ async def service_admin_search_books(
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    return result
+    response = DomainAdminGetBookList(
+        data=result,
+        total=total,
+    )
+
+    return response
 
 
 async def service_admin_create_book(request: DomainReqAdminPostBook, db: Session):
@@ -223,14 +250,44 @@ async def service_admin_delete_book(request: DomainReqAdminDelBook, db: Session)
     return
 
 
-async def service_admin_read_books(db: Session) -> list[DomainAdminGetBookItem]:
-    stmt = (select(Book).options(selectinload(Book.loans)).where(Book.is_deleted == False, Book.book_status == True))
+async def service_admin_read_books(
+    page: int,
+    limit: int,
+    db: Session,
+) -> DomainAdminGetBookList:
+    offset = (page - 1) * limit # Calculate offset based on the page numbe
+
+    stmt = (
+        select(Book)
+        .options(
+            selectinload(Book.loans)
+        )
+        .where(Book.is_deleted == False, Book.book_status == True)
+    )
 
     try:
-        books = db.execute(stmt.order_by(Book.updated_at.desc())).scalars().all()
+        books = db.execute(
+            stmt
+            .order_by(Book.updated_at.desc(), Book.id.asc())
+            .limit(limit)
+            .offset(offset)
+        ).scalars().all()
 
         if not books:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Books not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Books not found"
+            )
+
+        # Get total count using the same stmt conditions
+        count_stmt = stmt.with_only_columns(func.count())
+        total = db.execute(count_stmt).scalar()
+
+        if ceil(total/limit) < page:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Page is out of range"
+            )
 
         result = []
         for book in books:
@@ -257,7 +314,7 @@ async def service_admin_read_books(db: Session) -> list[DomainAdminGetBookItem]:
                     book_status=book.book_status,
                     created_at=book.created_at,
                     updated_at=book.updated_at,
-                    loanable = loanable
+                    loanable=loanable
                 )
             )
 
@@ -268,5 +325,9 @@ async def service_admin_read_books(db: Session) -> list[DomainAdminGetBookItem]:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
+    response = DomainAdminGetBookList(
+        data=result,
+        total=total,
+    )
 
-    return result
+    return response
