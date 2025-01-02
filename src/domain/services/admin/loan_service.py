@@ -17,12 +17,15 @@ async def service_admin_toggle_loan_return(
     loan = get_item(Loan, loan_id, db)
 
     try:
-        if loan.return_status: # 반납 상태가 True이면 False로 변경
+        if loan.return_status: # return_stauts가 True이면 False로 변경
             loan.return_status = False
             loan.return_date = None
-        else: # 반납 상태가 False이면 True로 변경
+            # loan.overdue_days = None # 굳이 db에 저장할 필요가 없을 것 같아서 주석 처리
+        else: # return_status가 False이면 True로 변경
             loan.return_status = True
             loan.return_date = datetime.now().date()
+            days_diff = (loan.return_date - loan.due_date).days
+            loan.overdue_days = max(days_diff, 0)  # Negative values become 0
 
         db.flush()
     except HTTPException as e:
@@ -50,6 +53,9 @@ async def service_admin_toggle_loan_return(
             overdue_days=loan.overdue_days,
             return_status=loan.return_status,
             return_date=loan.return_date,
+            book_title=loan.book.book_title,
+            code=loan.book.code,
+            version=loan.book.version,
         )
 
     return result
