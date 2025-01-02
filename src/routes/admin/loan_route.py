@@ -81,16 +81,25 @@ async def search_loans(
     summary="전체 대출 목록 조회",
 )
 async def get_all_loans(
+    page: Annotated[
+        int, Query(description="페이지", example=1, gt=0)
+    ] = 1,
+    limit: Annotated[
+        int, Query(description="페이지 당 조회 개수", example=10, gt=0)
+    ] = 10,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_admin)
 ):
     response = await service_admin_read_loans(
+        page=page,
+        limit=limit,
         db = db
     )
 
     result = RouteResAdminGetLoanList(
-            data=response,
-            count=len(response)
+            data=response.data,
+            count=len(response.data),
+            total=response.total
         )
 
     return result

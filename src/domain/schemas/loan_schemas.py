@@ -61,3 +61,8 @@ class DomainResAdminGetLoan(BaseModel):
     return_date: date | None = Field(title="return_date", description="반납 날짜", example=None)
     created_at: datetime = Field(title="create_at", description="생성일시", example=datetime.now())
     updated_at: datetime = Field(title="update_at", description="수정일시", example=datetime.now())
+
+
+class DomainResAdminGetLoanList(BaseModel):
+    data: list[DomainResAdminGetLoan]
+    total: int
