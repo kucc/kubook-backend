@@ -51,7 +51,7 @@ async def search_loans(
     category_name: Annotated[
         str, Query(description="카테고리 이름", example="category", min_length=2, max_length=50)
     ] = None,
-    return_status: Annotated[
+    is_loanable: Annotated[
         bool, Query(description="반납 여부", example=False)
     ] = None,
     page: Annotated[
@@ -64,10 +64,10 @@ async def search_loans(
     current_user=Depends(get_current_admin)
 ):
     response = await service_admin_search_loans(
-        user_name = user_name,
-        book_title = book_title,
-        category_name = category_name,
-        return_status = return_status,
+        user_name=user_name,
+        book_title=book_title,
+        category_name=category_name,
+        is_loanable=is_loanable,
         page=page,
         limit=limit,
         db = db

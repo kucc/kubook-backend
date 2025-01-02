@@ -59,7 +59,7 @@ async def service_admin_search_loans(
     user_name: str | None,
     book_title: str | None,
     category_name: str | None,
-    return_status: str | None,
+    is_loanable: str | None,
     page: int,
     limit: int,
     db: Session
@@ -94,8 +94,8 @@ async def service_admin_search_loans(
             stmt.where(text("MATCH(book.category_name) AGAINST(:category_name IN BOOLEAN MODE)"))
                 .params(category_name=f"{category_name}*")
         )
-    if return_status is not None:
-        stmt = stmt.where(Loan.return_status == return_status)
+    if is_loanable is not None:
+        stmt = stmt.where(Loan.return_status == is_loanable)
 
     try:
         loans = (
