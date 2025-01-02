@@ -54,6 +54,12 @@ async def search_loans(
     return_status: Annotated[
         bool, Query(description="반납 여부", example=False)
     ] = None,
+    page: Annotated[
+        int, Query(description="페이지", example=1, gt=0)
+    ] = 1,
+    limit: Annotated[
+        int, Query(description="페이지 당 조회 개수", example=10, gt=0)
+    ] = 10,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_admin)
 ):
@@ -62,12 +68,15 @@ async def search_loans(
         book_title = book_title,
         category_name = category_name,
         return_status = return_status,
+        page=page,
+        limit=limit,
         db = db
     )
 
     result = RouteResAdminGetLoanList(
-            data=response,
-            count=len(response)
+            data=response.data,
+            count=len(response.data),
+            total=response.total
         )
 
     return result

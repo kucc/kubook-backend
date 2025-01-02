@@ -60,8 +60,12 @@ async def service_admin_search_loans(
     book_title: str | None,
     category_name: str | None,
     return_status: str | None,
+    page: int,
+    limit: int,
     db: Session
-) -> list[DomainResAdminGetLoan]:
+) -> DomainResAdminGetLoanList:
+    offset = (page - 1) * limit
+
     stmt = (
         select(Loan)
         .join(Loan.book)
@@ -94,10 +98,27 @@ async def service_admin_search_loans(
         stmt = stmt.where(Loan.return_status == return_status)
 
     try:
-        loans = db.execute(stmt.order_by(Loan.updated_at.desc())).scalars().all()
+        loans = (
+            db.execute(
+                stmt
+                .order_by(Loan.updated_at.desc())
+                .limit(limit)
+                .offset(offset)
+            ).scalars().all()
+        )
 
         if not loans:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loans not found")
+
+        # Get total count using the same stmt conditions
+        count_stmt = stmt.with_only_columns(func.count())
+        total = db.execute(count_stmt).scalar()
+
+        if ceil(total/limit) < page:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Page is out of range"
+            )
 
         search_loans = []
         for loan in loans:
@@ -122,6 +143,7 @@ async def service_admin_search_loans(
                     category_name=loan.book.category_name,
                     loan_date=loan.loan_date,
                     due_date=loan.due_date,
+                    overdue_days=loan.overdue_days,
                     extend_status=loan.extend_status,
                     return_status=loan.return_status,
                     return_date=loan.return_date,
@@ -138,7 +160,13 @@ async def service_admin_search_loans(
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    return search_loans
+    response = DomainResAdminGetLoanList(
+        data=search_loans,
+        total=total
+    )
+
+    return response
+
 
 
 async def service_admin_read_loans(
@@ -228,4 +256,3 @@ async def service_admin_read_loans(
     )
 
     return response
-
