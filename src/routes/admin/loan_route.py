@@ -43,16 +43,16 @@ async def toggle_loan(
 )
 async def search_loans(
     book_title: Annotated[
-        str, Query(description="도서 제목", example="book", min_length=2, max_length=50)
+        str, Query(description="도서 제목", min_length=2, max_length=50)
     ] = None,
     user_name: Annotated[
-        str | None, Query(description="사용자 이름", example="test", min_length=2, max_length=45)
+        str | None, Query(description="사용자 이름", min_length=2, max_length=45)
     ] = None,
     category_name: Annotated[
-        str, Query(description="카테고리 이름", example="category", min_length=2, max_length=50)
+        str, Query(description="카테고리 이름", min_length=2, max_length=50)
     ] = None,
     is_loanable: Annotated[
-        bool, Query(description="반납 여부", example=False)
+        bool, Query(description="반납 여부")
     ] = None,
     page: Annotated[
         int, Query(description="페이지", example=1, gt=0)
