@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from domain.schemas.loan_schemas import DomainResAdminGetLoan, DomainResGetLoan
 from repositories.models import Loan
-from utils.crud_utils import get_item
+from utils.crud_utils import calculate_overdue_days, get_item
 
 
 async def service_admin_toggle_loan_return(
@@ -24,8 +24,7 @@ async def service_admin_toggle_loan_return(
         else: # return_status가 False이면 True로 변경
             loan.return_status = True
             loan.return_date = datetime.now().date()
-            days_diff = (loan.return_date - loan.due_date).days
-            loan.overdue_days = max(days_diff, 0)  # Negative values become 0
+            loan.overdue_days = calculate_overdue_days(loan.due_date)
 
         db.flush()
     except HTTPException as e:
@@ -50,7 +49,7 @@ async def service_admin_toggle_loan_return(
             loan_date=loan.loan_date,
             due_date=loan.due_date,
             extend_status=loan.extend_status,
-            overdue_days=loan.overdue_days,
+            overdue_days=calculate_overdue_days(loan.due_date),
             return_status=loan.return_status,
             return_date=loan.return_date,
             book_title=loan.book.book_title,
@@ -187,7 +186,7 @@ async def service_admin_read_loans(db: Session) -> list[DomainResAdminGetLoan]:
                     category_name=loan.book.category_name,
                     loan_date=loan.loan_date,
                     due_date=loan.due_date,
-                    overdue_days=loan.overdue_days,
+                    overdue_days=calculate_overdue_days(loan.due_date),
                     extend_status=loan.extend_status,
                     return_status=loan.return_status,
                     return_date=loan.return_date,
