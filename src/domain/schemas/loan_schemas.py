@@ -14,7 +14,7 @@ class DomainResGetLoan(BaseModel):
     due_date: date = Field(title="due_date", description="반납 기한", example=(datetime.today() + timedelta(days=14)).date())
     extend_status: bool = Field(title="extend_status", description="연장 상태", example=True)
     overdue_days: int = Field(title="overdue_days", description="연체 일자", example=1)
-    return_status: bool = Field(title="return_status", description="반납 상태", example=False)
+    return_status: bool = Field(title="return_status", description="반납 상태", example=False) # 0: 대출중, 1: 반납완료 -> 0: 대출 불가능, 1: 대출 가능
     return_date: date | None = Field(title="return_date", description="반납 날짜", example=None)
     book_title: str = Field(title="book_title", description="책 제목", example="FastAPI Tutorial")
     code: str = Field(title="code", description="책 코드", example="A3")

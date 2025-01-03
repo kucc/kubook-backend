@@ -9,6 +9,7 @@ from domain.schemas.book_schemas import DomainAdminGetBookItem
 class RouteResAdminGetBookList(BaseModel):
     data: list[DomainAdminGetBookItem]
     count: int
+    total: int
 
 
 class RouteResAdminPostBook(BaseModel):
