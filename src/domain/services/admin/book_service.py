@@ -1,20 +1,22 @@
 # ruff: noqa: C901
 from datetime import datetime
+from math import ceil
 
 from fastapi import HTTPException, status
-from sqlalchemy import select, text
+from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.orm import Session, selectinload
 
 from domain.enums.book_category import BookCategoryStatus
 from domain.schemas.book_schemas import (
     DomainAdminGetBookItem,
+    DomainAdminGetBookList,
     DomainReqAdminDelBook,
     DomainReqAdminPostBook,
     DomainReqAdminPutBook,
     DomainResAdminPostBook,
     DomainResAdminPutBook,
 )
-from repositories.models import Book
+from repositories.models import Book, Loan
 from utils.crud_utils import delete_item
 
 
@@ -23,12 +25,25 @@ async def service_admin_search_books(
     category_name: str | None,
     author: str | None,
     publisher: str | None,
-    return_status: bool | None,
+    is_loanable: bool | None,
+    page: int,
+    limit: int,
     db: Session
-) -> list[DomainAdminGetBookItem]:
+) -> DomainAdminGetBookList:
+    offset = (page - 1) * limit # Calculate offset based on the page number
+
+    latest_loan_subq = (
+        select(Loan.return_status)
+        .where(and_(Loan.book_id == Book.id, Loan.is_deleted == False))
+        .order_by(Loan.updated_at.desc())
+        .limit(1)
+    ).scalar_subquery()
+
     stmt = (
-        select(Book)
-        .options(selectinload(Book.loans))
+        select(
+            Book,
+            latest_loan_subq.label("loan_status")
+        )
         .where(Book.is_deleted == False)
     )
 
@@ -52,42 +67,65 @@ async def service_admin_search_books(
             stmt.where(text("MATCH(publisher) AGAINST(:publisher IN BOOLEAN MODE)"))
                 .params(publisher=f"{publisher}*")
         )
+    if is_loanable is not None: # is_lonable = True or Flase
+            if not is_loanable:
+                # loan.return_status = False
+                stmt = stmt.where(latest_loan_subq == False)
+            else:
+                # loan.return_status = True or null
+                stmt = stmt.where(or_(latest_loan_subq == True, latest_loan_subq.is_(None)))
 
     try:
-        books = db.execute(stmt.order_by(Book.updated_at.desc())).scalars().all() # 최신 업데이트 순으로 정렬
+        books = (
+            db.execute(
+                stmt
+                .order_by(Book.updated_at.desc(), Book.id.asc())
+                .limit(limit)
+                .offset(offset)
+            )
+            .all()
+        )
+
+        # Get total count using the same stmt conditions
+        count_stmt = stmt.with_only_columns(func.count())
+        total = db.execute(count_stmt).scalar_one()
 
         if not books:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Books not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Books not found"
+            )
 
-        search_books = []
+        if ceil(total/limit) < page:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Page is out of range"
+            )
+
+        result = []
         for book in books:
-            loan_status = None
-            if book.loans:
-                latest_load = max(book.loans, key=lambda loan: loan.updated_at, default=None)
-                loan_status = latest_load.return_status if latest_load else None
+            loanable = True if book.loan_status is None else book.loan_status
+            book_obj = book.Book  # Get the Book object from the result tuple
 
-                if return_status is not None and loan_status != return_status:
-                    continue
-
-            search_books.append(
+            result.append(
                 DomainAdminGetBookItem(
-                    book_id=book.id,
-                    book_title=book.book_title,
-                    code=book.code,
-                    category_name=book.category_name,
-                    subtitle=book.subtitle,
-                    author=book.author,
-                    publisher=book.publisher,
-                    publication_year=book.publication_year,
-                    image_url=book.image_url,
-                    version=book.version,
-                    major=book.major,
-                    language=book.language,
-                    donor_name=book.donor_name,
-                    book_status=book.book_status,
-                    created_at=book.created_at,
-                    updated_at=book.updated_at,
-                    loan_status=loan_status
+                    book_id=book_obj.id,
+                    book_title=book_obj.book_title,
+                    code=book_obj.code,
+                    category_name=book_obj.category_name,
+                    subtitle=book_obj.subtitle,
+                    author=book_obj.author,
+                    publisher=book_obj.publisher,
+                    publication_year=book_obj.publication_year,
+                    image_url=book_obj.image_url,
+                    version=book_obj.version,
+                    major=book_obj.major,
+                    language=book_obj.language,
+                    donor_name=book_obj.donor_name,
+                    book_status=book_obj.book_status,
+                    created_at=book_obj.created_at,
+                    updated_at=book_obj.updated_at,
+                    loanable=loanable,
                 )
             )
 
@@ -99,7 +137,12 @@ async def service_admin_search_books(
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    return search_books
+    response = DomainAdminGetBookList(
+        data=result,
+        total=total,
+    )
+
+    return response
 
 
 async def service_admin_create_book(request: DomainReqAdminPostBook, db: Session):
@@ -223,23 +266,53 @@ async def service_admin_delete_book(request: DomainReqAdminDelBook, db: Session)
     return
 
 
-async def service_admin_read_books(db: Session) -> list[DomainAdminGetBookItem]:
-    stmt = (select(Book).options(selectinload(Book.loans)).where(Book.is_deleted == False,))
+async def service_admin_read_books(
+    page: int,
+    limit: int,
+    db: Session,
+) -> DomainAdminGetBookList:
+    offset = (page - 1) * limit # Calculate offset based on the page numbe
+
+    stmt = (
+        select(Book)
+        .options(
+            selectinload(Book.loans)
+        )
+        .where(Book.is_deleted == False, Book.book_status == True)
+    )
 
     try:
-        books = db.execute(stmt.order_by(Book.updated_at.desc())).scalars().all()
+        books = db.execute(
+            stmt
+            .order_by(Book.updated_at.desc(), Book.id.asc())
+            .limit(limit)
+            .offset(offset)
+        ).scalars().all()
 
         if not books:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Books not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Books not found"
+            )
 
-        search_books = []
+        # Get total count using the same stmt conditions
+        count_stmt = stmt.with_only_columns(func.count())
+        total = db.execute(count_stmt).scalar()
+
+        if ceil(total/limit) < page:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Page is out of range"
+            )
+
+        result = []
         for book in books:
-            loan_status = None
+            loanable = True
             if book.loans:
-                latest_load = max(book.loans, key=lambda loan: loan.updated_at, default=None)
-                loan_status = latest_load.return_status if latest_load else None
+                latest_loan = max(book.loans, key=lambda loan: loan.updated_at, default=None)
+                loanable = latest_loan.return_status if latest_loan else True
 
-            search_books.append(
+            result.append(
                 DomainAdminGetBookItem(
                     book_id=book.id,
                     book_title=book.book_title,
@@ -257,7 +330,7 @@ async def service_admin_read_books(db: Session) -> list[DomainAdminGetBookItem]:
                     book_status=book.book_status,
                     created_at=book.created_at,
                     updated_at=book.updated_at,
-                    loan_status=loan_status
+                    loanable=loanable
                 )
             )
 
@@ -268,5 +341,9 @@ async def service_admin_read_books(db: Session) -> list[DomainAdminGetBookItem]:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
+    response = DomainAdminGetBookList(
+        data=result,
+        total=total,
+    )
 
-    return search_books
+    return response
