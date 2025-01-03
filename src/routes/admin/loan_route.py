@@ -43,31 +43,40 @@ async def toggle_loan(
 )
 async def search_loans(
     book_title: Annotated[
-        str, Query(description="도서 제목", example="book", min_length=2, max_length=50)
+        str, Query(description="도서 제목", min_length=2, max_length=50)
     ] = None,
     user_name: Annotated[
-        str | None, Query(description="사용자 이름", example="test", min_length=2, max_length=45)
+        str | None, Query(description="사용자 이름", min_length=2, max_length=45)
     ] = None,
     category_name: Annotated[
-        str, Query(description="카테고리 이름", example="category", min_length=2, max_length=50)
+        str, Query(description="카테고리 이름", min_length=2, max_length=50)
     ] = None,
-    return_status: Annotated[
-        bool, Query(description="반납 여부", example=False)
+    is_loanable: Annotated[
+        bool, Query(description="반납 여부")
     ] = None,
+    page: Annotated[
+        int, Query(description="페이지", example=1, gt=0)
+    ] = 1,
+    limit: Annotated[
+        int, Query(description="페이지 당 조회 개수", example=10, gt=0)
+    ] = 10,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_admin)
 ):
     response = await service_admin_search_loans(
-        user_name = user_name,
-        book_title = book_title,
-        category_name = category_name,
-        return_status = return_status,
+        user_name=user_name,
+        book_title=book_title,
+        category_name=category_name,
+        is_loanable=is_loanable,
+        page=page,
+        limit=limit,
         db = db
     )
 
     result = RouteResAdminGetLoanList(
-            data=response,
-            count=len(response)
+            data=response.data,
+            count=len(response.data),
+            total=response.total
         )
 
     return result
@@ -81,16 +90,25 @@ async def search_loans(
     summary="전체 대출 목록 조회",
 )
 async def get_all_loans(
+    page: Annotated[
+        int, Query(description="페이지", example=1, gt=0)
+    ] = 1,
+    limit: Annotated[
+        int, Query(description="페이지 당 조회 개수", example=10, gt=0)
+    ] = 10,
     db: Session = Depends(get_db),
     current_user=Depends(get_current_admin)
 ):
     response = await service_admin_read_loans(
+        page=page,
+        limit=limit,
         db = db
     )
 
     result = RouteResAdminGetLoanList(
-            data=response,
-            count=len(response)
+            data=response.data,
+            count=len(response.data),
+            total=response.total
         )
 
     return result
