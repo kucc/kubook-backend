@@ -1,11 +1,12 @@
 # ruff: noqa: C901
 from datetime import datetime
+from math import ceil
 
 from fastapi import HTTPException, status
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session, selectinload
 
-from domain.schemas.loan_schemas import DomainResAdminGetLoan, DomainResGetLoan
+from domain.schemas.loan_schemas import DomainResAdminGetLoan, DomainResAdminGetLoanList, DomainResGetLoan
 from repositories.models import Loan
 from utils.crud_utils import get_item
 
@@ -64,9 +65,13 @@ async def service_admin_search_loans(
     user_name: str | None,
     book_title: str | None,
     category_name: str | None,
-    return_status: str | None,
+    is_loanable: str | None,
+    page: int,
+    limit: int,
     db: Session
-) -> list[DomainResAdminGetLoan]:
+) -> DomainResAdminGetLoanList:
+    offset = (page - 1) * limit
+
     stmt = (
         select(Loan)
         .join(Loan.book)
@@ -95,14 +100,31 @@ async def service_admin_search_loans(
             stmt.where(text("MATCH(book.category_name) AGAINST(:category_name IN BOOLEAN MODE)"))
                 .params(category_name=f"{category_name}*")
         )
-    if return_status is not None:
-        stmt = stmt.where(Loan.return_status == return_status)
+    if is_loanable is not None:
+        stmt = stmt.where(Loan.return_status == is_loanable)
 
     try:
-        loans = db.execute(stmt.order_by(Loan.updated_at.desc())).scalars().all()
+        loans = (
+            db.execute(
+                stmt
+                .order_by(Loan.updated_at.desc())
+                .limit(limit)
+                .offset(offset)
+            ).scalars().all()
+        )
 
         if not loans:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Loans not found")
+
+        # Get total count using the same stmt conditions
+        count_stmt = stmt.with_only_columns(func.count())
+        total = db.execute(count_stmt).scalar()
+
+        if ceil(total/limit) < page:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Page is out of range"
+            )
 
         search_loans = []
         for loan in loans:
@@ -127,6 +149,7 @@ async def service_admin_search_loans(
                     category_name=loan.book.category_name,
                     loan_date=loan.loan_date,
                     due_date=loan.due_date,
+                    overdue_days=loan.overdue_days,
                     extend_status=loan.extend_status,
                     return_status=loan.return_status,
                     return_date=loan.return_date,
@@ -143,10 +166,22 @@ async def service_admin_search_loans(
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    return search_loans
+    response = DomainResAdminGetLoanList(
+        data=search_loans,
+        total=total
+    )
+
+    return response
 
 
-async def service_admin_read_loans(db: Session) -> list[DomainResAdminGetLoan]:
+
+async def service_admin_read_loans(
+    page: int,
+    limit: int,
+    db: Session
+) -> DomainResAdminGetLoanList:
+    offset = (page - 1) * limit
+
     stmt = (
         select(Loan)
         .options(
@@ -159,10 +194,27 @@ async def service_admin_read_loans(db: Session) -> list[DomainResAdminGetLoan]:
     )
 
     try:
-        loans = db.execute(stmt.order_by(Loan.updated_at.desc())).scalars().all()
+        loans = (
+            db.execute(
+                stmt
+                .order_by(Loan.updated_at.desc())
+                .limit(limit)
+                .offset(offset)
+            ).scalars().all()
+        )
 
         if not loans:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Books not found")
+
+        # Get total count using the same stmt conditions
+        count_stmt = stmt.with_only_columns(func.count())
+        total = db.execute(count_stmt).scalar()
+
+        if ceil(total/limit) < page:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Page is out of range"
+            )
 
         search_loans = []
         for loan in loans:
@@ -204,5 +256,9 @@ async def service_admin_read_loans(db: Session) -> list[DomainResAdminGetLoan]:
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    return search_loans
+    response = DomainResAdminGetLoanList(
+        data=search_loans,
+        total=total
+    )
 
+    return response

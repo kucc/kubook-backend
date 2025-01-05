@@ -85,6 +85,13 @@ async def service_search_books(
             )
             .all()
         )
+
+        if not books:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Books not found"
+            )
+
         # Get total count using the same stmt conditions
         count_stmt = stmt.with_only_columns(func.count())
         total = db.execute(count_stmt).scalar()
@@ -95,11 +102,6 @@ async def service_search_books(
                 detail="Page is out of range"
             )
 
-        if not books:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Books not found"
-            )
     except HTTPException as e:
         raise e
 
