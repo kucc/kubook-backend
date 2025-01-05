@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from domain.schemas.loan_schemas import DomainReqPostLoan, DomainReqPutLoan, DomainResGetLoan
 from repositories.models import Book, Loan
-from utils.crud_utils import get_item
+from utils.crud_utils import calculate_overdue_days, get_item
 
 
 async def service_read_loans_by_user_id(
@@ -44,7 +44,7 @@ async def service_read_loans_by_user_id(
                         loan_date=loan.loan_date,
                         due_date=loan.due_date,
                         extend_status=loan.extend_status,
-                        overdue_days=loan.overdue_days,
+                        overdue_days=calculate_overdue_days(loan.due_date),
                         return_status=loan.return_status,
                         return_date=loan.return_date,
                         book_title=loan.book.book_title,
@@ -104,7 +104,7 @@ async def service_extend_loan(request: DomainReqPutLoan, db: Session):
             loan_date=loan.loan_date,
             due_date=loan.due_date,
             extend_status=loan.extend_status,
-            overdue_days=loan.overdue_days,
+            overdue_days=calculate_overdue_days(loan.due_date),
             return_status=loan.return_status,
             return_date=loan.return_date,
         )
@@ -156,7 +156,7 @@ async def service_create_loan(request: DomainReqPostLoan, db: Session):
             loan_date=loan.loan_date,
             due_date=loan.due_date,
             extend_status=loan.extend_status,
-            overdue_days=loan.overdue_days,
+            overdue_days=calculate_overdue_days(loan.due_date),
             return_status=loan.return_status,
             return_date=loan.return_date,
         )
