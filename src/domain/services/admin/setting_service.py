@@ -2,8 +2,9 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm.session import Session
 
-from domain.schemas.setting_schemas import DomainReqAdminSetting, DomainResAdminSetting
+from domain.schemas.setting_schemas import DomainReqAdminPutSetting, DomainReqAdminSetting, DomainResAdminSetting
 from repositories.models import Settings
+from utils.crud_utils import delete_item
 
 
 async def service_admin_read_setting(db: Session):
@@ -77,3 +78,51 @@ async def service_admin_create_setting(request: DomainReqAdminSetting, db: Sessi
             updated_at=setting.updated_at
         )
     return response
+
+async def service_admin_update_setting(request: DomainReqAdminPutSetting, db: Session):
+    request.set_datetime()
+    stmt = select(Settings).where(Settings.id == request.setting_id)
+    setting = db.execute(stmt).scalar_one_or_none()
+
+    if not setting:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Setting not found")
+
+    try:
+        setting.start_date = request.start_date
+        setting.end_date = request.end_date
+        setting.extend_max_count = request.extend_max_count
+        setting.extend_days = request.extend_days
+        setting.loan_days = request.loan_days
+        setting.loan_max_book = request.loan_max_book
+        setting.request_max_count = request.request_max_count
+        setting.request_max_price = request.request_max_price
+        db.add(setting)
+        db.flush()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Unexpected error occurred during update: {str(e)}",
+        ) from e
+    else:
+        db.commit()
+        db.refresh(setting)
+
+        domain_res = DomainResAdminSetting(
+            setting_id=setting.id,
+            start_date=setting.start_date,
+            end_date=setting.end_date,
+            extend_max_count=setting.extend_max_count,
+            extend_days=setting.extend_days,
+            loan_days=setting.loan_days,
+            loan_max_book=setting.loan_max_book,
+            request_max_count=setting.request_max_count,
+            request_max_price=setting.request_max_price,
+            created_at=setting.created_at,
+            updated_at=setting.updated_at
+        )
+    return domain_res
+
+async def service_admin_delete_setting(setting_id: int, db: Session):
+    delete_item(Settings, setting_id, db)
+    return
