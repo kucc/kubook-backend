@@ -8,6 +8,7 @@ from domain.schemas.user_schemas import DomainAdminGetUserItem
 class RouteResAdminGetUserList(BaseModel):
     data: list[DomainAdminGetUserItem]
     count: int
+    total: int
 
 class RouteResAdminPutUser(BaseModel):
     user_id: int = Field(title="user_id", description="유저 고유 ID", example=1111, gt=0)

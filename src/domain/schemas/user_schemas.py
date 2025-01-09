@@ -39,6 +39,12 @@ class DomainAdminGetUserItem(BaseModel):
     updated_at: datetime = Field(title="update_at", description="수정일시")
     is_admin: bool = Field(title="is_admin", description="관리자 권환")
 
+
+class DomainAdminGetUserList(BaseModel):
+    data: list[DomainAdminGetUserItem]
+    total: int
+
+
 class DomainReqAdminPutUser(BaseModel):
     user_id: int = Field(title="user_id", description="관리자의 회원 ID", gt=0)
     user_status: bool | None = Field(None, title="is_active", description="회원 상태(대출 가능 여부",examples=[True])
