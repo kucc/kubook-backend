@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
+from math import ceil
 
 from fastapi import HTTPException, status
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.orm import Session, selectinload
 
 from domain.schemas.user_schemas import (
     DomainAdminGetUserItem,
+    DomainAdminGetUserList,
     DomainReqAdminDelUser,
     DomainReqAdminPutUser,
     DomainResAdminPutUser,
@@ -19,8 +21,12 @@ async def service_admin_search_users(
     user_name: str | None,
     authority: bool | None,
     active: bool | None,
+    page: int,
+    limit: int,
     db: Session
-) -> list[DomainAdminGetUserItem]:
+) -> DomainAdminGetUserList:
+    offset = (page - 1) * limit
+
     stmt = (
         select(User)
         .options(selectinload(User.admin))
@@ -40,7 +46,23 @@ async def service_admin_search_users(
         stmt = stmt.where(User.is_active == active)
 
     try:
-        users = db.execute(stmt.order_by(User.updated_at.desc())).scalars().all()
+        users = (
+            db.execute(
+                stmt
+                .order_by(User.updated_at.desc())
+                .limit(limit)
+                .offset(offset)
+            ).scalars().all())
+
+        # Get total count using the same stmt conditions
+        count_stmt = stmt.with_only_columns(func.count())
+        total = db.execute(count_stmt).scalar()
+
+        if ceil(total/limit) < page:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Page is out of range"
+            )
 
         if not users:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Users not found")
@@ -69,10 +91,21 @@ async def service_admin_search_users(
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    return search_users
+    response = DomainAdminGetUserList(
+        data=search_users,
+        total=total,
+    )
+
+    return response
 
 
-async def service_admin_read_users(db: Session) -> list[DomainAdminGetUserItem]:
+async def service_admin_read_users(
+    page: int,
+    limit: int,
+    db: Session
+) -> DomainAdminGetUserList:
+    offset = (page - 1) * limit
+
     stmt = (
         select(User)
         .options(
@@ -84,10 +117,26 @@ async def service_admin_read_users(db: Session) -> list[DomainAdminGetUserItem]:
     )
 
     try:
-        users = db.execute(stmt.order_by(User.updated_at.desc())).scalars().all()
+        users = (
+            db.execute(
+                stmt
+                .order_by(User.updated_at.desc())
+                .limit(limit)
+                .offset(offset)
+            ).scalars().all())
 
         if not users:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Users not found")
+
+         # Get total count using the same stmt conditions
+        count_stmt = stmt.with_only_columns(func.count())
+        total = db.execute(count_stmt).scalar()
+
+        if ceil(total/limit) < page:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Page is out of range"
+            )
 
         search_users = [
             DomainAdminGetUserItem(
@@ -113,7 +162,13 @@ async def service_admin_read_users(db: Session) -> list[DomainAdminGetUserItem]:
             detail=f"Unexpected error occurred during retrieve: {str(e)}",
         ) from e
 
-    return search_users
+    response = DomainAdminGetUserList(
+        data=search_users,
+        total=total,
+    )
+
+    return response
+
 
 
 

@@ -37,18 +37,27 @@ async def search_users(
     active: Annotated[
         bool, Query(description="관리자 활성 여부", example=False)
     ] = None,
+    page: Annotated[
+        int, Query(description="페이지", example=1, gt=0)
+    ] = 1,
+    limit: Annotated[
+        int, Query(description="페이지 당 조화 개수", example=10, gt=0)
+    ] = 10,
     current_user: Annotated = Depends(get_current_admin)
 ):
     response = await service_admin_search_users(
         user_name=user_name,
         authority=authority,
         active=active,
+        page=page,
+        limit=limit,
         db=db
     )
 
     result = RouteResAdminGetUserList(
-        data=response,
-        count=len(response)
+        data=response.data,
+        count=len(response.data),
+        total=response.total,
     )
 
     return result
@@ -62,15 +71,24 @@ async def search_users(
 )
 async def get_all_users(
     db: Session = Depends(get_db),
+    page: Annotated[
+        int, Query(description="페이지", example=1, gt=0)
+    ] = 1,
+    limit: Annotated[
+        int, Query(description="페이지 당 조화 개수", example=10, gt=0)
+    ] = 10,
     current_user=Depends(get_current_admin)
 ):
     response = await service_admin_read_users(
-        db=db
+        db=db,
+        page=page,
+        limit=limit,
     )
 
     result = RouteResAdminGetUserList(
-        data=response,
-        count=len(response)
+        data=response.data,
+        count=len(response.data),
+        total=response.total,
     )
 
     return result
