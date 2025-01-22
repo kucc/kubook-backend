@@ -8,7 +8,8 @@ from sqlalchemy.orm import Session, selectinload
 
 from domain.schemas.loan_schemas import DomainResAdminGetLoan, DomainResAdminGetLoanList, DomainResGetLoan
 from repositories.models import Loan
-from utils.crud_utils import calculate_overdue_days, get_item
+from utils.crud_utils import get_item
+from utils.shared_utils import calculate_overdue_days
 
 
 async def service_admin_toggle_loan_return(

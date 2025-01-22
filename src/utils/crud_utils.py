@@ -1,6 +1,3 @@
-
-from datetime import date
-
 from fastapi import HTTPException, status
 from sqlalchemy import and_, delete, select, update
 from sqlalchemy.exc import NoResultFound
@@ -143,9 +140,3 @@ def delete_item_dba(model, index: int, db: Session):
 #     result = db.scalars(stmt).all()
 
 #     return result
-
-def calculate_overdue_days(due_date: date) -> int:
-    today = date.today()
-    overdue = (today - due_date).days
-
-    return max(overdue, 0)

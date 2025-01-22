@@ -69,3 +69,9 @@ def get_admin_status(user_id: int, db: Session) -> bool:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Unexpected error while checking admin status: {str(e)}"
         ) from e
+
+def calculate_overdue_days(due_date: date) -> int:
+    today = date.today()
+    overdue = (today - due_date).days
+
+    return max(overdue, 0)
