@@ -22,7 +22,7 @@ def get_admin_status(user_id: int, db: Session) -> bool:
             - 404: User not found
             - 500: Unexpected database error
     """
-    from src.repositories.models import User
+    from repositories.models import User
 
     if not isinstance(user_id, int) or user_id <= 0:
         raise HTTPException(
@@ -44,7 +44,7 @@ def get_admin_status(user_id: int, db: Session) -> bool:
             return False
 
         # Get the most recent admin record
-        latest_admin = max(user.admin, key=lambda admin: admin.updated_at, default=None)
+        latest_admin = max(user.admin, key=lambda admin: admin.created_at, default=None)
         if latest_admin is None:
             return False
 
