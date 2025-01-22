@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 
 from domain.schemas.loan_schemas import DomainReqPostLoan, DomainReqPutLoan, DomainResGetLoan
 from repositories.models import Book, Loan
-from utils.crud_utils import calculate_overdue_days, get_item
+from utils.crud_utils import get_item
+from utils.shared_utils import calculate_overdue_days
 
 
 async def service_read_loans_by_user_id(
