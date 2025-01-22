@@ -55,7 +55,6 @@ async def service_admin_toggle_loan_return(
             return_date=loan.return_date,
             book_title=loan.book.book_title,
             code=loan.book.code,
-            version=loan.book.version,
         )
 
     return result
