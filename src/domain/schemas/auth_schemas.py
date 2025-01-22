@@ -8,6 +8,7 @@ class UserInfo(BaseModel):
     user_name: str
     is_active: bool
     email: EmailStr = Field(..., example="test@test.com")
+    is_admin: bool
 
 
 class FirebaseLoginRequest(BaseModel):

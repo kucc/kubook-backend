@@ -8,6 +8,7 @@ from domain.schemas.auth_schemas import LoginRequest, LoginResponse, RegisterReq
 from domain.services.token_service import create_user_tokens, verify_jwt
 from externals.firebase import sign_in_with_email_and_password
 from repositories.models import User
+from utils.shared_utils import get_admin_status
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 async def service_register(request: RegisterRequest, db: Session):
@@ -41,7 +42,8 @@ async def service_register(request: RegisterRequest, db: Session):
             id=user.id,
             user_name=user.user_name,
             email=user.email,
-            is_active=user.is_active
+            is_active=user.is_active,
+            is_admin=get_admin_status(user.id, db)
         )
     ).model_dump()
     response = JSONResponse(content=user_info, status_code=status.HTTP_201_CREATED)
@@ -85,7 +87,8 @@ async def service_login_sso(request:LoginRequest, db: Session):
             id=user.id,
             user_name=user.user_name,
             email=user.email,
-            is_active=user.is_active
+            is_active=user.is_active,
+            is_admin=get_admin_status(user.id, db)
         )
     ).model_dump()
     response = JSONResponse(content=login_response, status_code=status.HTTP_200_OK)
@@ -96,8 +99,9 @@ async def service_login_sso(request:LoginRequest, db: Session):
 
 
 async def service_login(
-        request: LoginRequest,
-        db: Session):
+    request: LoginRequest,
+    db: Session
+):
     # Authenticate user
     # Check if user information exists in the DB
     user = db.query(User).filter(User.email == request.email, User.is_deleted==False).first()
@@ -116,7 +120,8 @@ async def service_login(
             id=user.id,
             user_name=user.user_name,
             email=user.email,
-            is_active=user.is_active
+            is_active=user.is_active,
+            is_admin=get_admin_status(user.id, db)
         )
     ).model_dump()
     response = JSONResponse(content=login_response, status_code=status.HTTP_200_OK, headers={
