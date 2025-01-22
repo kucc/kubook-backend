@@ -50,7 +50,6 @@ async def service_read_loans_by_user_id(
                         return_date=loan.return_date,
                         book_title=loan.book.book_title,
                         code=loan.book.code,
-                        version=loan.book.version,
                     )
                 )
 
@@ -108,6 +107,8 @@ async def service_extend_loan(request: DomainReqPutLoan, db: Session):
             overdue_days=calculate_overdue_days(loan.due_date),
             return_status=loan.return_status,
             return_date=loan.return_date,
+            book_title=loan.book.book_title,
+            code=loan.book.code,
         )
 
     return result
@@ -160,5 +161,7 @@ async def service_create_loan(request: DomainReqPostLoan, db: Session):
             overdue_days=calculate_overdue_days(loan.due_date),
             return_status=loan.return_status,
             return_date=loan.return_date,
+            book_title=loan.book.book_title,
+            code=loan.book.code,
         )
         return result
