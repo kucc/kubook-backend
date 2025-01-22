@@ -165,3 +165,6 @@ kucc-lib-key1.pem
 
 # IDE
 .idea/
+
+# Mac
+.DS_Store
